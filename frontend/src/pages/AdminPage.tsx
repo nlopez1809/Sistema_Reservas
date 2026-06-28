@@ -898,9 +898,9 @@ export default function AdminPage() {
         alert('Importación completada'); loadAll()
       }}/>
 
-        </div>{/* end tab content padding */}
-        </div>{/* end MAIN CONTENT */}
-      </div>{/* end LAYOUT flex */}
-    </div>{/* end root */}
+        </div>
+        </div>
+      </div>
+    </div>
   )
 }
