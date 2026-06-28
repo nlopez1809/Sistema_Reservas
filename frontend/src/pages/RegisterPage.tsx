@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authSignUp } from '@/lib/api'
 
+const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+
 export default function RegisterPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ nombre:'', apellido:'', email:'', password:'', confirm:'' })
@@ -22,52 +24,53 @@ export default function RegisterPage() {
     navigate('/setup')
   }
 
-  const inp: React.CSSProperties = { width:'100%', padding:'11px 14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:15, boxSizing:'border-box', outline:'none' }
+  const inp: React.CSSProperties = { width:'100%', padding:'12px 14px', borderRadius:8, border:'1px solid #d1d5db', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:font }
 
   return (
-    <div style={{ minHeight:'100vh', background:'linear-gradient(160deg,#fff7ed,#fef3c7,#fff)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Georgia,serif', padding:16 }}>
-      <div style={{ background:'#fff', borderRadius:24, padding:36, maxWidth:440, width:'100%', boxShadow:'0 8px 40px rgba(0,0,0,0.1)' }}>
-        <div style={{ textAlign:'center', marginBottom:28 }}>
-          <span style={{ fontSize:48 }}>🍜</span>
-          <h1 style={{ fontSize:24, fontWeight:900, margin:'8px 0 4px', color:'#9a3412' }}>Crear Cuenta</h1>
-          <p style={{ color:'#64748b', fontSize:14 }}>Registra el administrador de tu restaurante</p>
+    <div style={{ minHeight:'100vh', background:'#f9fafb', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:font, padding:16 }}>
+      <div style={{ width:'100%', maxWidth:440 }}>
+        <div style={{ textAlign:'center', marginBottom:32 }}>
+          <h1 style={{ fontSize:24, fontWeight:700, margin:'0 0 6px', color:'#1f2937' }}>Crear Cuenta</h1>
+          <p style={{ color:'#6b7280', fontSize:14, margin:0 }}>Registra el administrador de tu restaurante</p>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
-            <div>
-              <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>Nombre</label>
-              <input required value={form.nombre} onChange={e=>set('nombre',e.target.value)} placeholder="María" style={inp} />
+        <div style={{ background:'#fff', borderRadius:12, padding:32, border:'1px solid #e5e7eb', boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
+              <div>
+                <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Nombre</label>
+                <input required value={form.nombre} onChange={e=>set('nombre',e.target.value)} placeholder="María" style={inp} />
+              </div>
+              <div>
+                <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Apellido</label>
+                <input required value={form.apellido} onChange={e=>set('apellido',e.target.value)} placeholder="Quispe" style={inp} />
+              </div>
             </div>
-            <div>
-              <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>Apellido</label>
-              <input required value={form.apellido} onChange={e=>set('apellido',e.target.value)} placeholder="Quispe" style={inp} />
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Email</label>
+              <input type="email" required value={form.email} onChange={e=>set('email',e.target.value)} placeholder="tu@email.com" style={inp} />
             </div>
-          </div>
-          <div style={{ marginBottom:14 }}>
-            <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>📧 Email</label>
-            <input type="email" required value={form.email} onChange={e=>set('email',e.target.value)} placeholder="tu@email.com" style={inp} />
-          </div>
-          <div style={{ marginBottom:14 }}>
-            <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Contraseña</label>
-            <div style={{ position:'relative' }}>
-              <input type={showPass ? 'text' : 'password'} required value={form.password} onChange={e=>set('password',e.target.value)} placeholder="Mínimo 6 caracteres" style={{ ...inp, paddingRight:42 }} />
-              <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#475569', padding:4 }}>{showPass ? '🙈' : '👁️'}</button>
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Contraseña</label>
+              <div style={{ position:'relative' }}>
+                <input type={showPass ? 'text' : 'password'} required value={form.password} onChange={e=>set('password',e.target.value)} placeholder="Mínimo 6 caracteres" style={{ ...inp, paddingRight:60 }} />
+                <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:13, color:'#6b7280', padding:4, fontFamily:font }}>{showPass ? 'Ocultar' : 'Mostrar'}</button>
+              </div>
             </div>
-          </div>
-          <div style={{ marginBottom:20 }}>
-            <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Confirmar Contraseña</label>
-            <div style={{ position:'relative' }}>
-              <input type={showConfirm ? 'text' : 'password'} required value={form.confirm} onChange={e=>set('confirm',e.target.value)} placeholder="Repetir contraseña" style={{ ...inp, paddingRight:42 }} />
-              <button type="button" onClick={()=>setShowConfirm(!showConfirm)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#475569', padding:4 }}>{showConfirm ? '🙈' : '👁️'}</button>
+            <div style={{ marginBottom:20 }}>
+              <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Confirmar Contraseña</label>
+              <div style={{ position:'relative' }}>
+                <input type={showConfirm ? 'text' : 'password'} required value={form.confirm} onChange={e=>set('confirm',e.target.value)} placeholder="Repetir contraseña" style={{ ...inp, paddingRight:60 }} />
+                <button type="button" onClick={()=>setShowConfirm(!showConfirm)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:13, color:'#6b7280', padding:4, fontFamily:font }}>{showConfirm ? 'Ocultar' : 'Mostrar'}</button>
+              </div>
             </div>
-          </div>
-          {error && <p style={{ color:'#ef4444', fontSize:13, marginBottom:12, fontWeight:600 }}>⚠️ {error}</p>}
-          <button type="submit" disabled={loading} style={{ width:'100%', padding:'13px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1 }}>
-            {loading ? 'Creando cuenta…' : 'Crear Cuenta →'}
-          </button>
-        </form>
-        <p style={{ textAlign:'center', marginTop:20, fontSize:14, color:'#64748b' }}>
-          ¿Ya tienes cuenta? <Link to="/login" style={{ color:'#f97316', fontWeight:700, textDecoration:'none' }}>Iniciar sesión</Link>
+            {error && <p style={{ color:'#dc2626', fontSize:13, marginBottom:12, fontWeight:500, background:'#fef2f2', padding:'8px 12px', borderRadius:6, border:'1px solid #fecaca' }}>{error}</p>}
+            <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
+              {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
+            </button>
+          </form>
+        </div>
+        <p style={{ textAlign:'center', marginTop:20, fontSize:14, color:'#6b7280' }}>
+          ¿Ya tienes cuenta? <Link to="/login" style={{ color:'#e91e63', fontWeight:600, textDecoration:'none' }}>Iniciar sesión</Link>
         </p>
       </div>
     </div>
