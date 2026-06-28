@@ -282,9 +282,9 @@ export default function AdminPage() {
             {/* Pedidos report */}
             {reportModal==='pedidos' && (<>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
-                <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>📋 Reporte de Pedidos</h3>
+                <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>Reporte de Pedidos</h3>
                 <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>downloadCSV(`pedidos.csv`,['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'],pedidos.map(o=>[o.codigo,new Date(o.creado_en).toLocaleDateString('es-BO'),o.dia?.nombre??'',`${o.cliente?.nombre??''} ${o.cliente?.apellido??''}`,o.cliente?.whatsapp??'',o.hora_recojo,o.consumo,o.metodo_pago,o.total]))} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#3b82f6',color:'#fff' }}>⬇️ Descargar</button>
+                  <button onClick={()=>downloadCSV(`pedidos.csv`,['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'],pedidos.map(o=>[o.codigo,new Date(o.creado_en).toLocaleDateString('es-BO'),o.dia?.nombre??'',`${o.cliente?.nombre??''} ${o.cliente?.apellido??''}`,o.cliente?.whatsapp??'',o.hora_recojo,o.consumo,o.metodo_pago,o.total]))} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Descargar</button>
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
@@ -310,9 +310,9 @@ export default function AdminPage() {
             {/* Clientes report */}
             {reportModal==='clientes' && (<>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
-                <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>👥 Reporte de Clientes</h3>
+                <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>Reporte de Clientes</h3>
                 <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>downloadCSV(`clientes.csv`,['#','Nombre','Apellido','WhatsApp','Pedidos'],clientes.sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>[i+1,c.nombre,c.apellido,c.whatsapp,c.total_pedidos||0]))} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#8b5cf6',color:'#fff' }}>⬇️ Descargar</button>
+                  <button onClick={()=>downloadCSV(`clientes.csv`,['#','Nombre','Apellido','WhatsApp','Pedidos'],clientes.sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>[i+1,c.nombre,c.apellido,c.whatsapp,c.total_pedidos||0]))} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#6b7280',color:'#fff' }}>Descargar</button>
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
@@ -490,11 +490,11 @@ export default function AdminPage() {
         {/* ── DASHBOARD ── */}
         {tab==='dashboard' && !loading && (<div>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-            <h2 style={{ margin:0, fontSize:17, fontWeight:900 }}>📊 Resumen General</h2>
+            <h2 style={{ margin:0, fontSize:17, fontWeight:900 }}>Resumen General</h2>
             <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>setReportModal('dashboard')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#22c55e',color:'#fff' }}>📊 Ver Resumen</button>
-              <button onClick={()=>setReportModal('pedidos')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#3b82f6',color:'#fff' }}>📋 Ver Pedidos</button>
-              <button onClick={()=>setReportModal('clientes')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#8b5cf6',color:'#fff' }}>👥 Ver Clientes</button>
+              <button onClick={()=>setReportModal('dashboard')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Ver Resumen</button>
+              <button onClick={()=>setReportModal('pedidos')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Ver Pedidos</button>
+              <button onClick={()=>setReportModal('clientes')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#6b7280',color:'#fff' }}>Ver Clientes</button>
             </div>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
@@ -508,21 +508,21 @@ export default function AdminPage() {
           </div>
           <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap:14 }}>
             <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🏆 Lo más vendido</h3>
+              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>Lo más vendido</h3>
               {topPlatos.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos</p>:topPlatos.slice(0,5).map((p,i)=>(<div key={i} style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}><span style={{ fontSize:13 }}>#{i+1} {p.plato}</span><span style={{ fontWeight:800,color:'#e91e63',fontSize:13 }}>{p.total_vendido}</span></div>))}
             </div>
             <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🍽️ Consumo</h3>
+              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>Consumo</h3>
               {barRow('En Local 🍽️',localN,pedidos.length,'#3b82f6')}
               {barRow('Para Llevar 📦',llevarN,pedidos.length,'#8b5cf6')}
             </div>
             <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>💳 Pago</h3>
+              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>Pago</h3>
               {barRow('Efectivo 💵',efecN,pedidos.length,'#22c55e')}
               {barRow('QR 📱',qrN,pedidos.length,'#3b82f6')}
             </div>
             <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',gridColumn:'1/-1' }}>
-              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>📅 Ventas por Día</h3>
+              <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>Ventas por Día</h3>
               <div style={{ display:'flex',gap:10,alignItems:'flex-end',height:110 }}>
                 {ALL_DAYS.map(day=>{ const val=salesByDay[day]||0; const maxV=Math.max(...Object.values(salesByDay),1); const h=Math.round((val/maxV)*90); return (<div key={day} style={{ flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4 }}><span style={{ fontSize:9,fontWeight:700,color:'#e91e63' }}>{val>0?fmtCur(val):''}</span><div style={{ width:'100%',display:'flex',alignItems:'flex-end',height:80 }}><div style={{ width:'100%',height:`${h}%`,minHeight:4,background:'#e0e7ff',borderRadius:'6px 6px 0 0' }}/></div><span style={{ fontSize:10,fontWeight:700,color:'#64748b' }}>{day.slice(0,3)}</span></div>) })}
               </div>
@@ -532,17 +532,17 @@ export default function AdminPage() {
 
         {/* ── DÍAS ── */}
         {tab==='dias' && !loading && (<div>
-          <h3 style={{ margin:'0 0 6px',fontWeight:800 }}>📅 Habilitar / Deshabilitar Días</h3>
+          <h3 style={{ margin:'0 0 6px',fontWeight:800 }}>Habilitar / Deshabilitar Días</h3>
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 20px' }}>Los días deshabilitados no aparecen en el menú de tus clientes.</p>
           <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:14 }}>
             {dias.sort((a,b)=>a.orden-b.orden).map(dia=>(
-              <div key={dia.id} style={{ background:'#fff',borderRadius:12,padding:20,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',border:`2px solid ${dia.habilitado?'#bbf7d0':'#fca5a5'}` }}>
+              <div key={dia.id} style={{ background:'#fff',borderRadius:12,padding:20,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:`2px solid ${dia.habilitado?'#bbf7d0':'#fca5a5'}` }}>
                 <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12 }}>
                   <span style={{ fontWeight:900,fontSize:16 }}>{dia.nombre}</span>
                   <span style={{ fontSize:11,fontWeight:700,padding:'2px 10px',borderRadius:99,background:dia.habilitado?'#dcfce7':'#fee2e2',color:dia.habilitado?'#166534':'#991b1b' }}>{dia.habilitado?'ACTIVO':'OFF'}</span>
                 </div>
                 <button onClick={async()=>{ await toggleDia(dia.id,!dia.habilitado); setDias(prev=>prev.map(d=>d.id===dia.id?{...d,habilitado:!d.habilitado}:d)) }} style={{ width:'100%',padding:'9px 0',borderRadius:12,border:'none',cursor:'pointer',fontWeight:700,color:'#fff',fontSize:13,background:dia.habilitado?'linear-gradient(135deg,#ef4444,#dc2626)':'linear-gradient(135deg,#22c55e,#16a34a)' }}>
-                  {dia.habilitado?'🚫 Deshabilitar':'✅ Habilitar'}
+                  {dia.habilitado?'Deshabilitar':'Habilitar'}
                 </button>
               </div>
             ))}
@@ -554,7 +554,7 @@ export default function AdminPage() {
           <div style={{ display:'flex',gap:8,marginBottom:18,flexWrap:'wrap' }}>
             {dias.sort((a,b)=>a.orden-b.orden).map(d=>(<button key={d.id} onClick={()=>setEditDay(d.nombre)} style={{ ...tabBtn(editDay===d.nombre),opacity:d.habilitado?1:0.5 }}>{d.nombre}{!d.habilitado?' 🚫':''}</button>))}
           </div>
-          {([['sopas','sopa','🥣 Sopas'],['segundos','segundo','🍳 Segundos'],['extras','extra','🥤 Extra']] as const).map(([_arr,cat,catLabel])=>{
+          {([['sopas','sopa','Sopas'],['segundos','segundo','Segundos'],['extras','extra','Extra']] as const).map(([_arr,cat,catLabel])=>{
             const items=cat==='sopa'?sopas:cat==='segundo'?segundos:extras
             return (<div key={cat} style={{ marginBottom:24 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12 }}>
@@ -588,7 +588,7 @@ export default function AdminPage() {
 
         {/* ── PEDIDOS ── */}
         {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-          <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>📋 Registro de Pedidos</h3>
+          <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>Registro de Pedidos</h3>
           {pedidos.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(<>
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
@@ -612,7 +612,7 @@ export default function AdminPage() {
 
         {/* ── CLIENTES ── */}
         {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-          <h3 style={{ margin:'0 0 6px',fontSize:16,fontWeight:800 }}>👥 Base de Datos de Clientes</h3>
+          <h3 style={{ margin:'0 0 6px',fontSize:16,fontWeight:800 }}>Base de Datos de Clientes</h3>
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 18px' }}>Identificados por WhatsApp. El contador sube automáticamente con cada pedido.</p>
           {clientes.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(<>
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
@@ -641,7 +641,7 @@ export default function AdminPage() {
           {/* Header with reset button */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
             <div>
-              <h2 style={{ margin:'0 0 4px', fontSize:17, fontWeight:900 }}>📦 Control de Stock</h2>
+              <h2 style={{ margin:'0 0 4px', fontSize:17, fontWeight:900 }}>Control de Stock</h2>
               <p style={{ margin:0, fontSize:13, color:'#64748b' }}>
                 Visualiza y ajusta manualmente el stock de cada plato. El reseteo automático ocurre cada día a las 6:00 AM.
               </p>
@@ -651,10 +651,10 @@ export default function AdminPage() {
               disabled={resettingStock}
               style={{ padding:'10px 20px', borderRadius:12, border:'none', cursor:resettingStock?'not-allowed':'pointer',
                 fontWeight:800, fontSize:14, color:'#fff',
-                background:resettingStock?'#94a3b8':'linear-gradient(135deg,#e91e63,#ef4444)',
-                boxShadow:resettingStock?'none':'0 4px 15px rgba(249,115,22,0.35)',
+                background:resettingStock?'#94a3b8':'#e91e63',
+                boxShadow:'none',
                 display:'flex', alignItems:'center', gap:8 }}>
-              {resettingStock ? '⏳ Reseteando…' : '🔄 Resetear Stock del Día'}
+              {resettingStock ? 'Reseteando...' : 'Resetear Stock del Día'}
             </button>
           </div>
 
@@ -691,7 +691,7 @@ export default function AdminPage() {
             return Object.entries(grouped).map(([dayName, items]) => (
               <div key={dayName} style={{ background:'#fff', borderRadius:12, padding:20, boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb', marginBottom:16 }}>
                 <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:800, color:'#1e293b', display:'flex', alignItems:'center', gap:8 }}>
-                  📅 {dayName}
+                  {dayName}
                   <span style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>({items.length} platos)</span>
                 </h3>
                 <div style={{ overflowX:'auto' }}>
@@ -784,7 +784,7 @@ export default function AdminPage() {
 
           {stockData.length === 0 && (
             <p style={{ color:'#475569', textAlign:'center', padding:40 }}>
-              No hay platos configurados aún. Ve a 🍽️ Menú para agregar platos.
+              No hay platos configurados aún. Ve a Menú para agregar platos.
             </p>
           )}
         </div>)}
@@ -792,7 +792,7 @@ export default function AdminPage() {
         {/* ── CONTABILIDAD ── */}
         {tab==='contabilidad' && !loading && (<div>
           <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
-            <h2 style={{ margin:0,fontSize:17,fontWeight:900 }}>💵 Contabilidad</h2>
+            <h2 style={{ margin:0,fontSize:17,fontWeight:900 }}>Contabilidad</h2>
           </div>
           <div style={{ display:'grid',gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)',gap:14,marginBottom:20 }}>
             {[{icon:'💰',label:'Total Histórico',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_recaudado),0)||totalRev),color:'#e91e63'},
@@ -805,13 +805,13 @@ export default function AdminPage() {
           {(()=>{ const rows=contDiaria; const data=rows.map((r:any)=>[r.fecha,r.total_pedidos,r.total_efectivo,r.total_qr,r.total_recaudado]); return (
             <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
-                <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>📅 Recaudación Diaria</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>⬇️ Descargar</button>
+                <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>Recaudación Diaria</h3>
+                <button onClick={()=>downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
-                    <thead><tr style={{ background:'#f8fafc' }}>{['Fecha','Pedidos','Efectivo 💵','QR 📱','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
+                    <thead><tr style={{ background:'#f8fafc' }}>{['Fecha','Pedidos','Efectivo','QR','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                     <tbody>{rows.map((r:any,i:number)=>(<tr key={i} style={rowBg(i)}>
                       <td style={{ ...td,fontWeight:700 }}>{r.fecha}</td>
                       <td style={td}>{r.total_pedidos}</td>
@@ -829,13 +829,13 @@ export default function AdminPage() {
           {(()=>{ const rows=contSemanal.map((r:any)=>({...r,fecha:`${r.semana_inicio}–${r.semana_fin}`})); const data=rows.map((r:any)=>[r.fecha,r.total_pedidos,r.total_efectivo,r.total_qr,r.total_recaudado]); return (
             <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
-                <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>📆 Recaudación Semanal</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_semanal.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#3b82f6',color:'#fff' }}>⬇️ Descargar</button>
+                <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>Recaudación Semanal</h3>
+                <button onClick={()=>downloadCSV(`contabilidad_semanal.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
-                    <thead><tr style={{ background:'#f8fafc' }}>{['Semana','Pedidos','Efectivo 💵','QR 📱','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
+                    <thead><tr style={{ background:'#f8fafc' }}>{['Semana','Pedidos','Efectivo','QR','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                     <tbody>{rows.map((r:any,i:number)=>(<tr key={i} style={rowBg(i)}>
                       <td style={{ ...td,fontWeight:700 }}>{r.fecha}</td>
                       <td style={td}>{r.total_pedidos}</td>
@@ -853,13 +853,13 @@ export default function AdminPage() {
           {(()=>{ const rows=contMensual.map((r:any)=>({...r,fecha:r.mes})); const data=rows.map((r:any)=>[r.fecha,r.total_pedidos,r.total_efectivo,r.total_qr,r.total_recaudado]); return (
             <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
-                <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>🗓️ Recaudación Mensual</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_mensual.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#22c55e',color:'#fff' }}>⬇️ Descargar</button>
+                <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>Recaudación Mensual</h3>
+                <button onClick={()=>downloadCSV(`contabilidad_mensual.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
-                    <thead><tr style={{ background:'#f8fafc' }}>{['Mes','Pedidos','Efectivo 💵','QR 📱','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
+                    <thead><tr style={{ background:'#f8fafc' }}>{['Mes','Pedidos','Efectivo','QR','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                     <tbody>{rows.map((r:any,i:number)=>(<tr key={i} style={rowBg(i)}>
                       <td style={{ ...td,fontWeight:700 }}>{r.fecha}</td>
                       <td style={td}>{r.total_pedidos}</td>
@@ -876,7 +876,7 @@ export default function AdminPage() {
 
         {/* ── AJUSTES ── */}
         {tab==='ajustes' && (<div style={{ maxWidth:560 }}>
-          <h3 style={{ margin:'0 0 20px',fontWeight:800 }}>⚙️ Ajustes del Restaurante</h3>
+          <h3 style={{ margin:'0 0 20px',fontWeight:800 }}>Ajustes del Restaurante</h3>
 
           {/* Información del negocio */}
           <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
@@ -892,7 +892,7 @@ export default function AdminPage() {
 
           {/* Logo del Restaurante */}
           <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
-            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>🖼️ Logo del Restaurante</h4>
+            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>Logo del Restaurante</h4>
             <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>
               Sube el logotipo de tu negocio. Se mostrará en el menú público y en el panel de administración.
             </p>
@@ -925,7 +925,7 @@ export default function AdminPage() {
 
           {/* QR de Pago */}
           <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
-            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>📱 QR de Pago</h4>
+            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>QR de Pago</h4>
             <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>
               Sube la imagen de tu QR de pago (transferencia bancaria, QR Simple, etc). Los clientes podrán verla y descargarla al pagar.
             </p>
@@ -964,15 +964,15 @@ export default function AdminPage() {
             <p style={{ fontSize:13,color:'#64748b',margin:'0 0 12px' }}>Comparte este link con tus clientes:</p>
             <div style={{ display:'flex',gap:10 }}>
               <input readOnly value={window.location.origin + '/menu/' + slug} style={{ ...inp,background:'#f8fafc',color:'#374151',fontWeight:700 }}/>
-              <button onClick={()=>navigator.clipboard.writeText(window.location.origin + '/menu/' + slug)} style={{ padding:'8px 14px',borderRadius:10,border:'none',background:'#1e293b',color:'#fff',fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontSize:12 }}>📋 Copiar</button>
+              <button onClick={()=>navigator.clipboard.writeText(window.location.origin + '/menu/' + slug)} style={{ padding:'8px 14px',borderRadius:10,border:'none',background:'#1e293b',color:'#fff',fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',fontSize:12 }}>Copiar</button>
             </div>
           </div>
         </div>)}
 
       {/* Edit Modal */}
       {editItem && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
-        <div style={{ background:'#fff',borderRadius:20,padding:26,maxWidth:400,width:'100%' }}>
-          <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>✏️ Editar plato</h3>
+        <div style={{ background:'#fff',borderRadius:12,padding:26,maxWidth:400,width:'100%' }}>
+          <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>Editar plato</h3>
           {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
           <div style={{ display:'flex',gap:10 }}>
             <button onClick={async()=>{ await updatePlato(editItem.id,editForm); setPlatos(prev=>prev.map(p=>p.id===editItem.id?{...p,...editForm}:p)); setEditItem(null) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar</button>
@@ -983,8 +983,8 @@ export default function AdminPage() {
 
       {/* New Plato Modal */}
       {showNew && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
-        <div style={{ background:'#fff',borderRadius:20,padding:26,maxWidth:400,width:'100%' }}>
-          <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>➕ Nuevo plato — {editDay}</h3>
+        <div style={{ background:'#fff',borderRadius:12,padding:26,maxWidth:400,width:'100%' }}>
+          <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>Nuevo plato — {editDay}</h3>
           {[{l:'Categoría',k:'categoria',t:'select'},{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label>
             {t==='select'?(<select value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:e.target.value}))} style={inp}><option value="sopa">Sopa</option><option value="segundo">Segundo</option><option value="extra">Extra</option></select>)
             :(<input type={t} value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/>)}
