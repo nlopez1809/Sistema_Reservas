@@ -28,7 +28,7 @@ export default function SetupPage() {
       await refreshSession()
       navigate('/admin')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear el restaurante')
+      setError(err.message || 'Error al crear el restaurante')
     } finally { setLoading(false) }
   }
 

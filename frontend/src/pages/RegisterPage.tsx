@@ -7,6 +7,8 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ nombre:'', apellido:'', email:'', password:'', confirm:'' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   function set(k: string, v: string) { setForm(prev => ({ ...prev, [k]: v })); setError('') }
 
@@ -47,11 +49,17 @@ export default function RegisterPage() {
           </div>
           <div style={{ marginBottom:14 }}>
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Contraseña</label>
-            <input type="password" required value={form.password} onChange={e=>set('password',e.target.value)} placeholder="Mínimo 6 caracteres" style={inp} />
+            <div style={{ position:'relative' }}>
+              <input type={showPass ? 'text' : 'password'} required value={form.password} onChange={e=>set('password',e.target.value)} placeholder="Mínimo 6 caracteres" style={{ ...inp, paddingRight:42 }} />
+              <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#94a3b8', padding:4 }}>{showPass ? '🙈' : '👁️'}</button>
+            </div>
           </div>
           <div style={{ marginBottom:20 }}>
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Confirmar Contraseña</label>
-            <input type="password" required value={form.confirm} onChange={e=>set('confirm',e.target.value)} placeholder="Repetir contraseña" style={inp} />
+            <div style={{ position:'relative' }}>
+              <input type={showConfirm ? 'text' : 'password'} required value={form.confirm} onChange={e=>set('confirm',e.target.value)} placeholder="Repetir contraseña" style={{ ...inp, paddingRight:42 }} />
+              <button type="button" onClick={()=>setShowConfirm(!showConfirm)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#94a3b8', padding:4 }}>{showConfirm ? '🙈' : '👁️'}</button>
+            </div>
           </div>
           {error && <p style={{ color:'#ef4444', fontSize:13, marginBottom:12, fontWeight:600 }}>⚠️ {error}</p>}
           <button type="submit" disabled={loading} style={{ width:'100%', padding:'13px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1 }}>

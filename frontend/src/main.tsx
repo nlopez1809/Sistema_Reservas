@@ -19,39 +19,30 @@ const center: React.CSSProperties = {
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { status, refreshSession } = useAuth()
 
-  // Still loading — show spinner
   if (status === 'loading') return (
     <div style={center}>
-      <div style={{ fontSize: 40 }}>🍜</div>
-      <p style={{ fontSize: 16 }}>Cargando tu panel…</p>
+      <div style={{ fontSize: 48, animation: 'pulse 1.5s ease-in-out infinite' }}>🍜</div>
+      <p style={{ fontSize: 16, fontWeight: 600 }}>Cargando tu panel...</p>
+      <style>{`@keyframes pulse { 0%,100% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.1); opacity: 0.7 } }`}</style>
     </div>
   )
 
-  // Backend unreachable — don't redirect, let user retry
   if (status === 'error') return (
     <div style={center}>
-      <div style={{ fontSize: 48 }}>⚠️</div>
-      <p style={{ fontSize: 16, fontWeight: 700, color: '#ef4444' }}>
+      <div style={{ fontSize: 48 }}>😕</div>
+      <p style={{ fontSize: 18, fontWeight: 700, color: '#ef4444' }}>
         No se pudo conectar al servidor
       </p>
-      <p style={{ fontSize: 13, color: '#64748b', textAlign: 'center', maxWidth: 360 }}>
-        El frontend está intentando conectarse a:<br/>
-        <strong style={{ color: '#1e293b', wordBreak: 'break-all' }}>
-          {import.meta.env.VITE_API_URL
-            ? `${import.meta.env.VITE_API_URL}/api/restaurante/me`
-            : 'http://localhost:3001/api/restaurante/me (proxy)'}
-        </strong>
-      </p>
-      <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', maxWidth: 360, marginTop: 4 }}>
-        Abre F12 → Console para ver el error exacto
+      <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', maxWidth: 360 }}>
+        Verifica que el servidor esté encendido e intenta de nuevo.
       </p>
       <button
         onClick={() => refreshSession()}
-        style={{ marginTop: 12, padding: '10px 24px', borderRadius: 12, border: 'none',
+        style={{ marginTop: 8, padding: '12px 28px', borderRadius: 12, border: 'none',
           background: 'linear-gradient(135deg,#f97316,#ef4444)', color: '#fff',
           fontWeight: 800, cursor: 'pointer', fontSize: 15 }}
       >
-        🔄 Reintentar
+        Reintentar
       </button>
     </div>
   )
