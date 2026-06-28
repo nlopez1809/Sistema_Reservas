@@ -448,19 +448,19 @@ export default function MenuPage() {
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar productos..." style={{ ...inp, paddingLeft:38, background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:24 }} />
           </div>
 
-        </div>
-        {/* Day tabs */}
-        <div style={{ display:'flex', flexWrap:'wrap', gap:6, paddingBottom:10, paddingLeft:16, paddingRight:16 }}>
-          {activeDays.map(d=>(
-            <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
-              padding:'8px 14px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
-              border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
-              background: activeDay===d.nombre ? '#fef1f5' : '#fff',
-              color: activeDay===d.nombre ? '#e91e63' : '#374151',
-            }}>
-              {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
-            </button>
-          ))}
+          {/* Day tabs */}
+          <div style={{ display:'flex', flexWrap:'wrap', gap:6, paddingBottom:10 }}>
+            {activeDays.map(d=>(
+              <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
+                padding:'8px 14px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
+                border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
+                background: activeDay===d.nombre ? '#fef1f5' : '#fff',
+                color: activeDay===d.nombre ? '#e91e63' : '#374151',
+              }}>
+                {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
