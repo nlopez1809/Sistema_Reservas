@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authSignUp } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { refreshSession } = useAuth()
   const [form, setForm] = useState({ nombre:'', apellido:'', email:'', password:'', confirm:'' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,6 +24,13 @@ export default function RegisterPage() {
     setLoading(true)
     const { error: err } = await authSignUp(form.email, form.password, form.nombre, form.apellido)
     if (err) { setError(err.message); setLoading(false); return }
+    // Wait for Supabase session to be ready before navigating
+    for (let i = 0; i < 10; i++) {
+      const { data } = await supabase.auth.getSession()
+      if (data.session?.access_token) break
+      await new Promise(r => setTimeout(r, 500))
+    }
+    await refreshSession()
     navigate('/setup')
   }
 
