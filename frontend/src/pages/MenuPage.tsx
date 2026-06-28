@@ -1,169 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { getMenuBySlug, getDiasBySlug, createPedido } from '@/lib/api'
 import { fmtCur, genId } from '@/lib/utils'
 import type { MenuDia, Dia, Combo, PedidoItem, Consumo, MetodoPago } from '@/types'
 
-// ─── StockBadge ───────────────────────────────────────────────────────────────
-function StockBadge({ stock, init, small }: { stock: number; init: number; small?: boolean }) {
+function StockBadge({ stock, init }: { stock: number; init: number }) {
   const pct = init > 0 ? (stock / init) * 100 : 0
-  const col = pct > 50 ? '#22c55e' : pct > 20 ? '#f59e0b' : '#ef4444'
+  const col = pct > 50 ? '#22c55e' : pct > 20 ? '#eab308' : '#ef4444'
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:6, marginTop: small?2:6 }}>
-      <div style={{ flex:1, height:small?4:6, background:'#e5e7eb', borderRadius:99, overflow:'hidden' }}>
-        <div style={{ width:`${pct}%`, height:'100%', background:col, borderRadius:99 }} />
-      </div>
-      <span style={{ fontSize:small?10:11, fontWeight:700, color:col, minWidth:56, whiteSpace:'nowrap' }}>
-        {stock === 0 ? 'AGOTADO' : `${stock} disponibles`}
-      </span>
-    </div>
+    <span style={{ fontSize:12, fontWeight:600, color: stock === 0 ? '#ef4444' : col }}>
+      {stock === 0 ? 'Agotado' : `${stock} disp.`}
+    </span>
   )
 }
 
-// ─── CompletoPicker ───────────────────────────────────────────────────────────
-function CompletoPicker({ dayMenu, combos, onSave, isMobile }: {
-  dayMenu: MenuDia; combos: Combo[]; onSave: (c: Combo[]) => void; isMobile: boolean
-}) {
-  const { sopas, segundos } = dayMenu
-  const add = () => onSave([...combos, { sopaIdx:null, segundoIdx:null, qty:1 }])
-  const remove = (i: number) => onSave(combos.filter((_,idx)=>idx!==i))
-  const setQty = (i: number, qty: number) => {
-    if (qty < 1) { remove(i); return }
-    const c = combos[i]
-    const maxS = c.sopaIdx!==null ? sopas[c.sopaIdx!].stock - combos.reduce((s,x,idx)=>idx!==i&&x.sopaIdx===c.sopaIdx?s+x.qty:s,0) : Infinity
-    const maxG = c.segundoIdx!==null ? segundos[c.segundoIdx!].stock - combos.reduce((s,x,idx)=>idx!==i&&x.segundoIdx===c.segundoIdx?s+c.qty:s,0) : Infinity
-    onSave(combos.map((x,idx)=>idx===i?{...x,qty:Math.min(qty,Math.max(1,Math.min(maxS,maxG)))}:x))
-  }
-  const pickSopa = (ci: number, si: number) => {
-    const upd = combos.map((c,i)=>i===ci?{...c,sopaIdx:c.sopaIdx===si?null:si}:c)
-    const cur = upd[ci]
-    if (cur.sopaIdx!==null && cur.segundoIdx!==null) {
-      const dup = upd.findIndex((c,i)=>i!==ci&&c.sopaIdx===cur.sopaIdx&&c.segundoIdx===cur.segundoIdx)
-      if (dup>=0) { onSave(upd.map((c,i)=>i===dup?{...c,qty:c.qty+cur.qty}:c).filter((_,i)=>i!==ci)); return }
-    }
-    onSave(upd)
-  }
-  const pickSeg = (ci: number, gi: number) => {
-    const upd = combos.map((c,i)=>i===ci?{...c,segundoIdx:c.segundoIdx===gi?null:gi}:c)
-    const cur = upd[ci]
-    if (cur.sopaIdx!==null && cur.segundoIdx!==null) {
-      const dup = upd.findIndex((c,i)=>i!==ci&&c.sopaIdx===cur.sopaIdx&&c.segundoIdx===cur.segundoIdx)
-      if (dup>=0) { onSave(upd.map((c,i)=>i===dup?{...c,qty:c.qty+cur.qty}:c).filter((_,i)=>i!==ci)); return }
-    }
-    onSave(upd)
-  }
-
-  const allDone = combos.length>0 && combos.every(c=>c.sopaIdx!==null&&c.segundoIdx!==null)
-  const total = combos.reduce((sum,c)=>{
-    const s=c.sopaIdx!==null?sopas[c.sopaIdx!]:null; const g=c.segundoIdx!==null?segundos[c.segundoIdx!]:null
-    return s&&g?sum+(s.precio+g.precio)*c.qty:sum
-  },0)
-
-  return (
-    <div style={{ background:'#fff', borderRadius:20, border:`2px solid ${allDone?'#f97316':'#fed7aa'}`, padding: isMobile ? 16 : 24, marginBottom:24, boxShadow:allDone?'0 8px 32px rgba(249,115,22,0.18)':'0 2px 10px rgba(0,0,0,0.06)' }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16, flexWrap:'wrap', gap:10 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-          <span style={{ fontSize: isMobile ? 28 : 36 }}>🍽️</span>
-          <div>
-            <span style={{ fontSize:10, fontWeight:800, letterSpacing:1.5, background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', padding:'3px 12px', borderRadius:99, textTransform:'uppercase' }}>Menú Completo</span>
-            <h2 style={{ margin:'6px 0 2px', fontSize: isMobile ? 17 : 20, fontWeight:900 }}>Armá tu Almuerzo</h2>
-            <p style={{ margin:0, fontSize:13, color:'#64748b' }}>Elegí 1 sopa + 1 segundo por combinación</p>
-          </div>
-        </div>
-        {combos.length>0 && <button onClick={()=>onSave([])} style={{ border:'none', background:'#fee2e2', color:'#ef4444', borderRadius:10, padding:'6px 14px', cursor:'pointer', fontWeight:700, fontSize:12 }}>Limpiar todo</button>}
-      </div>
-
-      {/* Reference - available items */}
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12, marginBottom:20, background:'#f8fafc', borderRadius:14, padding: isMobile ? 12 : 14 }}>
-        {([['🥣 Sopas del día','#3b82f6',sopas],['🍳 Segundos del día','#f97316',segundos]] as const).map(([label, col, items])=>(
-          <div key={label as string}>
-            <div style={{ fontSize:11, fontWeight:800, color:col as string, textTransform:'uppercase', marginBottom:8 }}>{label as string}</div>
-            {(items as any[]).map((s: any,i: number)=>(
-              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 10px', background:'#fff', borderRadius:8, marginBottom:4, border:`1.5px solid ${col as string}33` }}>
-                <span style={{ fontSize:13, fontWeight:700 }}>{s.emoji} {s.nombre}</span>
-                <span style={{ fontSize:12, fontWeight:800, color:col as string }}>{fmtCur(s.precio)}</span>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Combo rows */}
-      {combos.length === 0 && (
-        <div style={{ textAlign:'center', padding: isMobile ? '20px 10px' : '24px', background:'#fffbf5', borderRadius:14, border:'2px dashed #fed7aa', marginBottom:16 }}>
-          <div style={{ fontSize:32, marginBottom:8 }}>👇</div>
-          <p style={{ margin:0, fontWeight:700, color:'#9a3412', fontSize:14 }}>Toca el botón de abajo para armar tu almuerzo</p>
-          <p style={{ margin:'4px 0 0', fontSize:12, color:'#475569' }}>Podés pedir varias combinaciones distintas</p>
-        </div>
-      )}
-
-      {combos.map((combo, ci) => {
-        const sopaObj = combo.sopaIdx!==null ? sopas[combo.sopaIdx!] : null
-        const segObj  = combo.segundoIdx!==null ? segundos[combo.segundoIdx!] : null
-        const done = !!sopaObj && !!segObj
-        const otherS = combos.reduce((s,c,idx)=>idx!==ci&&c.sopaIdx===combo.sopaIdx?s+c.qty:s,0)
-        const otherG = combos.reduce((s,c,idx)=>idx!==ci&&c.segundoIdx===combo.segundoIdx?s+c.qty:s,0)
-        const maxQty = done ? Math.min(sopaObj!.stock-otherS, segObj!.stock-otherG) : 1
-        return (
-          <div key={ci} style={{ border:`2px solid ${done?'#f97316':'#e2e8f0'}`, borderRadius:16, padding: isMobile ? 14 : 16, marginBottom:12, background:done?'#fffbf5':'#fafafa' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, flexWrap:'wrap', gap:8 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:28, height:28, borderRadius:'50%', background:done?'linear-gradient(135deg,#f97316,#ef4444)':'#e2e8f0', color:done?'#fff':'#94a3b8', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:13 }}>{ci+1}</div>
-                <span style={{ fontWeight:800, fontSize:13 }}>{done?`${sopaObj!.emoji} ${sopaObj!.nombre} + ${segObj!.emoji} ${segObj!.nombre}`:`Combinación #${ci+1}`}</span>
-                {done && <span style={{ fontSize:11, background:'#dcfce7', color:'#166534', borderRadius:99, padding:'2px 8px', fontWeight:700 }}>✓ Listo</span>}
-              </div>
-              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                {done && (<>
-                  <button onClick={()=>setQty(ci,combo.qty-1)} style={{ width:32, height:32, borderRadius:8, border:'2px solid #f97316', background:'#fff', color:'#f97316', fontWeight:900, cursor:'pointer', fontSize:18, display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
-                  <span style={{ fontWeight:900, fontSize:16, minWidth:24, textAlign:'center' }}>{combo.qty}</span>
-                  <button onClick={()=>combo.qty<maxQty&&setQty(ci,combo.qty+1)} disabled={combo.qty>=maxQty} style={{ width:32, height:32, borderRadius:8, border:`2px solid ${combo.qty>=maxQty?'#e2e8f0':'#f97316'}`, background:combo.qty>=maxQty?'#f1f5f9':'#f97316', color:combo.qty>=maxQty?'#94a3b8':'#fff', fontWeight:900, cursor:combo.qty>=maxQty?'not-allowed':'pointer', fontSize:18, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
-                  <span style={{ fontSize:13, fontWeight:900, color:'#f97316', marginLeft:4 }}>{fmtCur((sopaObj!.precio+segObj!.precio)*combo.qty)}</span>
-                </>)}
-                <button onClick={()=>remove(ci)} style={{ border:'none', background:'#fee2e2', color:'#ef4444', borderRadius:8, padding:'4px 10px', cursor:'pointer', fontWeight:700, fontSize:12, marginLeft:4 }}>Quitar</button>
-              </div>
-            </div>
-            {!done && (
-              <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:10 }}>
-                {([['sopa','🥣 Elegí tu Sopa','#3b82f6',sopas,combo.sopaIdx,(si:number)=>pickSopa(ci,si)],
-                   ['segundo','🍳 Elegí tu Segundo','#f97316',segundos,combo.segundoIdx,(gi:number)=>pickSeg(ci,gi)]] as const).map(([_key,label,col,items,selIdx,pick])=>(
-                  <div key={label as string}>
-                    <div style={{ fontSize:12, fontWeight:700, color:col as string, textTransform:'uppercase', marginBottom:6 }}>{label as string}</div>
-                    {(items as any[]).map((s: any, si: number) => {
-                      const used = combos.reduce((sum,c,idx)=>idx!==ci&&(_key==='sopa'?c.sopaIdx:c.segundoIdx)===si?sum+c.qty:sum,0)
-                      const avail = s.stock-used; const noStock=avail<=0
-                      return (
-                        <button key={si} onClick={()=>!noStock&&(pick as any)(si)} style={{ width:'100%', marginBottom:5, padding:'10px 12px', borderRadius:10, border:`2px solid ${selIdx===si?col:'#e2e8f0'}`, background:selIdx===si?`${col as string}18`:'#fff', color:noStock?'#cbd5e1':selIdx===si?col:'#374151', fontWeight:selIdx===si?800:600, fontSize:13, cursor:noStock?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:noStock?0.5:1 }}>
-                          <span>{s.emoji} {s.nombre}</span>
-                          <span style={{ fontSize:12, fontWeight:800 }}>{fmtCur(s.precio)} · {noStock?'Agotado':`${avail} disp.`}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                ))}
-              </div>
-            )}
-            {done && (
-              <button onClick={()=>onSave(combos.map((c,i)=>i===ci?{...c,sopaIdx:null,segundoIdx:null}:c))} style={{ border:'none', background:'#f1f5f9', color:'#64748b', borderRadius:8, padding:'6px 14px', cursor:'pointer', fontWeight:600, fontSize:12 }}>Cambiar selección</button>
-            )}
-          </div>
-        )
-      })}
-
-      <button onClick={add} style={{ width:'100%', padding:'12px 0', borderRadius:12, border:'2px dashed #fed7aa', background:'#fffbf5', color:'#f97316', fontWeight:800, fontSize:15, cursor:'pointer', marginBottom:16 }}>+ Agregar almuerzo</button>
-
-      <div style={{ borderTop:'2px dashed #fed7aa', paddingTop:14, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
-        <div>
-          {allDone ? (<><div style={{ fontSize:12, color:'#475569' }}>{combos.length} combinación{combos.length>1?'es':''} · {combos.reduce((s,c)=>s+c.qty,0)} almuerzo{combos.reduce((s,c)=>s+c.qty,0)>1?'s':''}</div><div style={{ fontSize:26, fontWeight:900, color:'#f97316' }}>{fmtCur(total)}</div></>)
-          : combos.length===0 ? <div style={{ fontSize:13, color:'#475569', fontStyle:'italic' }}>Agrega almuerzos arriba</div>
-          : <div style={{ fontSize:13, color:'#f59e0b', fontWeight:700 }}>Completa todas las combinaciones</div>}
-        </div>
-        {allDone && <div style={{ background:'#dcfce7', borderRadius:12, padding:'8px 14px', fontSize:13, fontWeight:700, color:'#166534' }}>✓ Listo para pedir</div>}
-      </div>
-    </div>
-  )
-}
-
-// ─── MenuPage (main) ──────────────────────────────────────────────────────────
 export default function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
   const [menu, setMenu] = useState<MenuDia[]>([])
@@ -182,6 +32,10 @@ export default function MenuPage() {
   const [orderId, setOrderId] = useState('')
   const [payMethod, setPayMethod] = useState<MetodoPago>('efectivo')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [search, setSearch] = useState('')
+  const [finalTotal, setFinalTotal] = useState(0)
+  const [showMobileCart, setShowMobileCart] = useState(false)
+  const cartRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const h = () => setIsMobile(window.innerWidth < 768)
@@ -206,6 +60,7 @@ export default function MenuPage() {
   const simpleItems = cartKeys.filter(k=>!k.endsWith('-completo')).map(k=>cart[k])
   const comboValid = combos.length>0 && combos.every(c=>c.sopaIdx!==null&&c.segundoIdx!==null)
   const hasItems = simpleItems.length>0 || comboValid
+  const totalQty = simpleItems.reduce((s,c)=>s+c.qty,0) + (comboValid ? combos.reduce((s,c)=>s+c.qty,0) : 0)
 
   function simpleTotal() {
     return cartKeys.filter(k=>!k.endsWith('-completo')).reduce((sum,k)=>{
@@ -225,12 +80,46 @@ export default function MenuPage() {
   }
   const cartTotal = simpleTotal() + comboTotal()
 
-  function toggleSimple(type: 'sopa'|'segundo'|'extra', idx: number) {
+  function addToCart(type: 'sopa'|'segundo'|'extra', idx: number) {
     const key=`${activeDay}-${type}-${idx}`
-    setCart(prev=>{ const n={...prev}; if(n[key]) delete n[key]; else n[key]={type,idx,qty:1,day:activeDay}; return n })
+    setCart(prev=>{
+      const n={...prev}
+      if(n[key]) { n[key]={...n[key], qty: n[key].qty+1}; return n }
+      n[key]={type,idx,qty:1,day:activeDay}; return n
+    })
+  }
+  function removeFromCart(key: string) {
+    setCart(prev=>{ const n={...prev}; delete n[key]; return n })
   }
   function setQty(key: string, qty: number) {
+    if(qty<1) { removeFromCart(key); return }
     setCart(prev=>({...prev,[key]:{...prev[key],qty}}))
+  }
+
+  // Combo helpers
+  const addCombo = () => setCombos(prev=>[...prev, { sopaIdx:null, segundoIdx:null, qty:1 }])
+  const removeCombo = (i: number) => setCombos(prev=>prev.filter((_,idx)=>idx!==i))
+  const pickSopa = (ci: number, si: number) => {
+    const upd = combos.map((c,i)=>i===ci?{...c,sopaIdx:c.sopaIdx===si?null:si}:c)
+    const cur = upd[ci]
+    if (cur.sopaIdx!==null && cur.segundoIdx!==null) {
+      const dup = upd.findIndex((c,i)=>i!==ci&&c.sopaIdx===cur.sopaIdx&&c.segundoIdx===cur.segundoIdx)
+      if (dup>=0) { setCombos(upd.map((c,i)=>i===dup?{...c,qty:c.qty+cur.qty}:c).filter((_,i)=>i!==ci)); return }
+    }
+    setCombos(upd)
+  }
+  const pickSeg = (ci: number, gi: number) => {
+    const upd = combos.map((c,i)=>i===ci?{...c,segundoIdx:c.segundoIdx===gi?null:gi}:c)
+    const cur = upd[ci]
+    if (cur.sopaIdx!==null && cur.segundoIdx!==null) {
+      const dup = upd.findIndex((c,i)=>i!==ci&&c.sopaIdx===cur.sopaIdx&&c.segundoIdx===cur.segundoIdx)
+      if (dup>=0) { setCombos(upd.map((c,i)=>i===dup?{...c,qty:c.qty+cur.qty}:c).filter((_,i)=>i!==ci)); return }
+    }
+    setCombos(upd)
+  }
+  const setComboQty = (i: number, qty: number) => {
+    if(qty<1) { removeCombo(i); return }
+    setCombos(prev=>prev.map((c,idx)=>idx===i?{...c,qty}:c))
   }
 
   function buildItems(): PedidoItem[] {
@@ -264,8 +153,6 @@ export default function MenuPage() {
     setStep('pago')
   }
 
-  const [finalTotal, setFinalTotal] = useState(0)
-
   async function handlePay(method: MetodoPago) {
     setPayMethod(method); setSubmitting(true)
     const id=genId()
@@ -284,309 +171,501 @@ export default function MenuPage() {
     finally { setSubmitting(false) }
   }
 
-  function renderReceiptItems(items: PedidoItem[]) {
-    const groups: Record<number,PedidoItem[]>={}
-    items.filter(i=>i.combo_num!=null).forEach(i=>{const n=i.combo_num!;if(!groups[n])groups[n]=[];groups[n].push(i)})
-    const others=items.filter(i=>i.combo_num==null)
-    return (<>
-      {Object.entries(groups).map(([num,its])=>(<div key={num} style={{ marginBottom:8, background:'#fff7ed', borderRadius:10, padding:'8px 10px', border:'1.5px solid #fed7aa' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}><span style={{ fontSize:13, fontWeight:800, color:'#c2410c' }}>🍽️ Almuerzo #{num} {its[0].cantidad>1?`× ${its[0].cantidad}`:''}</span><span style={{ fontSize:13, fontWeight:900, color:'#f97316' }}>{fmtCur(its.reduce((s,i)=>s+i.precio*i.cantidad,0))}</span></div>
-        {its.map((it,i)=>(<div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:12, paddingLeft:6 }}><span style={{ color:'#64748b' }}>{it.tipo_linea==='sopa'?'🥣':'🍳'} {it.nombre}</span><span style={{ color:'#475569' }}>{fmtCur(it.precio)}</span></div>))}
-      </div>))}
-      {others.map((it,i)=>(<div key={i} style={{ display:'flex', justifyContent:'space-between', marginBottom:8, fontSize:14 }}><span>{it.cantidad}x {it.nombre}</span><span style={{ fontWeight:700 }}>{fmtCur(it.precio*it.cantidad)}</span></div>))}
-    </>)
-  }
+  // ── Styles ──
+  const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+  const inp: React.CSSProperties={ width:'100%', padding:'12px 14px', borderRadius:8, border:'1px solid #d1d5db', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:font }
 
   if(loading) return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:12 }}>
-      <div style={{ fontSize:48, animation:'spin 1s linear infinite' }}>🍜</div>
-      <p style={{ fontSize:16, color:'#475569', fontWeight:600 }}>Cargando menú...</p>
-      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:16, fontFamily:font }}>
+      <div style={{ width:40, height:40, border:'3px solid #e5e7eb', borderTopColor:'#e91e63', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
+      <p style={{ fontSize:15, color:'#6b7280', fontWeight:500 }}>Cargando menú...</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
   if(!menu.length) return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:12, padding:20, textAlign:'center' }}>
-      <div style={{ fontSize:48 }}>😕</div>
-      <p style={{ fontSize:18, color:'#ef4444', fontWeight:700 }}>Restaurante no encontrado</p>
-      <p style={{ fontSize:14, color:'#475569' }}>Verifica que el link sea correcto</p>
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:8, padding:20, textAlign:'center', fontFamily:font }}>
+      <p style={{ fontSize:18, color:'#374151', fontWeight:600 }}>Restaurante no encontrado</p>
+      <p style={{ fontSize:14, color:'#6b7280' }}>Verifica que el link sea correcto</p>
     </div>
   )
 
-  const inp: React.CSSProperties={ width:'100%', padding:'11px 14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:15, boxSizing:'border-box', outline:'none' }
+  function renderProductCard(item: any, type: 'sopa'|'segundo'|'extra', idx: number) {
+    const key=`${activeDay}-${type}-${idx}`
+    const inCart=cart[key]
+    const qty=inCart?.qty??0
+    const outOfStock=item.stock===0
+    const matchesSearch = !search || item.nombre.toLowerCase().includes(search.toLowerCase())
+    if(!matchesSearch) return null
 
-  return (
-    <div style={{ minHeight:'100vh', background:'linear-gradient(160deg,#fff7ed 0%,#fef3c7 30%,#fff 60%)', fontFamily:'Georgia,serif' }}>
-      {/* NAV */}
-      <nav style={{ background:'rgba(255,255,255,0.93)', backdropFilter:'blur(10px)', borderBottom:'2px solid #fed7aa', padding: isMobile ? '0 12px' : '0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:100, height:60 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          {restaurante?.logo_url
-            ? <img src={restaurante.logo_url} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover' }} />
-            : <span style={{ fontSize:24 }}>🍜</span>}
-          <div>
-            <div style={{ fontWeight:900, fontSize: isMobile ? 15 : 18, color:'#9a3412' }}>{restaurante?.nombre ?? 'Menú del día'}</div>
-            {restaurante?.ciudad && <div style={{ fontSize:10, color:'#c2410c', fontWeight:600 }}>{restaurante.ciudad}</div>}
+    return (
+      <div key={key} style={{
+        display:'flex', justifyContent:'space-between', alignItems:'center',
+        padding: isMobile ? '14px 12px' : '16px 20px',
+        borderBottom:'1px solid #f3f4f6',
+        opacity:outOfStock?0.5:1,
+        background: qty > 0 ? '#fef9f5' : '#fff',
+        cursor: outOfStock ? 'default' : 'pointer',
+        transition:'background 0.15s',
+      }}
+      onClick={()=>!outOfStock && addToCart(type, idx)}
+      >
+        <div style={{ flex:1, minWidth:0, marginRight:16 }}>
+          {item.popular && <span style={{ fontSize:11, fontWeight:700, color:'#d97706', background:'#fef3c7', padding:'2px 8px', borderRadius:4, marginBottom:4, display:'inline-block' }}>Más vendido</span>}
+          <div style={{ fontSize:15, fontWeight:600, color:'#1f2937', marginBottom:2 }}>{item.nombre}</div>
+          {item.descripcion && <div style={{ fontSize:13, color:'#6b7280', marginBottom:4, lineHeight:1.4 }}>{item.descripcion}</div>}
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <span style={{ fontSize:15, fontWeight:700, color:'#1f2937' }}>{fmtCur(item.precio)}</span>
+            <StockBadge stock={item.stock} init={item.stock_inicial} />
           </div>
         </div>
-        {hasItems && <div style={{ background:'#f97316', color:'#fff', borderRadius:20, padding:'6px 14px', fontSize:13, fontWeight:800 }}>🛒 {fmtCur(cartTotal)}</div>}
-      </nav>
-
-      {/* HERO */}
-      <div style={{ background:'linear-gradient(135deg,#9a3412,#c2410c,#ea580c)', padding: isMobile ? '28px 16px' : '36px 24px', textAlign:'center', color:'#fff' }}>
-        {restaurante?.logo_url && (
-          <img src={restaurante.logo_url} alt={restaurante.nombre} style={{ width: isMobile ? 70 : 90, height: isMobile ? 70 : 90, borderRadius:20, objectFit:'cover', border:'3px solid rgba(255,255,255,0.3)', boxShadow:'0 4px 20px rgba(0,0,0,0.25)', marginBottom:12 }} />
-        )}
-        <h1 style={{ margin:'0 0 6px', fontSize: isMobile ? 22 : 30, fontWeight:900 }}>Menú de la Semana</h1>
-        <p style={{ margin:0, opacity:1, fontSize: isMobile ? 13 : 14 }}>Reserva tu almuerzo · Pago en efectivo o QR</p>
+        <div style={{ position:'relative', flexShrink:0 }}>
+          {item.imagen_url ? (
+            <img src={item.imagen_url} alt="" style={{ width: isMobile ? 80 : 100, height: isMobile ? 80 : 100, borderRadius:8, objectFit:'cover' }} />
+          ) : (
+            <div style={{ width: isMobile ? 80 : 100, height: isMobile ? 80 : 100, borderRadius:8, background:'#f9fafb', display:'flex', alignItems:'center', justifyContent:'center', fontSize:36, border:'1px solid #f3f4f6' }}>
+              {item.emoji || (type==='sopa'?'🥣':type==='segundo'?'🍛':'🥤')}
+            </div>
+          )}
+          {qty > 0 && (
+            <div style={{ position:'absolute', bottom:-6, right:-6, display:'flex', alignItems:'center', background:'#fff', borderRadius:20, boxShadow:'0 2px 8px rgba(0,0,0,0.15)', border:'1px solid #e5e7eb', overflow:'hidden' }}
+              onClick={e=>e.stopPropagation()}>
+              <button onClick={()=>setQty(key, qty-1)} style={{ width:28, height:28, border:'none', background:'#fff', color:'#e91e63', fontWeight:700, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
+              <span style={{ fontSize:13, fontWeight:700, color:'#1f2937', minWidth:20, textAlign:'center' }}>{qty}</span>
+              <button onClick={()=>setQty(key, Math.min(item.stock, qty+1))} style={{ width:28, height:28, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'0 20px 20px 0' }}>+</button>
+            </div>
+          )}
+          {!qty && !outOfStock && (
+            <div style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#e91e63', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:700, boxShadow:'0 2px 6px rgba(233,30,99,0.4)', cursor:'pointer' }}
+              onClick={e=>{e.stopPropagation(); addToCart(type, idx)}}>+</div>
+          )}
+        </div>
       </div>
+    )
+  }
 
-      <div style={{ maxWidth:980, margin:'0 auto', padding: isMobile ? '16px 12px' : '24px 16px' }}>
-        {/* DAY TABS */}
-        <div style={{ display:'flex', gap:8, marginBottom:16, overflowX:'auto', paddingBottom:4, WebkitOverflowScrolling:'touch' }}>
-          {activeDays.map(d=>(
-            <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([])}} style={{ flexShrink:0, padding: isMobile ? '8px 16px' : '10px 20px', borderRadius:30, border:'none', cursor:'pointer', fontWeight:800, fontSize:13, background:activeDay===d.nombre?'linear-gradient(135deg,#f97316,#ef4444)':'#fff', color:activeDay===d.nombre?'#fff':'#64748b', boxShadow:activeDay===d.nombre?'0 4px 15px rgba(249,115,22,0.35)':'0 1px 4px rgba(0,0,0,0.08)' }}>
-              {d.nombre===today?`⭐ ${d.nombre}`:d.nombre}
-            </button>
-          ))}
+  function renderComboSection() {
+    if(!dayMenuData) return null
+    const { sopas, segundos } = dayMenuData
+    return (
+      <div>
+        <div style={{ padding:'16px 20px', borderBottom:'1px solid #f3f4f6' }}>
+          <div style={{ fontSize:15, fontWeight:700, color:'#1f2937', marginBottom:4 }}>Arma tu almuerzo completo</div>
+          <div style={{ fontSize:13, color:'#6b7280' }}>Elige 1 sopa + 1 segundo por combinación</div>
         </div>
 
-        {/* TYPE SELECTOR */}
-        <div style={{ background:'#fff', borderRadius:16, padding: isMobile ? 10 : 14, marginBottom:18, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', display:'flex', gap:6, flexWrap:'wrap' }}>
-          {([['completo','🍽️ Completo'],['sopa','🥣 Sopa'],['segundo','🍳 Segundo'],['extra','🥤 Extra']] as const).map(([v,l])=>(
-            <button key={v} onClick={()=>setMenuType(v)} style={{ padding: isMobile ? '7px 12px' : '8px 16px', borderRadius:20, border:`2px solid ${menuType===v?'#f97316':'#e2e8f0'}`, background:menuType===v?'#fff7ed':'#fff', color:menuType===v?'#f97316':'#64748b', fontWeight:700, cursor:'pointer', fontSize: isMobile ? 12 : 13, flex: isMobile ? '1 1 auto' : 'none', textAlign:'center' }}>{l}</button>
-          ))}
+        {combos.map((combo, ci) => {
+          const sopaObj = combo.sopaIdx!==null ? sopas[combo.sopaIdx!] : null
+          const segObj  = combo.segundoIdx!==null ? segundos[combo.segundoIdx!] : null
+          const done = !!sopaObj && !!segObj
+          return (
+            <div key={ci} style={{ margin:'12px 16px', border:'1px solid #e5e7eb', borderRadius:12, overflow:'hidden', background:'#fff' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background: done ? '#fef9f5' : '#f9fafb', borderBottom:'1px solid #f3f4f6' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <div style={{ width:24, height:24, borderRadius:'50%', background: done ? '#e91e63':'#d1d5db', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:12 }}>{ci+1}</div>
+                  <span style={{ fontWeight:600, fontSize:13, color:'#374151' }}>
+                    {done ? `${sopaObj!.nombre} + ${segObj!.nombre}` : `Combinación ${ci+1}`}
+                  </span>
+                  {done && <span style={{ fontSize:11, background:'#dcfce7', color:'#166534', borderRadius:4, padding:'1px 6px', fontWeight:600 }}>Listo</span>}
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  {done && (<>
+                    <button onClick={()=>setComboQty(ci, combo.qty-1)} style={{ width:26, height:26, borderRadius:6, border:'1px solid #d1d5db', background:'#fff', cursor:'pointer', fontSize:14, fontWeight:700, color:'#374151', display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
+                    <span style={{ fontSize:13, fontWeight:700, minWidth:18, textAlign:'center' }}>{combo.qty}</span>
+                    <button onClick={()=>setComboQty(ci, combo.qty+1)} style={{ width:26, height:26, borderRadius:6, border:'none', background:'#e91e63', color:'#fff', cursor:'pointer', fontSize:14, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
+                    <span style={{ fontSize:13, fontWeight:700, color:'#e91e63', marginLeft:4 }}>{fmtCur((sopaObj!.precio+segObj!.precio)*combo.qty)}</span>
+                  </>)}
+                  <button onClick={()=>removeCombo(ci)} style={{ border:'none', background:'none', color:'#9ca3af', cursor:'pointer', fontSize:18, padding:'0 4px' }}>×</button>
+                </div>
+              </div>
+              {!done && (
+                <div style={{ padding:12, display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:10 }}>
+                  <div>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#6b7280', textTransform:'uppercase', marginBottom:6 }}>Elige tu sopa</div>
+                    {sopas.map((s: any, si: number) => {
+                      const sel = combo.sopaIdx === si
+                      return (
+                        <button key={si} onClick={()=>pickSopa(ci, si)} style={{ width:'100%', marginBottom:4, padding:'8px 10px', borderRadius:6, border:`1px solid ${sel?'#e91e63':'#e5e7eb'}`, background:sel?'#fef1f5':'#fff', color: s.stock<=0?'#9ca3af':'#374151', fontWeight:sel?600:400, fontSize:13, cursor:s.stock<=0?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:s.stock<=0?0.5:1 }}>
+                          <span>{s.nombre}</span>
+                          <span style={{ fontSize:12, color:sel?'#e91e63':'#6b7280' }}>{fmtCur(s.precio)}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#6b7280', textTransform:'uppercase', marginBottom:6 }}>Elige tu segundo</div>
+                    {segundos.map((s: any, gi: number) => {
+                      const sel = combo.segundoIdx === gi
+                      return (
+                        <button key={gi} onClick={()=>pickSeg(ci, gi)} style={{ width:'100%', marginBottom:4, padding:'8px 10px', borderRadius:6, border:`1px solid ${sel?'#e91e63':'#e5e7eb'}`, background:sel?'#fef1f5':'#fff', color: s.stock<=0?'#9ca3af':'#374151', fontWeight:sel?600:400, fontSize:13, cursor:s.stock<=0?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:s.stock<=0?0.5:1 }}>
+                          <span>{s.nombre}</span>
+                          <span style={{ fontSize:12, color:sel?'#e91e63':'#6b7280' }}>{fmtCur(s.precio)}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              {done && (
+                <div style={{ padding:'8px 14px', borderTop:'1px solid #f3f4f6' }}>
+                  <button onClick={()=>setCombos(prev=>prev.map((c,i)=>i===ci?{...c,sopaIdx:null,segundoIdx:null}:c))} style={{ border:'none', background:'none', color:'#e91e63', cursor:'pointer', fontWeight:500, fontSize:12, padding:0 }}>Cambiar selección</button>
+                </div>
+              )}
+            </div>
+          )
+        })}
+
+        <div style={{ padding:'12px 16px' }}>
+          <button onClick={addCombo} style={{ width:'100%', padding:'10px 0', borderRadius:8, border:'1px dashed #d1d5db', background:'#fff', color:'#e91e63', fontWeight:600, fontSize:14, cursor:'pointer' }}>+ Agregar almuerzo</button>
         </div>
+      </div>
+    )
+  }
 
-        {/* CONTENT */}
-        {dayMenuData && (<>
-          {menuType==='completo' && <CompletoPicker dayMenu={dayMenuData} combos={combos} onSave={setCombos} isMobile={isMobile} />}
-
-          {(menuType==='sopa'||menuType==='segundo') && (
-            <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap:14, marginBottom:22 }}>
-              {(menuType==='sopa'?dayMenuData.sopas:dayMenuData.segundos).map((item,idx)=>{
-                const key=`${activeDay}-${menuType}-${idx}`; const sel=!!cart[key]; const qty=cart[key]?.qty??1
+  function renderCart() {
+    return (
+      <div ref={cartRef} style={{ background:'#fff', borderRadius:12, border:'1px solid #e5e7eb', overflow:'hidden', ...(isMobile ? {} : { position:'sticky', top:80 }) }}>
+        <div style={{ padding:'16px 18px', borderBottom:'1px solid #f3f4f6' }}>
+          <div style={{ fontSize:16, fontWeight:700, color:'#1f2937' }}>Mi pedido</div>
+        </div>
+        {!hasItems ? (
+          <div style={{ padding:'40px 20px', textAlign:'center' }}>
+            <div style={{ width:60, height:60, margin:'0 auto 12px', background:'#f3f4f6', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            </div>
+            <p style={{ fontSize:14, fontWeight:500, color:'#6b7280', margin:0 }}>Tu pedido está vacío</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ padding:'0 18px' }}>
+              {comboValid && dayMenuData && combos.map((c,i)=>{
+                const s=dayMenuData.sopas[c.sopaIdx!]; const g=dayMenuData.segundos[c.segundoIdx!]
                 return (
-                  <div key={key} onClick={()=>item.stock>0&&toggleSimple(menuType,idx)} style={{ background:item.stock===0?'#f1f5f9':sel?'#fff7ed':'#fff', border:`2px solid ${sel?'#f97316':item.stock===0?'#e2e8f0':'#e5e7eb'}`, borderRadius:16, padding: isMobile ? 16 : 20, cursor:item.stock===0?'not-allowed':'pointer', opacity:item.stock===0?0.6:1, position:'relative' }}>
-                    {sel&&<div style={{ position:'absolute',top:10,right:10,background:'#f97316',color:'#fff',borderRadius:'50%',width:24,height:24,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:900 }}>✓</div>}
-                    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                      <div style={{ fontSize:36 }}>{item.emoji}</div>
-                      <div style={{ flex:1 }}>
-                        <span style={{ fontSize:10,fontWeight:700,letterSpacing:1,background:menuType==='sopa'?'#3b82f6':'#f97316',color:'#fff',padding:'2px 8px',borderRadius:99,textTransform:'uppercase' }}>{menuType==='sopa'?'Sopa':'Segundo'}</span>
-                        <h3 style={{ margin:'4px 0 2px',fontSize:15,fontWeight:800 }}>{item.nombre}</h3>
-                        {item.descripcion && <p style={{ fontSize:12,color:'#64748b',margin:'0 0 4px' }}>{item.descripcion}</p>}
-                        <div style={{ fontSize:20,fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</div>
-                      </div>
+                  <div key={`combo-${i}`} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid #f3f4f6' }}>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:'#1f2937' }}>{c.qty}x Almuerzo #{i+1}</div>
+                      <div style={{ fontSize:12, color:'#6b7280' }}>{s.nombre} + {g.nombre}</div>
                     </div>
-                    <StockBadge stock={item.stock} init={item.stock_inicial} />
-                    {sel&&<div style={{ marginTop:12,display:'flex',alignItems:'center',gap:8 }} onClick={e=>e.stopPropagation()}>
-                      <button onClick={()=>setQty(key,Math.max(1,qty-1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#fff',color:'#f97316',fontWeight:900,cursor:'pointer',fontSize:18 }}>−</button>
-                      <span style={{ fontWeight:800,fontSize:18,minWidth:24,textAlign:'center' }}>{qty}</span>
-                      <button onClick={()=>setQty(key,Math.min(item.stock,qty+1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#f97316',color:'#fff',fontWeight:900,cursor:'pointer',fontSize:18 }}>+</button>
-                    </div>}
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <span style={{ fontSize:13, fontWeight:600 }}>{fmtCur((s.precio+g.precio)*c.qty)}</span>
+                      <button onClick={()=>removeCombo(i)} style={{ border:'none', background:'none', color:'#9ca3af', cursor:'pointer', fontSize:16 }}>×</button>
+                    </div>
                   </div>
                 )
               })}
-            </div>
-          )}
-
-          {menuType==='extra' && dayMenuData.extra && (()=>{
-            const item=dayMenuData.extra!; const key=`${activeDay}-extra-0`; const sel=!!cart[key]; const qty=cart[key]?.qty??1
-            return (<div style={{ maxWidth:400 }}>
-              <div onClick={()=>item.stock>0&&toggleSimple('extra',0)} style={{ background:item.stock===0?'#f1f5f9':sel?'#fff7ed':'#fff', border:`2px solid ${sel?'#f97316':item.stock===0?'#e2e8f0':'#e5e7eb'}`, borderRadius:16, padding: isMobile ? 16 : 20, cursor:item.stock===0?'not-allowed':'pointer', opacity:item.stock===0?0.6:1, position:'relative' }}>
-                {sel&&<div style={{ position:'absolute',top:10,right:10,background:'#f97316',color:'#fff',borderRadius:'50%',width:24,height:24,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:900 }}>✓</div>}
-                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                  <div style={{ fontSize:36 }}>{item.emoji}</div>
-                  <div style={{ flex:1 }}>
-                    <span style={{ fontSize:10,fontWeight:700,background:'#8b5cf6',color:'#fff',padding:'2px 8px',borderRadius:99 }}>Extra</span>
-                    <h3 style={{ margin:'4px 0 2px',fontSize:15,fontWeight:800 }}>{item.nombre}</h3>
-                    {item.descripcion && <p style={{ fontSize:12,color:'#64748b',margin:'0 0 4px' }}>{item.descripcion}</p>}
-                    <div style={{ fontSize:20,fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</div>
-                  </div>
-                </div>
-                <StockBadge stock={item.stock} init={item.stock_inicial} />
-                {sel&&<div style={{ marginTop:12,display:'flex',alignItems:'center',gap:8 }} onClick={e=>e.stopPropagation()}>
-                  <button onClick={()=>setQty(key,Math.max(1,qty-1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#fff',color:'#f97316',fontWeight:900,cursor:'pointer',fontSize:18 }}>−</button>
-                  <span style={{ fontWeight:800,fontSize:18,minWidth:24,textAlign:'center' }}>{qty}</span>
-                  <button onClick={()=>setQty(key,Math.min(item.stock,qty+1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#f97316',color:'#fff',fontWeight:900,cursor:'pointer',fontSize:18 }}>+</button>
-                </div>}
-              </div>
-            </div>)
-          })()}
-        </>)}
-
-        {/* CART */}
-        {hasItems && (
-          <div style={{ background:'#fff', borderRadius:20, padding: isMobile ? 16 : 22, marginTop:8, boxShadow:'0 4px 24px rgba(249,115,22,0.14)', border:'2px solid #fed7aa' }}>
-            <h3 style={{ margin:'0 0 14px', fontSize:16, fontWeight:900, color:'#9a3412' }}>🛒 Tu Pedido</h3>
-            <div style={{ marginBottom:14 }}>
-              {comboValid && dayMenuData && (<div style={{ marginBottom:8 }}>
-                <div style={{ display:'flex', justifyContent:'space-between', padding:'8px 12px', background:'linear-gradient(135deg,#fff7ed,#fef3c7)', borderRadius:10, border:'1.5px solid #fed7aa', marginBottom:4 }}>
-                  <span style={{ fontSize:13, fontWeight:800, color:'#9a3412' }}>🍽️ Menú Completo · {combos.reduce((s,c)=>s+c.qty,0)} almuerzo{combos.reduce((s,c)=>s+c.qty,0)>1?'s':''}</span>
-                  <span style={{ fontWeight:900, color:'#f97316' }}>{fmtCur(comboTotal())}</span>
-                </div>
-                {combos.map((c,i)=>{const s=dayMenuData.sopas[c.sopaIdx!];const g=dayMenuData.segundos[c.segundoIdx!];return(<div key={i} style={{ marginBottom:3,padding:'4px 10px',marginLeft:8,background:'#fffbf5',borderRadius:8,border:'1px solid #fed7aa',fontSize:11 }}><strong style={{ color:'#c2410c' }}>{c.qty>1?`${c.qty}×`:''} {s.emoji} {s.nombre} + {g.emoji} {g.nombre}</strong> <span style={{ color:'#f97316',fontWeight:900 }}>{fmtCur((s.precio+g.precio)*c.qty)}</span></div>)})}
-              </div>)}
               {simpleItems.map((ci,i)=>{
                 if(!dayMenuData) return null
                 const item=ci.type==='extra'?dayMenuData.extra:(ci.type==='sopa'?dayMenuData.sopas:dayMenuData.segundos)[ci.idx]
                 if(!item) return null
-                return(<div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8, padding:'8px 12px', background:'#fff7ed', borderRadius:10 }}><span style={{ fontSize:13, fontWeight:600 }}>{(item as any).emoji} {ci.qty}x {(item as any).nombre}</span><span style={{ fontWeight:800, color:'#f97316' }}>{fmtCur((item as any).precio*ci.qty)}</span></div>)
+                const key = `${ci.day}-${ci.type}-${ci.idx}`
+                return (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid #f3f4f6' }}>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:'#1f2937' }}>{ci.qty}x {(item as any).nombre}</div>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <span style={{ fontSize:13, fontWeight:600 }}>{fmtCur((item as any).precio*ci.qty)}</span>
+                      <button onClick={()=>removeFromCart(key)} style={{ border:'none', background:'none', color:'#9ca3af', cursor:'pointer', fontSize:16 }}>×</button>
+                    </div>
+                  </div>
+                )
               })}
             </div>
-            <div style={{ marginBottom:14 }}>
-              <p style={{ fontSize:13, fontWeight:700, marginBottom:8 }}>¿Cómo lo consumirás?</p>
-              <div style={{ display:'flex', gap:10 }}>
+
+            <div style={{ padding:'12px 18px', borderTop:'1px solid #e5e7eb' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+                <span style={{ fontSize:15, fontWeight:700, color:'#1f2937' }}>Total</span>
+                <span style={{ fontSize:17, fontWeight:700, color:'#1f2937' }}>{fmtCur(cartTotal)}</span>
+              </div>
+              <div style={{ display:'flex', gap:8, marginBottom:12 }}>
                 {(['local','llevar'] as const).map(v=>(
-                  <button key={v} onClick={()=>setConsumo(v)} style={{ flex:1, padding:'10px 8px', borderRadius:12, cursor:'pointer', border:`2px solid ${consumo===v?'#f97316':'#e2e8f0'}`, background:consumo===v?'#fff7ed':'#fff', color:consumo===v?'#f97316':'#64748b', fontWeight:700, fontSize:13 }}>
-                    {v==='local'?'🍽️ En el local':'📦 Para llevar'}
+                  <button key={v} onClick={()=>setConsumo(v)} style={{ flex:1, padding:'8px', borderRadius:6, cursor:'pointer', border:`1px solid ${consumo===v?'#e91e63':'#d1d5db'}`, background:consumo===v?'#fef1f5':'#fff', color:consumo===v?'#e91e63':'#6b7280', fontWeight:600, fontSize:12 }}>
+                    {v==='local'?'En el local':'Para llevar'}
                   </button>
                 ))}
               </div>
+              <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                Confirmar pedido
+              </button>
             </div>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-              <span style={{ fontWeight:800, fontSize:17 }}>Total:</span>
-              <span style={{ fontWeight:900, fontSize:24, color:'#f97316' }}>{fmtCur(cartTotal)}</span>
-            </div>
-            <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'14px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', boxShadow:'0 4px 20px rgba(249,115,22,0.35)' }}>
-              Confirmar Reserva →
-            </button>
-          </div>
+          </>
         )}
       </div>
+    )
+  }
+
+  const allItems: {item:any, type:'sopa'|'segundo'|'extra', idx:number}[] = []
+  if(dayMenuData) {
+    dayMenuData.sopas.forEach((s,i)=>allItems.push({item:s,type:'sopa',idx:i}))
+    dayMenuData.segundos.forEach((s,i)=>allItems.push({item:s,type:'segundo',idx:i}))
+    if(dayMenuData.extra) allItems.push({item:dayMenuData.extra,type:'extra',idx:0})
+  }
+
+  const categories: {key:string, label:string, type:'completo'|'sopa'|'segundo'|'extra'}[] = [
+    { key:'completo', label:'Almuerzo Completo', type:'completo' },
+    { key:'sopa', label:'Sopas', type:'sopa' },
+    { key:'segundo', label:'Segundos', type:'segundo' },
+    { key:'extra', label:'Extras', type:'extra' },
+  ]
+
+  return (
+    <div style={{ minHeight:'100vh', background:'#fafafa', fontFamily:font }}>
+      {/* Header */}
+      <header style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', position:'sticky', top:0, zIndex:100 }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', padding: isMobile ? '12px 16px' : '12px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            {restaurante?.logo_url
+              ? <img src={restaurante.logo_url} alt="" style={{ width:40, height:40, borderRadius:8, objectFit:'cover' }} />
+              : <div style={{ width:40, height:40, borderRadius:8, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>🍽️</div>}
+            <div>
+              <div style={{ fontWeight:700, fontSize:16, color:'#1f2937' }}>{restaurante?.nombre ?? 'Menú'}</div>
+              {restaurante?.ciudad && <div style={{ fontSize:12, color:'#6b7280' }}>{restaurante.ciudad}{restaurante?.direccion ? ` · ${restaurante.direccion}` : ''}</div>}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Restaurant Info */}
+      <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', padding: isMobile ? '16px' : '20px 24px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:16 }}>
+            {restaurante?.logo_url
+              ? <img src={restaurante.logo_url} alt="" style={{ width: isMobile ? 60 : 80, height: isMobile ? 60 : 80, borderRadius:12, objectFit:'cover', border:'1px solid #e5e7eb' }} />
+              : <div style={{ width: isMobile ? 60 : 80, height: isMobile ? 60 : 80, borderRadius:12, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32 }}>🍽️</div>}
+            <div>
+              <h1 style={{ margin:'0 0 4px', fontSize: isMobile ? 18 : 22, fontWeight:700, color:'#1f2937' }}>{restaurante?.nombre}</h1>
+              {restaurante?.descripcion && <p style={{ margin:'0 0 4px', fontSize:13, color:'#6b7280', lineHeight:1.4 }}>{restaurante.descripcion}</p>}
+              {restaurante?.telefono && <div style={{ fontSize:13, color:'#6b7280' }}>Tel: {restaurante.telefono}</div>}
+            </div>
+          </div>
+
+          {/* Search */}
+          <div style={{ position:'relative', marginBottom:12 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar productos..." style={{ ...inp, paddingLeft:38, background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:24 }} />
+          </div>
+
+          {/* Day tabs */}
+          <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4, WebkitOverflowScrolling:'touch' as any, marginBottom:8 }}>
+            {activeDays.map(d=>(
+              <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
+                flexShrink:0, padding:'6px 16px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
+                border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
+                background: activeDay===d.nombre ? '#fef1f5' : '#fff',
+                color: activeDay===d.nombre ? '#e91e63' : '#374151',
+              }}>
+                {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Category tabs */}
+      <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', position:'sticky', top:65, zIndex:90 }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:0, overflowX:'auto', WebkitOverflowScrolling:'touch' as any }}>
+          {categories.map(cat=>(
+            <button key={cat.key} onClick={()=>{setMenuType(cat.type);setSearch('')}} style={{
+              padding: isMobile ? '10px 14px' : '12px 20px', cursor:'pointer', fontWeight:600, fontSize:13,
+              border:'none', borderBottom: menuType===cat.type ? '3px solid #e91e63' : '3px solid transparent',
+              background:'transparent', color: menuType===cat.type ? '#e91e63' : '#6b7280',
+              whiteSpace:'nowrap', flexShrink:0,
+            }}>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div style={{ maxWidth:1200, margin:'0 auto', padding: isMobile ? '0' : '20px 24px' }}>
+        <div style={{ display: isMobile ? 'block' : 'flex', gap:24, alignItems:'flex-start' }}>
+          {/* Products */}
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ background:'#fff', borderRadius: isMobile ? 0 : 12, border: isMobile ? 'none' : '1px solid #e5e7eb', overflow:'hidden' }}>
+              {/* Section title */}
+              <div style={{ padding:'14px 20px', borderBottom:'1px solid #f3f4f6' }}>
+                <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:'#1f2937', textTransform:'uppercase', letterSpacing:0.5 }}>
+                  {categories.find(c=>c.type===menuType)?.label}
+                </h2>
+              </div>
+
+              {menuType === 'completo' ? renderComboSection() : (
+                <div>
+                  {menuType === 'extra' && dayMenuData?.extra ? (
+                    renderProductCard(dayMenuData.extra, 'extra', 0)
+                  ) : (
+                    (menuType==='sopa' ? dayMenuData?.sopas : dayMenuData?.segundos)?.map((item, idx) =>
+                      renderProductCard(item, menuType, idx)
+                    )
+                  )}
+                  {menuType !== 'extra' && (menuType==='sopa' ? dayMenuData?.sopas : dayMenuData?.segundos)?.length === 0 && (
+                    <div style={{ padding:'40px 20px', textAlign:'center', color:'#6b7280', fontSize:14 }}>No hay productos disponibles para este día</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Cart sidebar - desktop */}
+          {!isMobile && (
+            <div style={{ width:320, flexShrink:0 }}>
+              {renderCart()}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile cart bar */}
+      {isMobile && hasItems && step==='menu' && (
+        <div style={{ position:'fixed', bottom:0, left:0, right:0, zIndex:100, padding:'12px 16px', background:'#fff', borderTop:'1px solid #e5e7eb', boxShadow:'0 -4px 12px rgba(0,0,0,0.08)' }}>
+          <button onClick={()=>setShowMobileCart(true)} style={{ width:'100%', padding:'14px 20px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <span style={{ background:'rgba(255,255,255,0.2)', borderRadius:4, padding:'2px 8px', fontSize:13 }}>{totalQty}</span>
+            <span>Ver pedido</span>
+            <span>{fmtCur(cartTotal)}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Mobile cart modal */}
+      {isMobile && showMobileCart && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:200 }} onClick={()=>setShowMobileCart(false)}>
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'#fff', borderRadius:'16px 16px 0 0', maxHeight:'80vh', overflowY:'auto' }} onClick={e=>e.stopPropagation()}>
+            <div style={{ padding:'12px 16px 0', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <span style={{ fontWeight:700, fontSize:16 }}>Mi pedido</span>
+              <button onClick={()=>setShowMobileCart(false)} style={{ border:'none', background:'none', fontSize:24, color:'#6b7280', cursor:'pointer' }}>×</button>
+            </div>
+            {renderCart()}
+          </div>
+        </div>
+      )}
 
       {/* DATOS MODAL */}
       {step==='datos' && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.65)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 8 : 16 }}>
-          <div style={{ background:'#fff', borderRadius:24, padding: isMobile ? 20 : 30, maxWidth:460, width:'100%', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
-            <div style={{ textAlign:'center', marginBottom:18 }}><div style={{ fontSize:34 }}>👤</div><h2 style={{ margin:'8px 0 4px', fontSize:20, fontWeight:900 }}>Datos para tu Reserva</h2></div>
-            <div style={{ background:'#fff7ed', border:'2px solid #fed7aa', borderRadius:14, padding:'12px 14px', marginBottom:16 }}>
-              <p style={{ margin:'0 0 8px', fontSize:11, fontWeight:800, color:'#c2410c' }}>RESUMEN</p>
-              {renderReceiptItems(buildItems())}
-              <div style={{ borderTop:'1px dashed #fed7aa', marginTop:8, paddingTop:8, display:'flex', justifyContent:'space-between' }}>
-                <span style={{ fontWeight:800 }}>Total</span>
-                <span style={{ fontWeight:900, fontSize:16, color:'#f97316' }}>{fmtCur(cartTotal)}</span>
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 0 : 16 }}>
+          <div style={{ background:'#fff', borderRadius: isMobile ? 0 : 16, padding: isMobile ? '20px 16px' : '28px', maxWidth:480, width:'100%', maxHeight:'100vh', overflowY:'auto', ...(isMobile ? {minHeight:'100vh'} : {}) }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+              <h2 style={{ margin:0, fontSize:18, fontWeight:700, color:'#1f2937' }}>Datos de reserva</h2>
+              <button onClick={()=>setStep('menu')} style={{ border:'none', background:'none', fontSize:24, color:'#6b7280', cursor:'pointer' }}>×</button>
+            </div>
+
+            <div style={{ background:'#f9fafb', borderRadius:8, padding:'12px 14px', marginBottom:20, border:'1px solid #e5e7eb' }}>
+              <div style={{ fontSize:12, fontWeight:600, color:'#6b7280', marginBottom:8, textTransform:'uppercase' }}>Resumen del pedido</div>
+              {comboValid && dayMenuData && combos.map((c,i)=>{
+                const s=dayMenuData.sopas[c.sopaIdx!]; const g=dayMenuData.segundos[c.segundoIdx!]
+                return <div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:13, marginBottom:4 }}><span style={{ color:'#374151' }}>{c.qty}x {s.nombre} + {g.nombre}</span><span style={{ fontWeight:600 }}>{fmtCur((s.precio+g.precio)*c.qty)}</span></div>
+              })}
+              {simpleItems.map((ci,i)=>{
+                if(!dayMenuData) return null
+                const item=ci.type==='extra'?dayMenuData.extra:(ci.type==='sopa'?dayMenuData.sopas:dayMenuData.segundos)[ci.idx]
+                if(!item) return null
+                return <div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:13, marginBottom:4 }}><span style={{ color:'#374151' }}>{ci.qty}x {(item as any).nombre}</span><span style={{ fontWeight:600 }}>{fmtCur((item as any).precio*ci.qty)}</span></div>
+              })}
+              <div style={{ borderTop:'1px solid #e5e7eb', marginTop:8, paddingTop:8, display:'flex', justifyContent:'space-between', fontWeight:700, fontSize:14 }}>
+                <span>Total</span><span>{fmtCur(cartTotal)}</span>
               </div>
             </div>
-            {([{k:'nombre',l:'Nombre',p:'Ej. María',icon:'👤'},{k:'apellido',l:'Apellido',p:'Ej. Quispe',icon:'👤'},{k:'whatsapp',l:'WhatsApp',p:'Ej. 70123456',icon:'📱',t:'tel'}] as any[]).map(({k,l,p,icon,t})=>(
+
+            {([{k:'nombre',l:'Nombre',p:'María'},{k:'apellido',l:'Apellido',p:'Quispe'},{k:'whatsapp',l:'WhatsApp',p:'70123456',t:'tel'}] as any[]).map(({k,l,p,t})=>(
               <div key={k} style={{ marginBottom:14 }}>
-                <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>{icon} {l}</label>
-                <input type={t||'text'} placeholder={p} value={(customer as any)[k]} onChange={e=>{setCustomer(prev=>({...prev,[k]:e.target.value}));setCustErr(prev=>({...prev,[k]:''}))} } style={{ ...inp, border:`2px solid ${custErr[k]?'#ef4444':'#e2e8f0'}`, background:custErr[k]?'#fff5f5':'#fff' }} />
-                {custErr[k]&&<p style={{ color:'#ef4444', fontSize:12, margin:'4px 0 0', fontWeight:600 }}>{custErr[k]}</p>}
+                <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:5, color:'#374151' }}>{l}</label>
+                <input type={t||'text'} placeholder={p} value={(customer as any)[k]} onChange={e=>{setCustomer(prev=>({...prev,[k]:e.target.value}));setCustErr(prev=>({...prev,[k]:''}))} } style={{ ...inp, border:`1px solid ${custErr[k]?'#ef4444':'#d1d5db'}` }} />
+                {custErr[k]&&<p style={{ color:'#ef4444', fontSize:12, margin:'4px 0 0', fontWeight:500 }}>{custErr[k]}</p>}
               </div>
             ))}
-            <div style={{ marginBottom:18 }}>
-              <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:6 }}>🕐 Hora de recojo / llegada</label>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
+            <div style={{ marginBottom:20 }}>
+              <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Hora de recojo</label>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6 }}>
                 {['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30'].map(h=>(
-                  <button key={h} onClick={()=>{setCustomer(p=>({...p,hora:h}));setCustErr(p=>({...p,hora:''}))}} style={{ padding:'10px 4px', borderRadius:10, cursor:'pointer', border:`2px solid ${customer.hora===h?'#f97316':'#e2e8f0'}`, background:customer.hora===h?'#fff7ed':'#fff', color:customer.hora===h?'#f97316':'#64748b', fontWeight:800, fontSize:14 }}>{h}</button>
+                  <button key={h} onClick={()=>{setCustomer(p=>({...p,hora:h}));setCustErr(p=>({...p,hora:''}))}} style={{ padding:'8px 4px', borderRadius:6, cursor:'pointer', border:`1px solid ${customer.hora===h?'#e91e63':'#d1d5db'}`, background:customer.hora===h?'#fef1f5':'#fff', color:customer.hora===h?'#e91e63':'#374151', fontWeight:600, fontSize:13 }}>{h}</button>
                 ))}
               </div>
-              {custErr.hora&&<p style={{ color:'#ef4444', fontSize:12, margin:'6px 0 0', fontWeight:600 }}>{custErr.hora}</p>}
+              {custErr.hora&&<p style={{ color:'#ef4444', fontSize:12, margin:'4px 0 0', fontWeight:500 }}>{custErr.hora}</p>}
             </div>
-            <button onClick={handleConfirmData} style={{ width:'100%', padding:'14px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', marginBottom:10 }}>Continuar al Pago →</button>
-            <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:12, border:'none', background:'#f1f5f9', color:'#64748b', cursor:'pointer', fontWeight:600 }}>← Volver al menú</button>
+            <button onClick={handleConfirmData} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:8 }}>Continuar al pago</button>
+            <button onClick={()=>{setStep('menu');setShowMobileCart(false)}} style={{ width:'100%', padding:10, borderRadius:8, border:'1px solid #d1d5db', background:'#fff', color:'#6b7280', cursor:'pointer', fontWeight:500 }}>Volver al menú</button>
           </div>
         </div>
       )}
 
       {/* PAGO MODAL */}
       {step==='pago' && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 8 : 16 }}>
-          <div style={{ background:'#fff', borderRadius:24, padding: isMobile ? 20 : 30, maxWidth:440, width:'100%', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
-            <div style={{ textAlign:'center', marginBottom:18 }}>
-              <div style={{ fontSize:34 }}>🧾</div>
-              <h2 style={{ margin:'8px 0 4px', fontSize:21, fontWeight:900 }}>Confirmar Pago</h2>
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 0 : 16 }}>
+          <div style={{ background:'#fff', borderRadius: isMobile ? 0 : 16, padding: isMobile ? '20px 16px' : '28px', maxWidth:440, width:'100%', maxHeight:'100vh', overflowY:'auto', ...(isMobile ? {minHeight:'100vh'} : {}) }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+              <h2 style={{ margin:0, fontSize:18, fontWeight:700, color:'#1f2937' }}>Confirmar pago</h2>
+              <button onClick={()=>setStep('datos')} style={{ border:'none', background:'none', fontSize:24, color:'#6b7280', cursor:'pointer' }}>×</button>
             </div>
-            <div style={{ background:'#f0fdf4', border:'2px solid #bbf7d0', borderRadius:12, padding:'10px 14px', marginBottom:14 }}>
-              <p style={{ margin:'0 0 4px', fontSize:10, fontWeight:800, color:'#166534' }}>CLIENTE</p>
-              <p style={{ margin:0, fontWeight:800, fontSize:14 }}>{customer.nombre} {customer.apellido}</p>
-              <p style={{ margin:'2px 0 0', fontSize:13 }}>📱 {customer.whatsapp} · 🕐 {customer.hora}</p>
+
+            <div style={{ background:'#f0fdf4', borderRadius:8, padding:'10px 14px', marginBottom:16, border:'1px solid #bbf7d0' }}>
+              <div style={{ fontSize:12, fontWeight:600, color:'#166534', marginBottom:4 }}>CLIENTE</div>
+              <div style={{ fontWeight:600, fontSize:14, color:'#374151' }}>{customer.nombre} {customer.apellido}</div>
+              <div style={{ fontSize:13, color:'#6b7280' }}>Tel: {customer.whatsapp} · {customer.hora}</div>
             </div>
-            <div style={{ borderTop:'2px dashed #e2e8f0', borderBottom:'2px dashed #e2e8f0', padding:'14px 0', marginBottom:14 }}>
-              {renderReceiptItems(buildItems())}
+
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', marginBottom:16, borderTop:'1px solid #e5e7eb', borderBottom:'1px solid #e5e7eb' }}>
+              <span style={{ color:'#6b7280', fontSize:14 }}>Consumo: {consumo==='local'?'En el local':'Para llevar'}</span>
+              <span style={{ fontSize:18, fontWeight:700, color:'#1f2937' }}>Total: {fmtCur(cartTotal)}</span>
             </div>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8, fontSize:14 }}>
-              <span style={{ color:'#64748b' }}>Consumo:</span>
-              <span style={{ fontWeight:700 }}>{consumo==='local'?'🍽️ En el local':'📦 Para llevar'}</span>
-            </div>
-            <div style={{ display:'flex', justifyContent:'space-between', fontSize:20, fontWeight:900, marginBottom:22, color:'#f97316' }}>
-              <span>TOTAL</span><span>{fmtCur(cartTotal)}</span>
-            </div>
-            <p style={{ fontSize:14, fontWeight:700, marginBottom:12, textAlign:'center' }}>¿Cómo deseas pagar?</p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:10 }}>
-              <button onClick={()=>handlePay('efectivo')} disabled={submitting} style={{ padding:'18px 8px', borderRadius:14, border:'2px solid #22c55e', background:'#f0fdf4', color:'#166534', fontWeight:800, cursor:'pointer', fontSize:16, display:'flex', flexDirection:'column', alignItems:'center', gap:6, opacity:submitting?0.6:1 }}>
-                💵<span>Efectivo</span>
+
+            <div style={{ fontSize:14, fontWeight:600, marginBottom:12, color:'#374151' }}>Método de pago</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16 }}>
+              <button onClick={()=>handlePay('efectivo')} disabled={submitting} style={{ padding:'16px', borderRadius:8, border:'1px solid #d1d5db', background:'#fff', cursor:'pointer', fontSize:14, fontWeight:600, color:'#374151', opacity:submitting?0.6:1 }}>
+                Efectivo
               </button>
               <button
                 onClick={()=>restaurante?.qr_url ? handlePay('qr') : null}
                 disabled={submitting || !restaurante?.qr_url}
-                title={!restaurante?.qr_url ? 'El restaurante aún no ha configurado su QR de pago' : 'Pagar con QR'}
-                style={{ padding:'18px 8px', borderRadius:14, border:`2px solid ${restaurante?.qr_url?'#3b82f6':'#e2e8f0'}`, background:restaurante?.qr_url?'#eff6ff':'#f8fafc', color:restaurante?.qr_url?'#1e40af':'#94a3b8', fontWeight:800, cursor:restaurante?.qr_url?'pointer':'not-allowed', fontSize:16, display:'flex', flexDirection:'column', alignItems:'center', gap:6, opacity:submitting?0.6:1 }}>
-                📱<span>Pago QR</span>
-                {!restaurante?.qr_url && <span style={{ fontSize:10, fontWeight:600, color:'#475569' }}>No disponible</span>}
+                style={{ padding:'16px', borderRadius:8, border:`1px solid ${restaurante?.qr_url?'#d1d5db':'#e5e7eb'}`, background:restaurante?.qr_url?'#fff':'#f9fafb', cursor:restaurante?.qr_url?'pointer':'not-allowed', fontSize:14, fontWeight:600, color:restaurante?.qr_url?'#374151':'#9ca3af', opacity:submitting?0.6:1 }}>
+                Pago QR {!restaurante?.qr_url && <div style={{ fontSize:11, fontWeight:400, color:'#9ca3af' }}>No disponible</div>}
               </button>
             </div>
-            <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:12, borderRadius:12, border:'none', background:'#f1f5f9', color:'#64748b', cursor:'pointer', fontWeight:600 }}>← Volver</button>
+            <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:10, borderRadius:8, border:'1px solid #d1d5db', background:'#fff', color:'#6b7280', cursor:'pointer', fontWeight:500 }}>Volver</button>
           </div>
         </div>
       )}
 
       {/* DONE MODAL */}
       {step==='done' && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 8 : 16 }}>
-          <div style={{ background:'#fff', borderRadius:24, padding: isMobile ? 24 : 36, maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 0 : 16 }}>
+          <div style={{ background:'#fff', borderRadius: isMobile ? 0 : 16, padding: isMobile ? '24px 16px' : '32px', maxWidth:420, width:'100%', textAlign:'center', maxHeight:'100vh', overflowY:'auto', ...(isMobile ? {minHeight:'100vh', display:'flex', flexDirection:'column' as const, justifyContent:'center'} : {}) }}>
             {payMethod==='qr' ? (
               <>
-                <div style={{ fontSize:48, marginBottom:8 }}>📱</div>
-                <h2 style={{ margin:'0 0 6px', fontWeight:900, fontSize:22 }}>¡Escanea el QR para pagar!</h2>
-                <p style={{ color:'#64748b', fontSize:13, marginBottom:20 }}>
-                  Pedido <strong>#{orderId}</strong> · Total: <strong style={{ color:'#f97316' }}>{fmtCur(finalTotal)}</strong>
+                <h2 style={{ margin:'0 0 8px', fontWeight:700, fontSize:20, color:'#1f2937' }}>Escanea el QR para pagar</h2>
+                <p style={{ color:'#6b7280', fontSize:13, marginBottom:20 }}>
+                  Pedido <strong>#{orderId}</strong> · Total: <strong style={{ color:'#e91e63' }}>{fmtCur(finalTotal)}</strong>
                 </p>
-
-                {restaurante?.qr_url ? (
+                {restaurante?.qr_url && (
                   <div style={{ marginBottom:20 }}>
-                    <div style={{ background:'#f8fafc', border:'2px solid #e2e8f0', borderRadius:16, padding:16, display:'inline-block', marginBottom:12 }}>
-                      <img src={restaurante.qr_url} alt="QR de pago" style={{ width: isMobile ? 180 : 220, height: isMobile ? 180 : 220, objectFit:'contain', borderRadius:8, display:'block' }} />
+                    <div style={{ background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:12, padding:16, display:'inline-block', marginBottom:12 }}>
+                      <img src={restaurante.qr_url} alt="QR" style={{ width: isMobile ? 180 : 220, height: isMobile ? 180 : 220, objectFit:'contain', display:'block' }} />
                     </div>
-                    <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
-                      <a href={restaurante.qr_url} download={`QR-Pago-${restaurante?.nombre ?? 'restaurante'}.png`} target="_blank" rel="noreferrer" style={{ padding:'10px 20px', borderRadius:12, background:'linear-gradient(135deg,#3b82f6,#1d4ed8)', color:'#fff', fontWeight:800, fontSize:14, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6 }}>
-                        Descargar QR
-                      </a>
-                      {navigator.share && (
-                        <button onClick={async()=>{try{const res=await fetch(restaurante!.qr_url!);const blob=await res.blob();const file=new File([blob],'QR-Pago.png',{type:blob.type});await navigator.share({title:'QR de Pago',files:[file]})}catch{}}} style={{ padding:'10px 20px', borderRadius:12, background:'#f1f5f9', color:'#374151', fontWeight:800, fontSize:14, border:'none', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:6 }}>
-                          Compartir
-                        </button>
-                      )}
+                    <div style={{ display:'flex', gap:8, justifyContent:'center' }}>
+                      <a href={restaurante.qr_url} download target="_blank" rel="noreferrer" style={{ padding:'8px 16px', borderRadius:6, background:'#1f2937', color:'#fff', fontWeight:600, fontSize:13, textDecoration:'none' }}>Descargar QR</a>
                     </div>
-                    <p style={{ fontSize:12, color:'#475569', marginTop:12 }}>Descarga el QR y realiza la transferencia por el monto exacto</p>
-                  </div>
-                ) : (
-                  <div style={{ background:'#fef3c7', borderRadius:12, padding:16, marginBottom:20, fontSize:13, color:'#92400e' }}>
-                    El restaurante aún no ha subido su QR de pago. Consulta al local.
+                    <div style={{ marginTop:16, background:'#f9fafb', borderRadius:8, padding:12, textAlign:'left', fontSize:13, color:'#6b7280', border:'1px solid #e5e7eb' }}>
+                      <div style={{ marginBottom:4 }}>1. Escanea el QR con tu app bancaria</div>
+                      <div style={{ marginBottom:4 }}>2. Transfiere exactamente <strong style={{ color:'#1f2937' }}>{fmtCur(finalTotal)}</strong></div>
+                      <div>3. Guarda el comprobante</div>
+                    </div>
                   </div>
                 )}
-
-                <div style={{ background:'#fff7ed', border:'1.5px solid #fed7aa', borderRadius:12, padding:'12px 14px', marginBottom:20, fontSize:13, textAlign:'left' }}>
-                  <div style={{ fontWeight:700, color:'#9a3412', marginBottom:6 }}>Instrucciones de pago:</div>
-                  <div style={{ color:'#64748b', marginBottom:4 }}>1. Escanea el QR con tu app bancaria</div>
-                  <div style={{ color:'#64748b', marginBottom:4 }}>2. Transfiere exactamente <strong style={{ color:'#f97316' }}>{fmtCur(finalTotal)}</strong></div>
-                  <div style={{ color:'#64748b' }}>3. Guarda el comprobante</div>
-                </div>
-
-                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:14, borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer' }}>
-                  ¡Listo, ya pagué!
+                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                  Listo, ya pagué
                 </button>
               </>
             ) : (
               <>
-                <div style={{ fontSize:64, marginBottom:14 }}>✅</div>
-                <h2 style={{ margin:'0 0 8px', fontWeight:900, fontSize:22 }}>¡Reserva Confirmada!</h2>
-                <p style={{ color:'#64748b', fontSize:14, marginBottom:22, lineHeight:1.6 }}>
+                <div style={{ width:64, height:64, borderRadius:'50%', background:'#dcfce7', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h2 style={{ margin:'0 0 8px', fontWeight:700, fontSize:20, color:'#1f2937' }}>Reserva confirmada</h2>
+                <p style={{ color:'#6b7280', fontSize:14, marginBottom:24, lineHeight:1.6 }}>
                   Pedido <strong>#{orderId}</strong> registrado.<br/>
-                  {consumo==='local'?'Te esperamos en el local 🍽️':'Pasarás a recogerlo 📦'}<br/>
+                  {consumo==='local'?'Te esperamos en el local.':'Pasarás a recogerlo.'}<br/>
                   <strong>Paga en efectivo al recoger.</strong>
                 </p>
-                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:14, borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer' }}>
-                  ¡Listo!
+                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                  Volver al menú
                 </button>
               </>
             )}
@@ -594,8 +673,9 @@ export default function MenuPage() {
         </div>
       )}
 
-      <footer style={{ marginTop:48, background:'linear-gradient(135deg,#9a3412,#c2410c)', padding:'18px 24px', textAlign:'center' }}>
-        <p style={{ margin:0, fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.9)' }}>© 2026 <strong>SSH Soluciones Bolivia</strong> — DERECHOS RESERVADOS</p>
+      {/* Footer */}
+      <footer style={{ marginTop:48, padding: isMobile ? '60px 16px 20px' : '20px 24px', textAlign:'center', borderTop:'1px solid #e5e7eb', background:'#fff' }}>
+        <p style={{ margin:0, fontSize:12, color:'#9ca3af' }}>© 2026 SSH Soluciones Bolivia — Derechos reservados</p>
       </footer>
     </div>
   )
