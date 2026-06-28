@@ -1,0 +1,62 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { forgotPassword } from '@/lib/api'
+
+const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true); setError('')
+    try {
+      await forgotPassword(email)
+      setSent(true)
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const inp: React.CSSProperties = { width:'100%', padding:'12px 14px', borderRadius:8, border:'1px solid #d1d5db', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:font }
+
+  return (
+    <div style={{ minHeight:'100vh', background:'#f9fafb', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:font, padding:16 }}>
+      <div style={{ width:'100%', maxWidth:400 }}>
+        <div style={{ textAlign:'center', marginBottom:32 }}>
+          <h1 style={{ fontSize:24, fontWeight:700, margin:'0 0 6px', color:'#1f2937' }}>Recuperar Contrasena</h1>
+          <p style={{ color:'#6b7280', fontSize:14, margin:0 }}>Te enviaremos instrucciones por email</p>
+        </div>
+        <div style={{ background:'#fff', borderRadius:12, padding:32, border:'1px solid #e5e7eb', boxShadow:'0 1px 3px rgba(0,0,0,0.04)' }}>
+          {sent ? (
+            <div style={{ textAlign:'center' }}>
+              <div style={{ width:64, height:64, borderRadius:'50%', background:'#dcfce7', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p style={{ color:'#374151', fontSize:14, lineHeight:1.6 }}>Si el email existe, recibiras instrucciones para restablecer tu contrasena.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom:20 }}>
+                <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Email</label>
+                <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@email.com" style={inp} />
+              </div>
+              {error && <p style={{ color:'#dc2626', fontSize:13, marginBottom:12, fontWeight:500, background:'#fef2f2', padding:'8px 12px', borderRadius:6, border:'1px solid #fecaca' }}>{error}</p>}
+              <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
+                {loading ? 'Enviando...' : 'Enviar instrucciones'}
+              </button>
+            </form>
+          )}
+        </div>
+        <p style={{ textAlign:'center', marginTop:20, fontSize:14, color:'#6b7280' }}>
+          <Link to="/login" style={{ color:'#e91e63', fontWeight:600, textDecoration:'none' }}>Volver al inicio de sesion</Link>
+        </p>
+      </div>
+    </div>
+  )
+}

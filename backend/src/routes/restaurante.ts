@@ -73,11 +73,22 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
 
 // PUT /api/restaurante/me — update restaurante info
 router.put('/me', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { nombre, descripcion, telefono, direccion, ciudad, qr_url, logo_url } = req.body
+  const { nombre, descripcion, telefono, direccion, ciudad, qr_url, logo_url, hora_apertura, hora_cierre } = req.body
+
+  const updateData: Record<string, any> = {}
+  if (nombre !== undefined) updateData.nombre = nombre
+  if (descripcion !== undefined) updateData.descripcion = descripcion
+  if (telefono !== undefined) updateData.telefono = telefono
+  if (direccion !== undefined) updateData.direccion = direccion
+  if (ciudad !== undefined) updateData.ciudad = ciudad
+  if (qr_url !== undefined) updateData.qr_url = qr_url
+  if (logo_url !== undefined) updateData.logo_url = logo_url
+  if (hora_apertura !== undefined) updateData.hora_apertura = hora_apertura
+  if (hora_cierre !== undefined) updateData.hora_cierre = hora_cierre
 
   const { data, error } = await supabase
     .from('restaurantes')
-    .update({ nombre, descripcion, telefono, direccion, ciudad, qr_url, logo_url })
+    .update(updateData)
     .eq('id', req.restauranteId)
     .select()
     .single()

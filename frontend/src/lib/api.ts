@@ -85,3 +85,7 @@ export const getContDiaria  = () => api.get('/contabilidad/diaria').then(r => r.
 export const getContSemanal = () => api.get('/contabilidad/semanal').then(r => r.data)
 export const getContMensual = () => api.get('/contabilidad/mensual').then(r => r.data)
 export const getTopPlatos   = () => api.get('/contabilidad/top-platos').then(r => r.data)
+
+// ── Password Recovery ────────────────────────────────────────────────────────
+export const forgotPassword = (email: string) =>
+  api.post('/public/forgot-password', { email }).then(r => r.data)

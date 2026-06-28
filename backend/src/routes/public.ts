@@ -1,5 +1,24 @@
 import { Router, Request, Response } from 'express'
+import { z } from 'zod'
 import { supabase } from '../supabase'
+
+const pedidoSchema = z.object({
+  codigo:      z.string().min(1).max(20),
+  nombre:      z.string().min(1).max(100),
+  apellido:    z.string().max(100),
+  whatsapp:    z.string().regex(/^\d{7,15}$/, 'Número de WhatsApp inválido'),
+  hora_recojo: z.string().max(10),
+  consumo:     z.enum(['local', 'llevar']),
+  metodo_pago: z.enum(['efectivo', 'qr']),
+  total:       z.number().min(0),
+  dia_nombre:  z.string().min(1).max(20),
+  items: z.array(z.object({
+    nombre:     z.string(),
+    precio:     z.number().min(0),
+    cantidad:   z.number().min(1),
+    tipo_linea: z.string(),
+  })).min(1),
+})
 
 const router = Router()
 
@@ -69,14 +88,21 @@ router.post('/:slug/pedidos', async (req: Request, res: Response) => {
   const rest = await getRestBySlug(slug)
   if (!rest) return res.status(404).json({ error: 'Restaurante no encontrado' })
 
+  const parsed = pedidoSchema.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Datos inválidos',
+      details: parsed.error.flatten().fieldErrors,
+    })
+  }
+
   const {
     codigo, nombre, apellido, whatsapp, hora_recojo,
-    consumo, metodo_pago, total, dia_nombre, items
-  } = req.body
+    consumo, metodo_pago, dia_nombre, items
+  } = parsed.data
 
-  if (!codigo || !nombre || !whatsapp || !items?.length) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios' })
-  }
+  // Server-side total recalculation (never trust client-sent total)
+  const total = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0)
 
   const { data, error } = await supabase.rpc('registrar_pedido', {
     p_restaurante_id: rest.id,
@@ -94,6 +120,19 @@ router.post('/:slug/pedidos', async (req: Request, res: Response) => {
 
   if (error) return res.status(500).json({ error: error.message })
   res.status(201).json({ id: data, codigo })
+})
+
+// POST /api/public/forgot-password
+router.post('/forgot-password', async (req: Request, res: Response) => {
+  const { email } = req.body
+  if (!email) return res.status(400).json({ error: 'Email requerido' })
+
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.FRONTEND_URL}/reset-password`
+  })
+
+  // Always return success to prevent email enumeration
+  res.json({ message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña.' })
 })
 
 export default router

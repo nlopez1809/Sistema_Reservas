@@ -1,5 +1,7 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import dotenv from 'dotenv'
 
 import restauranteRouter  from './routes/restaurante'
@@ -15,6 +17,26 @@ dotenv.config()
 
 const app  = express()
 const PORT = process.env.PORT || 3001
+
+// ── Security ─────────────────────────────────────────────────────────────────
+app.use(helmet())
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes, intenta de nuevo más tarde.' },
+})
+app.use(generalLimiter)
+
+const publicRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes, intenta de nuevo más tarde.' },
+})
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors({
@@ -54,7 +76,7 @@ app.get('/health', (_req, res) =>
 )
 
 // ── Public routes (no auth) ───────────────────────────────────────────────────
-app.use('/api/public', publicRouter)
+app.use('/api/public', publicRateLimiter, publicRouter)
 
 // ── Protected routes (require Supabase JWT) ───────────────────────────────────
 app.use('/api/restaurante',  restauranteRouter)
@@ -67,6 +89,12 @@ app.use('/api/stock',        stockRouter)
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada' }))
+
+// ── Global error handler ─────────────────────────────────────────────────────
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled error:', err)
+  res.status(500).json({ error: 'Error interno del servidor' })
+})
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {

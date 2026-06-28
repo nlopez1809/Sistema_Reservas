@@ -45,6 +45,9 @@ export default function LoginPage() {
                 <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:13, color:'#6b7280', padding:4, fontFamily:font }}>{showPass ? 'Ocultar' : 'Mostrar'}</button>
               </div>
             </div>
+            <div style={{ textAlign:'right', marginBottom:16 }}>
+              <Link to="/forgot-password" style={{ fontSize:13, color:'#e91e63', textDecoration:'none', fontWeight:500 }}>¿Olvidaste tu contrasena?</Link>
+            </div>
             {error && <p style={{ color:'#dc2626', fontSize:13, marginBottom:12, fontWeight:500, background:'#fef2f2', padding:'8px 12px', borderRadius:6, border:'1px solid #fecaca' }}>{error}</p>}
             <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
               {loading ? 'Iniciando...' : 'Iniciar Sesión'}

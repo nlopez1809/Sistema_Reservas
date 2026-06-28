@@ -54,6 +54,14 @@ export default function MenuPage() {
 
   const activeDays = dias.filter(d=>d.habilitado)
   const disabledDaysWithMsg = dias.filter(d=>!d.habilitado && d.mensaje_deshabilitado)
+
+  function isOutsideHours() {
+    if (!restaurante?.hora_apertura || !restaurante?.hora_cierre) return false
+    const now = new Date()
+    const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    return hhmm < restaurante.hora_apertura || hhmm > restaurante.hora_cierre
+  }
+  const outsideHours = isOutsideHours()
   const dayMenuData = menu.find(m=>m.dia.nombre===activeDay)
   const today = (['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'] as const)[new Date().getDay()]
 
@@ -386,9 +394,15 @@ export default function MenuPage() {
                   </button>
                 ))}
               </div>
-              <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
-                Confirmar pedido
-              </button>
+              {outsideHours ? (
+                <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:8, padding:'10px 14px', fontSize:13, color:'#991b1b', textAlign:'center', fontWeight:600 }}>
+                  Fuera de horario de atención ({restaurante.hora_apertura} - {restaurante.hora_cierre})
+                </div>
+              ) : (
+                <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                  Confirmar pedido
+                </button>
+              )}
             </div>
           </>
         )}
@@ -448,6 +462,13 @@ export default function MenuPage() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar productos..." style={{ ...inp, paddingLeft:38, background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:24 }} />
           </div>
+
+          {/* Outside hours notice */}
+          {outsideHours && (
+            <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:10, padding:'12px 16px', marginBottom:12, fontSize:13, color:'#92400e', fontWeight:600, textAlign:'center' }}>
+              Estamos fuera de horario de atención. Horario: {restaurante.hora_apertura} - {restaurante.hora_cierre}
+            </div>
+          )}
 
           {/* Disabled day notices */}
           {disabledDaysWithMsg.length>0 && disabledDaysWithMsg.map(d=>(
@@ -665,9 +686,21 @@ export default function MenuPage() {
                     </div>
                   </div>
                 )}
+                <div style={{ background:'#f9fafb', borderRadius:10, padding:16, textAlign:'left', marginTop:16, marginBottom:16, border:'1px solid #e5e7eb' }}>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Nombre:</strong> {customer.nombre} {customer.apellido}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>WhatsApp:</strong> {customer.whatsapp}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Hora de recojo:</strong> {customer.hora}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Consumo:</strong> {consumo==='local'?'En el local':'Para llevar'}</div>
+                  <div style={{ fontSize:13, color:'#6b7280' }}><strong style={{ color:'#1f2937' }}>Total:</strong> <span style={{ color:'#e91e63', fontWeight:700 }}>{fmtCur(finalTotal)}</span></div>
+                </div>
                 <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
                   Listo, ya pagué
                 </button>
+                {restaurante?.telefono && (
+                  <a href={`https://wa.me/591${restaurante.telefono}?text=${encodeURIComponent(`Hola! Acabo de hacer mi pedido #${orderId} por ${fmtCur(finalTotal)}. ${consumo==='local'?'Comeré en el local':'Pasaré a recoger'} a las ${customer.hora}. Gracias!`)}`} target="_blank" rel="noreferrer" style={{ display:'block', width:'100%', padding:12, borderRadius:8, border:'1px solid #25d366', background:'#fff', color:'#25d366', fontWeight:700, fontSize:15, cursor:'pointer', textAlign:'center', textDecoration:'none', marginTop:8, boxSizing:'border-box' }}>
+                    Confirmar por WhatsApp
+                  </a>
+                )}
               </>
             ) : (
               <>
@@ -675,14 +708,26 @@ export default function MenuPage() {
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <h2 style={{ margin:'0 0 8px', fontWeight:700, fontSize:20, color:'#1f2937' }}>Reserva confirmada</h2>
-                <p style={{ color:'#6b7280', fontSize:14, marginBottom:24, lineHeight:1.6 }}>
+                <p style={{ color:'#6b7280', fontSize:14, marginBottom:4, lineHeight:1.6 }}>
                   Pedido <strong>#{orderId}</strong> registrado.<br/>
                   {consumo==='local'?'Te esperamos en el local.':'Pasarás a recogerlo.'}<br/>
                   <strong>Paga en efectivo al recoger.</strong>
                 </p>
+                <div style={{ background:'#f9fafb', borderRadius:10, padding:16, textAlign:'left', marginTop:16, marginBottom:16, border:'1px solid #e5e7eb' }}>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Nombre:</strong> {customer.nombre} {customer.apellido}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>WhatsApp:</strong> {customer.whatsapp}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Hora de recojo:</strong> {customer.hora}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Consumo:</strong> {consumo==='local'?'En el local':'Para llevar'}</div>
+                  <div style={{ fontSize:13, color:'#6b7280' }}><strong style={{ color:'#1f2937' }}>Total:</strong> <span style={{ color:'#e91e63', fontWeight:700 }}>{fmtCur(finalTotal)}</span></div>
+                </div>
                 <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
                   Volver al menú
                 </button>
+                {restaurante?.telefono && (
+                  <a href={`https://wa.me/591${restaurante.telefono}?text=${encodeURIComponent(`Hola! Acabo de hacer mi pedido #${orderId} por ${fmtCur(finalTotal)}. ${consumo==='local'?'Comeré en el local':'Pasaré a recoger'} a las ${customer.hora}. Gracias!`)}`} target="_blank" rel="noreferrer" style={{ display:'block', width:'100%', padding:12, borderRadius:8, border:'1px solid #25d366', background:'#fff', color:'#25d366', fontWeight:700, fontSize:15, cursor:'pointer', textAlign:'center', textDecoration:'none', marginTop:8, boxSizing:'border-box' }}>
+                    Confirmar por WhatsApp
+                  </a>
+                )}
               </>
             )}
           </div>

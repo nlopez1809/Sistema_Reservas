@@ -8,6 +8,8 @@ import SetupPage    from '@/pages/SetupPage'
 import AdminPage    from '@/pages/AdminPage'
 import MenuPage     from '@/pages/MenuPage'
 import LandingPage  from '@/pages/LandingPage'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/ResetPasswordPage'
 import './index.css'
 
 const center: React.CSSProperties = {
@@ -72,6 +74,8 @@ function App() {
           <Route path="/"           element={<LandingPage />} />
           <Route path="/login"      element={<AuthRoute><LoginPage /></AuthRoute>} />
           <Route path="/register"   element={<AuthRoute><RegisterPage /></AuthRoute>} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/setup"      element={<SetupPage />} />
           <Route path="/admin/*"    element={<PrivateRoute><AdminPage /></PrivateRoute>} />
           <Route path="/menu/:slug" element={<MenuPage />} />

@@ -12,6 +12,8 @@ export interface Restaurante {
   activo: boolean
   plan: 'free' | 'pro' | 'enterprise'
   creado_en: string
+  hora_apertura?: string
+  hora_cierre?: string
 }
 
 export interface Perfil {

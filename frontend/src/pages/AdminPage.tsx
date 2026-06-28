@@ -50,6 +50,8 @@ export default function AdminPage() {
   const [editingStock, setEditingStock] = useState<Record<number,number>>({})
   const [disableModal, setDisableModal] = useState<{dia:Dia}|null>(null)
   const [disableMsg, setDisableMsg] = useState('')
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('notif_sound') !== 'off')
+  const [horario, setHorario] = useState({ hora_apertura:'08:00', hora_cierre:'15:00' })
 
   async function handleQrUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -142,8 +144,8 @@ export default function AdminPage() {
     setNotifHistory(prev => [pedido, ...prev].slice(0, 20))
     // Increment badge
     setUnreadCount(prev => prev + 1)
-    // Play sound
-    playNotificationSound()
+    // Play sound (respects user preference)
+    if (localStorage.getItem('notif_sound') !== 'off') playNotificationSound()
     // Browser push notification
     const nombre = pedido.cliente ? `${pedido.cliente.nombre} ${pedido.cliente.apellido}` : 'Cliente'
     showBrowserNotification(
@@ -161,6 +163,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (!session) return
     setRestForm({ nombre:rest?.nombre??'', descripcion:rest?.descripcion??'', telefono:rest?.telefono??'', ciudad:rest?.ciudad??'La Paz', direccion:rest?.direccion??'' })
+    setHorario({ hora_apertura: (rest as any)?.hora_apertura ?? '08:00', hora_cierre: (rest as any)?.hora_cierre ?? '15:00' })
     loadAll()
   }, [session])
 
@@ -614,7 +617,7 @@ export default function AdminPage() {
         {/* ── PEDIDOS ── */}
         {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
           <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>Registro de Pedidos</h3>
-          {pedidos.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(<>
+          {pedidos.length===0?<div style={{ textAlign:'center',padding:48,color:'#9ca3af' }}><div style={{ fontSize:40,marginBottom:8 }}>📋</div><p style={{ fontWeight:600,color:'#6b7280',margin:'0 0 4px' }}>No hay pedidos registrados</p><p style={{ fontSize:13,margin:0 }}>Los pedidos de tus clientes aparecerán aquí en tiempo real.</p></div>:(<>
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
@@ -639,7 +642,7 @@ export default function AdminPage() {
         {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
           <h3 style={{ margin:'0 0 6px',fontSize:16,fontWeight:800 }}>Base de Datos de Clientes</h3>
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 18px' }}>Identificados por WhatsApp. El contador sube automáticamente con cada pedido.</p>
-          {clientes.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(<>
+          {clientes.length===0?<div style={{ textAlign:'center',padding:48,color:'#9ca3af' }}><div style={{ fontSize:40,marginBottom:8 }}>👥</div><p style={{ fontWeight:600,color:'#6b7280',margin:'0 0 4px' }}>No hay clientes registrados</p><p style={{ fontSize:13,margin:0 }}>Cuando los clientes hagan pedidos, aparecerán aquí automáticamente.</p></div>:(<>
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
@@ -981,6 +984,47 @@ export default function AdminPage() {
             />
             {qrError && <p style={{ color:'#ef4444',fontSize:13,fontWeight:600 }}>⚠️ {qrError}</p>}
             {qrSuccess && <p style={{ color:'#22c55e',fontSize:13,fontWeight:600 }}>✅ QR actualizado correctamente</p>}
+          </div>
+
+          {/* Horario de atención */}
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
+            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>Horario de Atención</h4>
+            <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>Los clientes solo podrán hacer pedidos dentro de este horario.</p>
+            <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14 }}>
+              <div>
+                <label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5 }}>Apertura</label>
+                <input type="time" value={horario.hora_apertura} onChange={e=>setHorario(p=>({...p,hora_apertura:e.target.value}))} style={inp} />
+              </div>
+              <div>
+                <label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5 }}>Cierre</label>
+                <input type="time" value={horario.hora_cierre} onChange={e=>setHorario(p=>({...p,hora_cierre:e.target.value}))} style={inp} />
+              </div>
+            </div>
+            <button onClick={async()=>{ await updateRestaurante(horario); await refreshSession(); alert('Horario guardado ✓') }} style={{ width:'100%',padding:12,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar Horario</button>
+          </div>
+
+          {/* Notificaciones */}
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
+            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>Notificaciones</h4>
+            <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>Configura las alertas de nuevos pedidos.</p>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 0',borderBottom:'1px solid #f1f5f9' }}>
+              <div>
+                <div style={{ fontWeight:700,fontSize:14,color:'#374151' }}>Sonido de notificación</div>
+                <div style={{ fontSize:12,color:'#6b7280' }}>Reproduce un sonido al recibir un nuevo pedido</div>
+              </div>
+              <button onClick={()=>{ const next=!soundEnabled; setSoundEnabled(next); localStorage.setItem('notif_sound',next?'on':'off') }} style={{ width:48,height:26,borderRadius:13,border:'none',cursor:'pointer',background:soundEnabled?'#e91e63':'#d1d5db',position:'relative',transition:'background 0.2s' }}>
+                <div style={{ width:20,height:20,borderRadius:10,background:'#fff',position:'absolute',top:3,left:soundEnabled?25:3,transition:'left 0.2s',boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }} />
+              </button>
+            </div>
+            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 0' }}>
+              <div>
+                <div style={{ fontWeight:700,fontSize:14,color:'#374151' }}>Notificaciones del navegador</div>
+                <div style={{ fontSize:12,color:'#6b7280' }}>{notifEnabled?'Activadas':'Desactivadas — haz clic para activar'}</div>
+              </div>
+              <button onClick={()=>requestNotificationPermission().then(g=>setNotifEnabled(g))} style={{ padding:'6px 14px',borderRadius:8,border:'1px solid #d1d5db',background:notifEnabled?'#dcfce7':'#fff',color:notifEnabled?'#166534':'#374151',fontWeight:600,fontSize:12,cursor:'pointer' }}>
+                {notifEnabled?'Activado':'Activar'}
+              </button>
+            </div>
           </div>
 
           {/* Link público */}
