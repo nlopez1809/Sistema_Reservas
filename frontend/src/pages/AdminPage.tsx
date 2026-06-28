@@ -32,6 +32,10 @@ export default function AdminPage() {
   const [uploadingQr, setUploadingQr] = useState(false)
   const [qrError, setQrError] = useState('')
   const [qrSuccess, setQrSuccess] = useState(false)
+  const logoFileRef = useRef<HTMLInputElement>(null)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [logoError, setLogoError] = useState('')
+  const [logoSuccess, setLogoSuccess] = useState(false)
   const [stockData, setStockData] = useState<any[]>([])
   const [resettingStock, setResettingStock] = useState(false)
   const [resetMsg, setResetMsg] = useState('')
@@ -68,6 +72,38 @@ export default function AdminPage() {
       setUploadingQr(false)
       // Reset input so same file can be re-uploaded
       if (qrFileRef.current) qrFileRef.current.value = ''
+    }
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !rest?.id) return
+    if (file.size > 2 * 1024 * 1024) { setLogoError('El archivo supera los 2 MB'); return }
+
+    setUploadingLogo(true); setLogoError(''); setLogoSuccess(false)
+    try {
+      const ext = file.name.split('.').pop()
+      const path = `${rest.id}/logo.${ext}`
+
+      const { error: upErr } = await supabase.storage
+        .from('qr-pagos')
+        .upload(path, file, { upsert: true, contentType: file.type })
+
+      if (upErr) throw new Error(upErr.message)
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('qr-pagos')
+        .getPublicUrl(path)
+
+      const logo_url = `${publicUrl}?t=${Date.now()}`
+      await updateRestaurante({ logo_url })
+      await refreshSession()
+      setLogoSuccess(true)
+    } catch (err: any) {
+      setLogoError(err.message || 'Error al subir la imagen')
+    } finally {
+      setUploadingLogo(false)
+      if (logoFileRef.current) logoFileRef.current.value = ''
     }
   }
 
@@ -307,7 +343,7 @@ export default function AdminPage() {
           {/* Logo / Restaurant name */}
           <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
-              <span style={{ fontSize:28 }}>🍜</span>
+              {rest?.logo_url ? <img src={rest.logo_url} alt="Logo" style={{ width:32,height:32,borderRadius:8,objectFit:'cover' }} /> : <span style={{ fontSize:28 }}>🍜</span>}
               <div>
                 <div style={{ color:'#fff', fontWeight:900, fontSize:15, lineHeight:1.2 }}>{rest?.nombre ?? 'Mi Restaurante'}</div>
                 <div style={{ color:'#64748b', fontSize:10, marginTop:2 }}>Panel Admin</div>
@@ -809,6 +845,39 @@ export default function AdminPage() {
               </div>
             ))}
             <button onClick={async()=>{ await updateRestaurante(restForm); await refreshSession(); alert('Guardado ✓') }} style={{ width:'100%',padding:12,borderRadius:12,border:'none',background:'linear-gradient(135deg,#f97316,#ef4444)',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar Cambios</button>
+          </div>
+
+          {/* Logo del Restaurante */}
+          <div style={{ background:'#fff',borderRadius:16,padding:24,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+            <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>🖼️ Logo del Restaurante</h4>
+            <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>
+              Sube el logotipo de tu negocio. Se mostrará en el menú público y en el panel de administración.
+            </p>
+            {rest?.logo_url && (
+              <div style={{ marginBottom:16,textAlign:'center' }}>
+                <p style={{ fontSize:12,fontWeight:700,color:'#64748b',marginBottom:8 }}>Logo actual:</p>
+                <img src={rest.logo_url} alt="Logo del restaurante" style={{ maxWidth:150,maxHeight:150,borderRadius:16,border:'2px solid #e2e8f0',objectFit:'contain' }} />
+              </div>
+            )}
+            <div
+              onClick={() => logoFileRef.current?.click()}
+              style={{ border:'2px dashed #cbd5e1',borderRadius:12,padding:28,textAlign:'center',cursor:'pointer',background:'#f8fafc',marginBottom:12 }}
+            >
+              <div style={{ fontSize:36,marginBottom:8 }}>{uploadingLogo ? '⏳' : '🖼️'}</div>
+              <p style={{ margin:0,fontWeight:700,color:'#374151',fontSize:14 }}>
+                {uploadingLogo ? 'Subiendo imagen...' : rest?.logo_url ? 'Clic para cambiar el logo' : 'Clic para subir tu logo'}
+              </p>
+              <p style={{ margin:'4px 0 0',fontSize:11,color:'#94a3b8' }}>PNG, JPG o WEBP · Máximo 2 MB</p>
+            </div>
+            <input
+              ref={logoFileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              style={{ display:'none' }}
+              onChange={handleLogoUpload}
+            />
+            {logoError && <p style={{ color:'#ef4444',fontSize:13,fontWeight:600 }}>⚠️ {logoError}</p>}
+            {logoSuccess && <p style={{ color:'#22c55e',fontSize:13,fontWeight:600 }}>✅ Logo actualizado correctamente</p>}
           </div>
 
           {/* QR de Pago */}
