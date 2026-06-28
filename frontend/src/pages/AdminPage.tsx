@@ -214,11 +214,11 @@ export default function AdminPage() {
   const salesByDay: Record<string,number>={}
   pedidos.forEach(o=>{ if(o.dia?.nombre) salesByDay[o.dia.nombre]=(salesByDay[o.dia.nombre]||0)+Number(o.total) })
 
-  const tabBtn=(active:boolean):React.CSSProperties=>({ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:active?'#f97316':'#f1f5f9',color:active?'#fff':'#64748b' })
-  const th:React.CSSProperties={ padding:'9px 12px',textAlign:'left',fontWeight:800,color:'#374151',borderBottom:'2px solid #e5e7eb',fontSize:12,whiteSpace:'nowrap' }
+  const tabBtn=(active:boolean):React.CSSProperties=>({ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:active?'#e91e63':'#f1f5f9',color:active?'#fff':'#64748b' })
+  const th:React.CSSProperties={ padding:'9px 12px',textAlign:'left',fontWeight:600,color:'#6b7280',borderBottom:'2px solid #e5e7eb',fontSize:12,whiteSpace:'nowrap' }
   const td:React.CSSProperties={ padding:'9px 12px',fontSize:12 }
   const rowBg=(i:number):React.CSSProperties=>({ background:i%2===0?'#fff':'#f8fafc' })
-  const inp:React.CSSProperties={ width:'100%',padding:'8px 12px',borderRadius:10,border:'2px solid #e2e8f0',fontSize:14,boxSizing:'border-box' }
+  const inp:React.CSSProperties={ width:'100%',padding:'8px 12px',borderRadius:8,border:'1px solid #d1d5db',fontSize:14,boxSizing:'border-box' }
 
   function barRow(label:string,val:number,total:number,col:string) {
     return (<div style={{ marginBottom:12 }}>
@@ -235,7 +235,7 @@ export default function AdminPage() {
   const [reportModal, setReportModal] = useState<null|'dashboard'|'pedidos'|'clientes'>(null)
 
   return (
-    <div style={{ minHeight:'100vh', background:'#f8fafc', fontFamily:'Georgia,serif' }}>
+    <div style={{ minHeight:'100vh', background:'#f9fafb', fontFamily:'-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
 
       {/* ── Notification Toast ── */}
       {toastPedido && (
@@ -259,14 +259,14 @@ export default function AdminPage() {
       {reportModal && (
         <div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}
           onClick={()=>setReportModal(null)}>
-          <div style={{ background:'#fff',borderRadius:20,padding:28,maxWidth:700,width:'100%',maxHeight:'85vh',overflowY:'auto',boxShadow:'0 25px 60px rgba(0,0,0,0.25)' }}
+          <div style={{ background:'#fff',borderRadius:12,padding:28,maxWidth:700,width:'100%',maxHeight:'85vh',overflowY:'auto',boxShadow:'0 4px 16px rgba(0,0,0,0.12)' }}
             onClick={e=>e.stopPropagation()}>
             {/* Dashboard report */}
             {reportModal==='dashboard' && (<>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
-                <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>📊 Resumen General</h3>
+                <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>Resumen General</h3>
                 <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>downloadCSV(`dashboard.csv`,['Indicador','Valor'],[['Total Recaudado',fmtCur(totalRev)],['Pedidos',pedidos.length],['En Local',localN],['Para Llevar',llevarN],...ALL_DAYS.map(d=>[`Ventas ${d}`,fmtCur(salesByDay[d]||0)])])} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#22c55e',color:'#fff' }}>⬇️ Descargar</button>
+                  <button onClick={()=>downloadCSV(`dashboard.csv`,['Indicador','Valor'],[['Total Recaudado',fmtCur(totalRev)],['Pedidos',pedidos.length],['En Local',localN],['Para Llevar',llevarN],...ALL_DAYS.map(d=>[`Ventas ${d}`,fmtCur(salesByDay[d]||0)])])} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
@@ -274,7 +274,7 @@ export default function AdminPage() {
                 <thead><tr style={{ background:'#f8fafc' }}>{['Indicador','Valor'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                 <tbody>
                   {[['Total Recaudado',fmtCur(totalRev)],['Total Pedidos',pedidos.length],['En Local',localN],['Para Llevar',llevarN],['Pago Efectivo',efecN],['Pago QR',qrN],...ALL_DAYS.map(d=>[`Ventas ${d}`,fmtCur(salesByDay[d]||0)])].map(([k,v],i)=>(
-                    <tr key={i} style={rowBg(i)}><td style={{ ...td,fontWeight:700 }}>{k}</td><td style={{ ...td,fontWeight:800,color:'#f97316' }}>{v}</td></tr>
+                    <tr key={i} style={rowBg(i)}><td style={{ ...td,fontWeight:700 }}>{k}</td><td style={{ ...td,fontWeight:800,color:'#e91e63' }}>{v}</td></tr>
                   ))}
                 </tbody>
               </table>
@@ -301,7 +301,7 @@ export default function AdminPage() {
                       <td style={{ ...td,color:'#7c3aed',fontWeight:700 }}>{o.hora_recojo||'—'}</td>
                       <td style={td}><span style={{ background:o.consumo==='local'?'#eff6ff':'#f5f3ff',color:o.consumo==='local'?'#1d4ed8':'#6d28d9',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.consumo==='local'?'🍽️ Local':'📦 Llevar'}</span></td>
                       <td style={td}><span style={{ background:o.metodo_pago==='efectivo'?'#f0fdf4':'#eff6ff',color:o.metodo_pago==='efectivo'?'#166534':'#1e40af',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.metodo_pago==='efectivo'?'💵':'📱'} {o.metodo_pago}</span></td>
-                      <td style={{ ...td,fontWeight:900,color:'#f97316' }}>{fmtCur(Number(o.total))}</td>
+                      <td style={{ ...td,fontWeight:900,color:'#e91e63' }}>{fmtCur(Number(o.total))}</td>
                     </tr>))}</tbody>
                   </table>
                 </div>
@@ -349,7 +349,7 @@ export default function AdminPage() {
         {/* SIDEBAR */}
         <div style={{
           width: 240, flexShrink: 0,
-          background: 'linear-gradient(180deg,#1e293b 0%,#0f172a 100%)',
+          background: '#fff', borderRight: '1px solid #e5e7eb',
           display: 'flex', flexDirection: 'column',
           position: isMobile ? 'fixed' : 'sticky', top: 0, height: '100vh', overflowY: 'auto',
           zIndex: isMobile ? 100 : 'auto',
@@ -357,18 +357,18 @@ export default function AdminPage() {
           transition: 'transform 0.25s ease-in-out',
         }}>
           {/* Logo / Restaurant name */}
-          <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid #e5e7eb' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
               {rest?.logo_url ? <img src={rest.logo_url} alt="Logo" style={{ width:32,height:32,borderRadius:8,objectFit:'cover' }} /> : <span style={{ fontSize:28 }}>🍜</span>}
               <div>
-                <div style={{ color:'#fff', fontWeight:900, fontSize:15, lineHeight:1.2 }}>{rest?.nombre ?? 'Mi Restaurante'}</div>
-                <div style={{ color:'#64748b', fontSize:10, marginTop:2 }}>Panel Admin</div>
+                <div style={{ color:'#1f2937', fontWeight:900, fontSize:15, lineHeight:1.2 }}>{rest?.nombre ?? 'Mi Restaurante'}</div>
+                <div style={{ color:'#9ca3af', fontSize:10, marginTop:2 }}>Panel Admin</div>
               </div>
             </div>
             <a href={`/menu/${slug}`} target="_blank" rel="noreferrer"
-              style={{ display:'block', fontSize:11, color:'#fb923c', textDecoration:'none', fontWeight:600,
-                background:'rgba(249,115,22,0.1)', borderRadius:8, padding:'4px 8px', marginTop:4 }}>
-              🔗 /menu/{slug}
+              style={{ display:'block', fontSize:11, color:'#e91e63', textDecoration:'none', fontWeight:600,
+                background:'rgba(233,30,99,0.06)', borderRadius:8, padding:'4px 8px', marginTop:4 }}>
+              /menu/{slug}
             </a>
           </div>
 
@@ -388,7 +388,7 @@ export default function AdminPage() {
               { id:'ajustes',      icon:'⚙️', label:'Ajustes' },
             ].map(item => {
               if (item.id.startsWith('_section')) return (
-                <div key={item.id} style={{ fontSize:10, fontWeight:700, color:'#475569', textTransform:'uppercase' as const, letterSpacing:1, padding:'12px 12px 4px', marginTop:4, borderTop: item.id === '_section' ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>
+                <div key={item.id} style={{ fontSize:10, fontWeight:700, color:'#9ca3af', textTransform:'uppercase' as const, letterSpacing:1, padding:'12px 12px 4px', marginTop:4, borderTop: item.id === '_section' ? 'none' : '1px solid #e5e7eb' }}>
                   {item.label}
                 </div>
               )
@@ -401,9 +401,9 @@ export default function AdminPage() {
                   padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
                   marginBottom: 2, textAlign:'left', fontSize:13, fontWeight:600,
                   transition:'all 0.15s',
-                  background: tab===item.id ? 'linear-gradient(135deg,rgba(249,115,22,0.25),rgba(239,68,68,0.15))' : 'transparent',
-                  color: tab===item.id ? '#fb923c' : '#94a3b8',
-                  borderLeft: tab===item.id ? '3px solid #f97316' : '3px solid transparent',
+                  background: tab===item.id ? '#fef1f5' : 'transparent',
+                  color: tab===item.id ? '#e91e63' : '#6b7280',
+                  borderLeft: tab===item.id ? '3px solid #e91e63' : '3px solid transparent',
                 }}>
                 <span style={{ fontSize:16, width:20, textAlign:'center' }}>{item.icon}</span>
                 <span>{item.label}</span>
@@ -417,14 +417,14 @@ export default function AdminPage() {
           </nav>
 
           {/* Bottom: notifications + signout */}
-          <div style={{ padding:'12px', borderTop:'1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ padding:'12px', borderTop:'1px solid #e5e7eb' }}>
             {/* Notification bell row */}
             <button
               onClick={() => { setShowHistory(prev=>!prev); setUnreadCount(0) }}
               style={{ width:'100%', display:'flex', alignItems:'center', gap:10,
                 padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
-                background: showHistory?'rgba(249,115,22,0.15)':'transparent',
-                color:'#475569', fontSize:13, fontWeight:600, textAlign:'left', marginBottom:4 }}>
+                background: showHistory?'#fef1f5':'transparent',
+                color:'#6b7280', fontSize:13, fontWeight:600, textAlign:'left', marginBottom:4 }}>
               <span style={{ fontSize:16 }}>🔔</span>
               <span>Notificaciones</span>
               {unreadCount>0 && (
@@ -444,17 +444,17 @@ export default function AdminPage() {
             <button onClick={handleSignOut}
               style={{ width:'100%', display:'flex', alignItems:'center', gap:10,
                 padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
-                background:'rgba(239,68,68,0.1)', color:'#f87171',
+                background:'#fef2f2', color:'#ef4444',
                 fontSize:13, fontWeight:600, textAlign:'left' }}>
-              <span style={{ fontSize:16 }}>🚪</span><span>Cerrar Sesión</span>
+              <span>Cerrar Sesión</span>
             </button>
           </div>
         </div>
 
         {/* MAIN CONTENT */}
-        <div style={{ flex:1, overflowY:'auto', background:'#f8fafc' }}>
+        <div style={{ flex:1, overflowY:'auto', background:'#f9fafb' }}>
           {/* Top bar */}
-          <div style={{ background:'#fff', borderBottom:'1px solid #e2e8f0', padding: isMobile ? '10px 14px' : '14px 28px',
+          <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', padding: isMobile ? '10px 14px' : '14px 28px',
             display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:50 }}>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               {isMobile && (
@@ -464,9 +464,9 @@ export default function AdminPage() {
               )}
             <h2 style={{ margin:0, fontSize: isMobile ? 14 : 17, fontWeight:900, color:'#1e293b' }}>
               {[
-                ['dashboard','📊 Dashboard'],['menu','🍽️ Menú del Día'],['dias','📅 Días'],
-                ['stock','📦 Control de Stock'],['pedidos','📋 Pedidos'],['clientes','👥 Clientes'],
-                ['contabilidad','💵 Contabilidad'],['ajustes','⚙️ Ajustes'],
+                ['dashboard','Dashboard'],['menu','Menú del Día'],['dias','Días'],
+                ['stock','Control de Stock'],['pedidos','Pedidos'],['clientes','Clientes'],
+                ['contabilidad','Contabilidad'],['ajustes','Ajustes'],
               ].find(([id])=>id===tab)?.[1] ?? ''}
             </h2>
             </div>
@@ -498,8 +498,8 @@ export default function AdminPage() {
             </div>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
-            {[{icon:'💰',label:'Total Recaudado',value:fmtCur(totalRev),color:'#22c55e'},{icon:'📋',label:'Total Pedidos',value:pedidos.length,color:'#3b82f6'},{icon:'🍽️',label:'En Local',value:localN,color:'#f97316'},{icon:'📦',label:'Para Llevar',value:llevarN,color:'#8b5cf6'}].map((k,i)=>(
-              <div key={i} style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',borderLeft:`4px solid ${k.color}` }}>
+            {[{icon:'💰',label:'Total Recaudado',value:fmtCur(totalRev),color:'#22c55e'},{icon:'📋',label:'Total Pedidos',value:pedidos.length,color:'#3b82f6'},{icon:'🍽️',label:'En Local',value:localN,color:'#e91e63'},{icon:'📦',label:'Para Llevar',value:llevarN,color:'#8b5cf6'}].map((k,i)=>(
+              <div key={i} style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',borderLeft:`4px solid ${k.color}` }}>
                 <div style={{ fontSize:24 }}>{k.icon}</div>
                 <div style={{ fontSize:22,fontWeight:900,margin:'4px 0' }}>{k.value}</div>
                 <div style={{ fontSize:11,color:'#64748b',fontWeight:600 }}>{k.label}</div>
@@ -507,24 +507,24 @@ export default function AdminPage() {
             ))}
           </div>
           <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap:14 }}>
-            <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🏆 Lo más vendido</h3>
-              {topPlatos.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos</p>:topPlatos.slice(0,5).map((p,i)=>(<div key={i} style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}><span style={{ fontSize:13 }}>#{i+1} {p.plato}</span><span style={{ fontWeight:800,color:'#f97316',fontSize:13 }}>{p.total_vendido}</span></div>))}
+              {topPlatos.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos</p>:topPlatos.slice(0,5).map((p,i)=>(<div key={i} style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}><span style={{ fontSize:13 }}>#{i+1} {p.plato}</span><span style={{ fontWeight:800,color:'#e91e63',fontSize:13 }}>{p.total_vendido}</span></div>))}
             </div>
-            <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🍽️ Consumo</h3>
               {barRow('En Local 🍽️',localN,pedidos.length,'#3b82f6')}
               {barRow('Para Llevar 📦',llevarN,pedidos.length,'#8b5cf6')}
             </div>
-            <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>💳 Pago</h3>
               {barRow('Efectivo 💵',efecN,pedidos.length,'#22c55e')}
               {barRow('QR 📱',qrN,pedidos.length,'#3b82f6')}
             </div>
-            <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',gridColumn:'1/-1' }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:18,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',gridColumn:'1/-1' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>📅 Ventas por Día</h3>
               <div style={{ display:'flex',gap:10,alignItems:'flex-end',height:110 }}>
-                {ALL_DAYS.map(day=>{ const val=salesByDay[day]||0; const maxV=Math.max(...Object.values(salesByDay),1); const h=Math.round((val/maxV)*90); return (<div key={day} style={{ flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4 }}><span style={{ fontSize:9,fontWeight:700,color:'#f97316' }}>{val>0?fmtCur(val):''}</span><div style={{ width:'100%',display:'flex',alignItems:'flex-end',height:80 }}><div style={{ width:'100%',height:`${h}%`,minHeight:4,background:'#e0e7ff',borderRadius:'6px 6px 0 0' }}/></div><span style={{ fontSize:10,fontWeight:700,color:'#64748b' }}>{day.slice(0,3)}</span></div>) })}
+                {ALL_DAYS.map(day=>{ const val=salesByDay[day]||0; const maxV=Math.max(...Object.values(salesByDay),1); const h=Math.round((val/maxV)*90); return (<div key={day} style={{ flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4 }}><span style={{ fontSize:9,fontWeight:700,color:'#e91e63' }}>{val>0?fmtCur(val):''}</span><div style={{ width:'100%',display:'flex',alignItems:'flex-end',height:80 }}><div style={{ width:'100%',height:`${h}%`,minHeight:4,background:'#e0e7ff',borderRadius:'6px 6px 0 0' }}/></div><span style={{ fontSize:10,fontWeight:700,color:'#64748b' }}>{day.slice(0,3)}</span></div>) })}
               </div>
             </div>
           </div>
@@ -536,7 +536,7 @@ export default function AdminPage() {
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 20px' }}>Los días deshabilitados no aparecen en el menú de tus clientes.</p>
           <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:14 }}>
             {dias.sort((a,b)=>a.orden-b.orden).map(dia=>(
-              <div key={dia.id} style={{ background:'#fff',borderRadius:16,padding:20,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',border:`2px solid ${dia.habilitado?'#bbf7d0':'#fca5a5'}` }}>
+              <div key={dia.id} style={{ background:'#fff',borderRadius:12,padding:20,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',border:`2px solid ${dia.habilitado?'#bbf7d0':'#fca5a5'}` }}>
                 <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12 }}>
                   <span style={{ fontWeight:900,fontSize:16 }}>{dia.nombre}</span>
                   <span style={{ fontSize:11,fontWeight:700,padding:'2px 10px',borderRadius:99,background:dia.habilitado?'#dcfce7':'#fee2e2',color:dia.habilitado?'#166534':'#991b1b' }}>{dia.habilitado?'ACTIVO':'OFF'}</span>
@@ -559,10 +559,10 @@ export default function AdminPage() {
             return (<div key={cat} style={{ marginBottom:24 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>{catLabel}</h3>
-                <button onClick={()=>{ setNewForm({categoria:cat,stock:20,stock_inicial:20,precio:10,emoji:'🍽️'}); setShowNew(true) }} style={{ background:'#f97316',color:'#fff',border:'none',borderRadius:10,padding:'5px 12px',cursor:'pointer',fontWeight:700,fontSize:12 }}>+ Agregar</button>
+                <button onClick={()=>{ setNewForm({categoria:cat,stock:20,stock_inicial:20,precio:10,emoji:'🍽️'}); setShowNew(true) }} style={{ background:'#e91e63',color:'#fff',border:'none',borderRadius:10,padding:'5px 12px',cursor:'pointer',fontWeight:700,fontSize:12 }}>+ Agregar</button>
               </div>
               <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:12 }}>
-                {items.map(item=>(<div key={item.id} style={{ background:'#fff',borderRadius:14,padding:16,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+                {items.map(item=>(<div key={item.id} style={{ background:'#fff',borderRadius:14,padding:16,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
                   <div style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}>
                     <span style={{ fontSize:24 }}>{item.emoji}</span>
                     <div style={{ display:'flex',gap:6 }}>
@@ -573,7 +573,7 @@ export default function AdminPage() {
                   <div style={{ fontWeight:800,fontSize:14,marginBottom:2 }}>{item.nombre}</div>
                   <div style={{ fontSize:12,color:'#64748b',marginBottom:6 }}>{item.descripcion}</div>
                   <div style={{ display:'flex',justifyContent:'space-between',fontSize:13 }}>
-                    <span style={{ fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</span>
+                    <span style={{ fontWeight:900,color:'#e91e63' }}>{fmtCur(item.precio)}</span>
                     <span style={{ color:'#64748b' }}>Stock: <strong>{item.stock}/{item.stock_inicial}</strong></span>
                   </div>
                   <div style={{ display:'flex',alignItems:'center',gap:6,marginTop:6 }}>
@@ -587,7 +587,7 @@ export default function AdminPage() {
         </div>)}
 
         {/* ── PEDIDOS ── */}
-        {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding: isMobile ? 14 : 22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+        {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
           <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>📋 Registro de Pedidos</h3>
           {pedidos.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(<>
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
@@ -603,7 +603,7 @@ export default function AdminPage() {
                   <td style={{ ...td,color:'#7c3aed',fontWeight:700 }}>{o.hora_recojo?`🕐 ${o.hora_recojo}`:'—'}</td>
                   <td style={td}><span style={{ background:o.consumo==='local'?'#eff6ff':'#f5f3ff',color:o.consumo==='local'?'#1d4ed8':'#6d28d9',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.consumo==='local'?'🍽️ Local':'📦 Llevar'}</span></td>
                   <td style={td}><span style={{ background:o.metodo_pago==='efectivo'?'#f0fdf4':'#eff6ff',color:o.metodo_pago==='efectivo'?'#166534':'#1e40af',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.metodo_pago==='efectivo'?'💵 Efectivo':'📱 QR'}</span></td>
-                  <td style={{ ...td,fontWeight:900,color:'#f97316' }}>{fmtCur(Number(o.total))}</td>
+                  <td style={{ ...td,fontWeight:900,color:'#e91e63' }}>{fmtCur(Number(o.total))}</td>
                 </tr>))}</tbody>
               </table>
             </div>
@@ -611,7 +611,7 @@ export default function AdminPage() {
         </div>)}
 
         {/* ── CLIENTES ── */}
-        {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding: isMobile ? 14 : 22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+        {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
           <h3 style={{ margin:'0 0 6px',fontSize:16,fontWeight:800 }}>👥 Base de Datos de Clientes</h3>
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 18px' }}>Identificados por WhatsApp. El contador sube automáticamente con cada pedido.</p>
           {clientes.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(<>
@@ -651,7 +651,7 @@ export default function AdminPage() {
               disabled={resettingStock}
               style={{ padding:'10px 20px', borderRadius:12, border:'none', cursor:resettingStock?'not-allowed':'pointer',
                 fontWeight:800, fontSize:14, color:'#fff',
-                background:resettingStock?'#94a3b8':'linear-gradient(135deg,#f97316,#ef4444)',
+                background:resettingStock?'#94a3b8':'linear-gradient(135deg,#e91e63,#ef4444)',
                 boxShadow:resettingStock?'none':'0 4px 15px rgba(249,115,22,0.35)',
                 display:'flex', alignItems:'center', gap:8 }}>
               {resettingStock ? '⏳ Reseteando…' : '🔄 Resetear Stock del Día'}
@@ -685,11 +685,11 @@ export default function AdminPage() {
               if (!grouped[dayName]) grouped[dayName] = []
               grouped[dayName].push(p)
             })
-            const catColors: Record<string,string> = { sopa:'#3b82f6', segundo:'#f97316', extra:'#8b5cf6' }
+            const catColors: Record<string,string> = { sopa:'#3b82f6', segundo:'#e91e63', extra:'#8b5cf6' }
             const catLabels: Record<string,string> = { sopa:'Sopa', segundo:'Segundo', extra:'Extra' }
 
             return Object.entries(grouped).map(([dayName, items]) => (
-              <div key={dayName} style={{ background:'#fff', borderRadius:16, padding:20, boxShadow:'0 1px 6px rgba(0,0,0,0.07)', marginBottom:16 }}>
+              <div key={dayName} style={{ background:'#fff', borderRadius:12, padding:20, boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb', marginBottom:16 }}>
                 <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:800, color:'#1e293b', display:'flex', alignItems:'center', gap:8 }}>
                   📅 {dayName}
                   <span style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>({items.length} platos)</span>
@@ -724,11 +724,11 @@ export default function AdminPage() {
                                     type="number" min={0} max={p.stock_inicial}
                                     value={editingStock[p.id]}
                                     onChange={e => setEditingStock(prev => ({...prev, [p.id]: parseInt(e.target.value)||0}))}
-                                    style={{ width:70, padding:'4px 8px', borderRadius:8, border:'2px solid #f97316', fontSize:13, fontWeight:700 }}
+                                    style={{ width:70, padding:'4px 8px', borderRadius:8, border:'2px solid #e91e63', fontSize:13, fontWeight:700 }}
                                     autoFocus
                                   />
                                   <button onClick={()=>handleUpdateStock(p.id, editingStock[p.id])}
-                                    style={{ padding:'4px 10px', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:800, cursor:'pointer', fontSize:12 }}>✓</button>
+                                    style={{ padding:'4px 10px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:800, cursor:'pointer', fontSize:12 }}>✓</button>
                                   <button onClick={()=>setEditingStock(prev=>{const n={...prev};delete n[p.id];return n})}
                                     style={{ padding:'4px 8px', borderRadius:8, border:'none', background:'#f1f5f9', color:'#64748b', fontWeight:700, cursor:'pointer', fontSize:12 }}>✕</button>
                                 </div>
@@ -795,18 +795,18 @@ export default function AdminPage() {
             <h2 style={{ margin:0,fontSize:17,fontWeight:900 }}>💵 Contabilidad</h2>
           </div>
           <div style={{ display:'grid',gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)',gap:14,marginBottom:20 }}>
-            {[{icon:'💰',label:'Total Histórico',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_recaudado),0)||totalRev),color:'#f97316'},
+            {[{icon:'💰',label:'Total Histórico',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_recaudado),0)||totalRev),color:'#e91e63'},
               {icon:'💵',label:'Efectivo',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_efectivo),0)),color:'#22c55e'},
               {icon:'📱',label:'QR',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_qr),0)),color:'#3b82f6'},
-            ].map((k,i)=>(<div key={i} style={{ background:'#fff',borderRadius:16,padding:20,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',borderLeft:`4px solid ${k.color}` }}><div style={{ fontSize:26 }}>{k.icon}</div><div style={{ fontSize:22,fontWeight:900,margin:'4px 0' }}>{k.value}</div><div style={{ fontSize:12,color:'#64748b',fontWeight:600 }}>{k.label}</div></div>))}
+            ].map((k,i)=>(<div key={i} style={{ background:'#fff',borderRadius:12,padding:20,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',borderLeft:`4px solid ${k.color}` }}><div style={{ fontSize:26 }}>{k.icon}</div><div style={{ fontSize:22,fontWeight:900,margin:'4px 0' }}>{k.value}</div><div style={{ fontSize:12,color:'#64748b',fontWeight:600 }}>{k.label}</div></div>))}
           </div>
 
           {/* Diaria */}
           {(()=>{ const rows=contDiaria; const data=rows.map((r:any)=>[r.fecha,r.total_pedidos,r.total_efectivo,r.total_qr,r.total_recaudado]); return (
-            <div style={{ background:'#fff',borderRadius:16,padding:22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>📅 Recaudación Diaria</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#f97316',color:'#fff' }}>⬇️ Descargar</button>
+                <button onClick={()=>downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>⬇️ Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
@@ -817,7 +817,7 @@ export default function AdminPage() {
                       <td style={td}>{r.total_pedidos}</td>
                       <td style={{ ...td,color:'#166534',fontWeight:700 }}>{fmtCur(Number(r.total_efectivo))}</td>
                       <td style={{ ...td,color:'#1e40af',fontWeight:700 }}>{fmtCur(Number(r.total_qr))}</td>
-                      <td style={{ ...td,fontWeight:900,color:'#f97316',fontSize:14 }}>{fmtCur(Number(r.total_recaudado))}</td>
+                      <td style={{ ...td,fontWeight:900,color:'#e91e63',fontSize:14 }}>{fmtCur(Number(r.total_recaudado))}</td>
                     </tr>))}</tbody>
                   </table>
                 </div>
@@ -827,7 +827,7 @@ export default function AdminPage() {
 
           {/* Semanal */}
           {(()=>{ const rows=contSemanal.map((r:any)=>({...r,fecha:`${r.semana_inicio}–${r.semana_fin}`})); const data=rows.map((r:any)=>[r.fecha,r.total_pedidos,r.total_efectivo,r.total_qr,r.total_recaudado]); return (
-            <div style={{ background:'#fff',borderRadius:16,padding:22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>📆 Recaudación Semanal</h3>
                 <button onClick={()=>downloadCSV(`contabilidad_semanal.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#3b82f6',color:'#fff' }}>⬇️ Descargar</button>
@@ -841,7 +841,7 @@ export default function AdminPage() {
                       <td style={td}>{r.total_pedidos}</td>
                       <td style={{ ...td,color:'#166534',fontWeight:700 }}>{fmtCur(Number(r.total_efectivo))}</td>
                       <td style={{ ...td,color:'#1e40af',fontWeight:700 }}>{fmtCur(Number(r.total_qr))}</td>
-                      <td style={{ ...td,fontWeight:900,color:'#f97316',fontSize:14 }}>{fmtCur(Number(r.total_recaudado))}</td>
+                      <td style={{ ...td,fontWeight:900,color:'#e91e63',fontSize:14 }}>{fmtCur(Number(r.total_recaudado))}</td>
                     </tr>))}</tbody>
                   </table>
                 </div>
@@ -851,7 +851,7 @@ export default function AdminPage() {
 
           {/* Mensual */}
           {(()=>{ const rows=contMensual.map((r:any)=>({...r,fecha:r.mes})); const data=rows.map((r:any)=>[r.fecha,r.total_pedidos,r.total_efectivo,r.total_qr,r.total_recaudado]); return (
-            <div style={{ background:'#fff',borderRadius:16,padding:22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>🗓️ Recaudación Mensual</h3>
                 <button onClick={()=>downloadCSV(`contabilidad_mensual.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#22c55e',color:'#fff' }}>⬇️ Descargar</button>
@@ -865,7 +865,7 @@ export default function AdminPage() {
                       <td style={td}>{r.total_pedidos}</td>
                       <td style={{ ...td,color:'#166634',fontWeight:700 }}>{fmtCur(Number(r.total_efectivo))}</td>
                       <td style={{ ...td,color:'#1e40af',fontWeight:700 }}>{fmtCur(Number(r.total_qr))}</td>
-                      <td style={{ ...td,fontWeight:900,color:'#f97316',fontSize:14 }}>{fmtCur(Number(r.total_recaudado))}</td>
+                      <td style={{ ...td,fontWeight:900,color:'#e91e63',fontSize:14 }}>{fmtCur(Number(r.total_recaudado))}</td>
                     </tr>))}</tbody>
                   </table>
                 </div>
@@ -879,7 +879,7 @@ export default function AdminPage() {
           <h3 style={{ margin:'0 0 20px',fontWeight:800 }}>⚙️ Ajustes del Restaurante</h3>
 
           {/* Información del negocio */}
-          <div style={{ background:'#fff',borderRadius:16,padding:24,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
             <h4 style={{ margin:'0 0 16px',fontWeight:800,color:'#374151' }}>Información del Negocio</h4>
             {[{k:'nombre',l:'Nombre'},{k:'descripcion',l:'Descripción'},{k:'telefono',l:'Teléfono'},{k:'ciudad',l:'Ciudad'},{k:'direccion',l:'Dirección'}].map(({k,l})=>(
               <div key={k} style={{ marginBottom:14 }}>
@@ -887,11 +887,11 @@ export default function AdminPage() {
                 <input value={(restForm as any)[k]} onChange={e=>setRestForm(p=>({...p,[k]:e.target.value}))} style={inp} />
               </div>
             ))}
-            <button onClick={async()=>{ await updateRestaurante(restForm); await refreshSession(); alert('Guardado ✓') }} style={{ width:'100%',padding:12,borderRadius:12,border:'none',background:'linear-gradient(135deg,#f97316,#ef4444)',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar Cambios</button>
+            <button onClick={async()=>{ await updateRestaurante(restForm); await refreshSession(); alert('Guardado ✓') }} style={{ width:'100%',padding:12,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar Cambios</button>
           </div>
 
           {/* Logo del Restaurante */}
-          <div style={{ background:'#fff',borderRadius:16,padding:24,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
             <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>🖼️ Logo del Restaurante</h4>
             <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>
               Sube el logotipo de tu negocio. Se mostrará en el menú público y en el panel de administración.
@@ -899,7 +899,7 @@ export default function AdminPage() {
             {rest?.logo_url && (
               <div style={{ marginBottom:16,textAlign:'center' }}>
                 <p style={{ fontSize:12,fontWeight:700,color:'#64748b',marginBottom:8 }}>Logo actual:</p>
-                <img src={rest.logo_url} alt="Logo del restaurante" style={{ maxWidth:150,maxHeight:150,borderRadius:16,border:'2px solid #e2e8f0',objectFit:'contain' }} />
+                <img src={rest.logo_url} alt="Logo del restaurante" style={{ maxWidth:150,maxHeight:150,borderRadius:12,border:'2px solid #e2e8f0',objectFit:'contain' }} />
               </div>
             )}
             <div
@@ -924,7 +924,7 @@ export default function AdminPage() {
           </div>
 
           {/* QR de Pago */}
-          <div style={{ background:'#fff',borderRadius:16,padding:24,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',marginBottom:20 }}>
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
             <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>📱 QR de Pago</h4>
             <p style={{ fontSize:13,color:'#64748b',margin:'0 0 16px' }}>
               Sube la imagen de tu QR de pago (transferencia bancaria, QR Simple, etc). Los clientes podrán verla y descargarla al pagar.
@@ -959,7 +959,7 @@ export default function AdminPage() {
           </div>
 
           {/* Link público */}
-          <div style={{ background:'#fff',borderRadius:16,padding:24,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
             <h4 style={{ margin:'0 0 8px',fontWeight:800,color:'#374151' }}>Tu Link Público</h4>
             <p style={{ fontSize:13,color:'#64748b',margin:'0 0 12px' }}>Comparte este link con tus clientes:</p>
             <div style={{ display:'flex',gap:10 }}>
@@ -975,7 +975,7 @@ export default function AdminPage() {
           <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>✏️ Editar plato</h3>
           {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
           <div style={{ display:'flex',gap:10 }}>
-            <button onClick={async()=>{ await updatePlato(editItem.id,editForm); setPlatos(prev=>prev.map(p=>p.id===editItem.id?{...p,...editForm}:p)); setEditItem(null) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'linear-gradient(135deg,#f97316,#ef4444)',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar</button>
+            <button onClick={async()=>{ await updatePlato(editItem.id,editForm); setPlatos(prev=>prev.map(p=>p.id===editItem.id?{...p,...editForm}:p)); setEditItem(null) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar</button>
             <button onClick={()=>setEditItem(null)} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#f1f5f9',color:'#64748b',fontWeight:700,cursor:'pointer' }}>Cancelar</button>
           </div>
         </div>
@@ -990,7 +990,7 @@ export default function AdminPage() {
             :(<input type={t} value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/>)}
           </div>))}
           <div style={{ display:'flex',gap:10 }}>
-            <button onClick={async()=>{ const dia=dias.find(d=>d.nombre===editDay); if(!dia)return; const created=await createPlato({...newForm,dia_id:dia.id} as any); setPlatos(prev=>[...prev,created]); setShowNew(false) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'linear-gradient(135deg,#f97316,#ef4444)',color:'#fff',fontWeight:800,cursor:'pointer' }}>Crear</button>
+            <button onClick={async()=>{ const dia=dias.find(d=>d.nombre===editDay); if(!dia)return; const created=await createPlato({...newForm,dia_id:dia.id} as any); setPlatos(prev=>[...prev,created]); setShowNew(false) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Crear</button>
             <button onClick={()=>setShowNew(false)} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#f1f5f9',color:'#64748b',fontWeight:700,cursor:'pointer' }}>Cancelar</button>
           </div>
         </div>
