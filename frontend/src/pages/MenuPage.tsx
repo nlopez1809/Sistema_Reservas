@@ -331,7 +331,10 @@ export default function MenuPage() {
       </nav>
 
       {/* HERO */}
-      <div style={{ background:'linear-gradient(135deg,#9a3412,#c2410c,#ea580c)', padding: isMobile ? '24px 16px' : '32px 24px', textAlign:'center', color:'#fff' }}>
+      <div style={{ background:'linear-gradient(135deg,#9a3412,#c2410c,#ea580c)', padding: isMobile ? '28px 16px' : '36px 24px', textAlign:'center', color:'#fff' }}>
+        {restaurante?.logo_url && (
+          <img src={restaurante.logo_url} alt={restaurante.nombre} style={{ width: isMobile ? 70 : 90, height: isMobile ? 70 : 90, borderRadius:20, objectFit:'cover', border:'3px solid rgba(255,255,255,0.3)', boxShadow:'0 4px 20px rgba(0,0,0,0.25)', marginBottom:12 }} />
+        )}
         <h1 style={{ margin:'0 0 6px', fontSize: isMobile ? 22 : 30, fontWeight:900 }}>Menú de la Semana</h1>
         <p style={{ margin:0, opacity:0.85, fontSize: isMobile ? 13 : 14 }}>Reserva tu almuerzo · Pago en efectivo o QR</p>
       </div>
