@@ -1,0 +1,8 @@
+const fs = require('fs');
+const ts = require('typescript');
+const source = 'const clientes=[] as any;\nconst td = {} as any;\nconst rowBg = () => ({});\nconst Test = () => (\n  <table>\n    <tbody>{[...clientes].sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>(<tr key={c.id} style={rowBg(i)}>\n      <td style={{ ...td,color:\'#94a3b8\',fontWeight:700 }}>{i+1}</td>\n      <td style={{ ...td,fontWeight:800 }}>{c.nombre}</td>\n      <td style={td}>{c.apellido}</td>\n      <td style={td}><a href={`https://wa.me/591${c.whatsapp}`} target=\"_blank\" rel=\"noreferrer\" style={{ color:\'#22c55e\',fontWeight:700,textDecoration:\'none\' }}>📱 {c.whatsapp}</a></td>\n      <td style={td}><span style={{ background:(c.total_pedidos||0)>=5?\'#fef3c7\':(c.total_pedidos||0)>=3?\'#eff6ff\':\'#f1f5f9\',color:(c.total_pedidos||0)>=5?\'#92400e\':(c.total_pedidos||0)>=3?\'#1d4ed8\':\'#374151\',borderRadius:99,padding:\'3px 12px\',fontWeight:900,fontSize:13 }}>{(c.total_pedidos||0)>=5?\'⭐\':(c.total_pedidos||0)>=3?\'🔵\':\'🔢\'} {c.total_pedidos||0} pedido{(c.total_pedidos||0)!==1?\'s\' : \'\'}</span></td>\n      <td style={{ ...td,color:\'#64748b\',fontSize:12 }}>{c.ultimo_pedido?new Date(c.ultimo_pedido).toLocaleDateString(\'es-BO\'):\'—\'}</td>\n    </tr>))}</tbody>\n  </table>\n);\n';\nconst sf = ts.createSourceFile('snippet.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const diag = sf.parseDiagnostics;
+if (!diag.length) console.log('OK'); else diag.forEach(d=>{
+  const pos = sf.getLineAndCharacterOfPosition(d.start||0);
+  console.log(`${pos.line+1}:${pos.character+1} ${ts.flattenDiagnosticMessageText(d.messageText,'\n')}`);
+});
