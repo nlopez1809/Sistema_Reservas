@@ -10,8 +10,9 @@ export interface Restaurante {
   ciudad?: string
   owner_id: string
   activo: boolean
-  plan: 'free' | 'pro' | 'enterprise'
+  plan: 'starter' | 'negocio' | 'premium'
   creado_en: string
+  trial_ends?: string
   hora_apertura?: string
   hora_cierre?: string
 }

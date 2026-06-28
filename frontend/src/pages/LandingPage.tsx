@@ -28,7 +28,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <div style={{ background:'#f9fafb', padding: isMobile ? '48px 20px' : '80px 32px', textAlign:'center' }}>
-        <span style={{ display:'inline-block', background:'#dcfce7', color:'#166534', fontWeight:700, fontSize:13, padding:'4px 14px', borderRadius:99, marginBottom:16 }}>100% Gratis</span>
+        <span style={{ display:'inline-block', background:'#dcfce7', color:'#166534', fontWeight:700, fontSize:13, padding:'4px 14px', borderRadius:99, marginBottom:16 }}>Primer mes GRATIS</span>
         <h1 style={{ fontSize: isMobile ? 28 : 48, fontWeight:800, margin:'0 0 16px', color:'#1f2937', letterSpacing:-0.5, lineHeight:1.2 }}>Digitaliza tu Pensión o Restaurante</h1>
         <p style={{ fontSize: isMobile ? 15 : 18, color:'#4b5563', margin:'0 0 40px', maxWidth:560, marginLeft:'auto', marginRight:'auto', lineHeight:1.6 }}>
           Sistema de reservas de almuerzos con menú semanal, control de stock, pagos y contabilidad. Listo para usar.
@@ -81,12 +81,57 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* Pricing */}
+      <div style={{ background:'#f9fafb', padding: isMobile ? '40px 16px' : '64px 32px', borderTop:'1px solid #e5e7eb' }}>
+        <h2 style={{ textAlign:'center', fontSize: isMobile ? 22 : 28, fontWeight:700, marginBottom:8, color:'#1f2937' }}>Planes y Precios</h2>
+        <p style={{ textAlign:'center', color:'#6b7280', fontSize:14, marginBottom: isMobile ? 28 : 48, maxWidth:500, marginLeft:'auto', marginRight:'auto' }}>Primer mes gratis en todos los planes. Sin tarjeta de crédito.</p>
+        <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: isMobile ? 16 : 20, maxWidth:1000, margin:'0 auto' }}>
+          {[
+            {
+              name:'Starter', price:'49', period:'/mes',
+              features:['Menú semanal','Hasta 100 pedidos/mes','Control de stock','Estado de pedidos'],
+              cta:'Empezar gratis', popular:false
+            },
+            {
+              name:'Negocio', price:'99', period:'/mes',
+              features:['Todo de Starter','Pedidos ilimitados','Base de clientes','Contabilidad y reportes'],
+              cta:'Empezar gratis', popular:true
+            },
+            {
+              name:'Premium', price:'249', period:'/mes',
+              features:['Todo de Negocio','Exportar CSV','Soporte prioritario','Funciones futuras incluidas'],
+              cta:'Empezar gratis', popular:false
+            },
+          ].map((plan,i) => (
+            <div key={i} style={{ background:'#fff', borderRadius:12, padding: isMobile ? 24 : 32, border: plan.popular ? '2px solid #e91e63' : '1px solid #e5e7eb', position:'relative' as const }}>
+              {plan.popular && <span style={{ position:'absolute' as const, top:-12, left:'50%', transform:'translateX(-50%)', background:'#e91e63', color:'#fff', fontSize:11, fontWeight:700, padding:'3px 14px', borderRadius:99 }}>Más popular</span>}
+              <h3 style={{ fontSize:18, fontWeight:800, margin:'0 0 4px', color:'#1f2937' }}>{plan.name}</h3>
+              <div style={{ marginBottom:20 }}>
+                <span style={{ fontSize:36, fontWeight:800, color:'#1f2937' }}>{plan.price}</span>
+                <span style={{ fontSize:14, color:'#6b7280', fontWeight:500 }}> Bs{plan.period}</span>
+              </div>
+              <ul style={{ listStyle:'none', padding:0, margin:'0 0 24px' }}>
+                {plan.features.map((f,j) => (
+                  <li key={j} style={{ fontSize:14, color:'#4b5563', padding:'6px 0', display:'flex', alignItems:'center', gap:8 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={()=>navigate('/register')} style={{ width:'100%', padding:'12px 0', borderRadius:8, border: plan.popular ? 'none' : '1px solid #d1d5db', background: plan.popular ? '#e91e63' : '#fff', color: plan.popular ? '#fff' : '#374151', fontWeight:600, fontSize:14, cursor:'pointer', fontFamily:font }}>
+                {plan.cta}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* CTA */}
       <div style={{ background:'#f9fafb', padding: isMobile ? '36px 20px' : '48px 32px', textAlign:'center', borderTop:'1px solid #e5e7eb' }}>
         <h3 style={{ fontSize: isMobile ? 20 : 24, fontWeight:700, marginBottom:12, color:'#1f2937' }}>¿Listo para empezar?</h3>
-        <p style={{ color:'#6b7280', marginBottom:24, fontSize: isMobile ? 14 : 15 }}>Crea tu restaurante en menos de 2 minutos. Gratis para siempre.</p>
+        <p style={{ color:'#6b7280', marginBottom:24, fontSize: isMobile ? 14 : 15 }}>Crea tu restaurante en menos de 2 minutos. Primer mes gratis. Sin compromiso.</p>
         <button onClick={()=>navigate('/register')} style={{ padding:'14px 36px', fontSize:15, fontWeight:600, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', cursor:'pointer', width: isMobile ? '100%' : 'auto', maxWidth:400, fontFamily:font }}>
-          Registrar mi Restaurante Gratis
+          Empezar mi prueba gratis
         </button>
       </div>
 

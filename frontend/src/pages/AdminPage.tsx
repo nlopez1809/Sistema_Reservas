@@ -128,6 +128,16 @@ export default function AdminPage() {
 
   const rest = session?.restaurante
   const slug = rest?.slug ?? ''
+  const plan = rest?.plan ?? 'starter'
+  const trialEnds = rest?.trial_ends ? new Date(rest.trial_ends) : rest?.creado_en ? new Date(new Date(rest.creado_en).getTime() + 30*24*60*60*1000) : null
+  const inTrial = trialEnds ? new Date() < trialEnds : false
+  const trialDays = trialEnds ? Math.max(0, Math.ceil((trialEnds.getTime() - Date.now()) / (24*60*60*1000))) : 0
+  const canAccess = (feature: string) => {
+    if (inTrial) return true
+    if (feature === 'clientes' || feature === 'contabilidad') return plan !== 'starter'
+    if (feature === 'csv') return plan === 'premium'
+    return true
+  }
 
   // Request browser notification permission on mount
   useEffect(() => {
@@ -271,7 +281,7 @@ export default function AdminPage() {
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
                 <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>Resumen General</h3>
                 <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>downloadCSV(`dashboard.csv`,['Indicador','Valor'],[['Total Recaudado',fmtCur(totalRev)],['Pedidos',pedidos.length],['En Local',localN],['Para Llevar',llevarN],...ALL_DAYS.map(d=>[`Ventas ${d}`,fmtCur(salesByDay[d]||0)])])} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
+                  <button onClick={()=>{if(!canAccess('csv')){alert('Exportar CSV requiere el plan Premium.');return}downloadCSV(`dashboard.csv`,['Indicador','Valor'],[['Total Recaudado',fmtCur(totalRev)],['Pedidos',pedidos.length],['En Local',localN],['Para Llevar',llevarN],...ALL_DAYS.map(d=>[`Ventas ${d}`,fmtCur(salesByDay[d]||0)])])}} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
@@ -289,7 +299,7 @@ export default function AdminPage() {
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
                 <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>Reporte de Pedidos</h3>
                 <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>downloadCSV(`pedidos.csv`,['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'],pedidos.map(o=>[o.codigo,new Date(o.creado_en).toLocaleDateString('es-BO'),o.dia?.nombre??'',`${o.cliente?.nombre??''} ${o.cliente?.apellido??''}`,o.cliente?.whatsapp??'',o.hora_recojo,o.consumo,o.metodo_pago,o.total]))} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Descargar</button>
+                  <button onClick={()=>{if(!canAccess('csv')){alert('Exportar CSV requiere el plan Premium.');return}downloadCSV(`pedidos.csv`,['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'],pedidos.map(o=>[o.codigo,new Date(o.creado_en).toLocaleDateString('es-BO'),o.dia?.nombre??'',`${o.cliente?.nombre??''} ${o.cliente?.apellido??''}`,o.cliente?.whatsapp??'',o.hora_recojo,o.consumo,o.metodo_pago,o.total]))}} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Descargar</button>
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
@@ -317,7 +327,7 @@ export default function AdminPage() {
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
                 <h3 style={{ margin:0,fontWeight:900,fontSize:17 }}>Reporte de Clientes</h3>
                 <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>downloadCSV(`clientes.csv`,['#','Nombre','Apellido','WhatsApp','Pedidos'],clientes.sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>[i+1,c.nombre,c.apellido,c.whatsapp,c.total_pedidos||0]))} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#6b7280',color:'#fff' }}>Descargar</button>
+                  <button onClick={()=>{if(!canAccess('csv')){alert('Exportar CSV requiere el plan Premium.');return}downloadCSV(`clientes.csv`,['#','Nombre','Apellido','WhatsApp','Pedidos'],clientes.sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>[i+1,c.nombre,c.apellido,c.whatsapp,c.total_pedidos||0]))}} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#6b7280',color:'#fff' }}>Descargar</button>
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
@@ -367,7 +377,7 @@ export default function AdminPage() {
               {rest?.logo_url ? <img src={rest.logo_url} alt="Logo" style={{ width:32,height:32,borderRadius:8,objectFit:'cover' }} /> : <span style={{ fontSize:28 }}>🍜</span>}
               <div>
                 <div style={{ color:'#1f2937', fontWeight:900, fontSize:15, lineHeight:1.2 }}>{rest?.nombre ?? 'Mi Restaurante'}</div>
-                <div style={{ color:'#9ca3af', fontSize:10, marginTop:2 }}>Panel Admin</div>
+                <div style={{ color:'#9ca3af', fontSize:10, marginTop:2 }}>Plan {plan.charAt(0).toUpperCase()+plan.slice(1)} {inTrial?'(Prueba)':''}</div>
               </div>
             </div>
             <a href={`/menu/${slug}`} target="_blank" rel="noreferrer"
@@ -400,7 +410,7 @@ export default function AdminPage() {
               return (
               <button
                 key={item.id}
-                onClick={() => { setTab(item.id); if (isMobile) setSidebarOpen(false) }}
+                onClick={() => { if(!canAccess(item.id)){alert(`Esta función requiere el plan Negocio o superior.`);return} setTab(item.id); if (isMobile) setSidebarOpen(false) }}
                 style={{
                   width: '100%', display:'flex', alignItems:'center', gap:10,
                   padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
@@ -412,6 +422,9 @@ export default function AdminPage() {
                 }}>
                 <span style={{ fontSize:16, width:20, textAlign:'center' }}>{item.icon}</span>
                 <span>{item.label}</span>
+                {(item.id==='clientes'||item.id==='contabilidad') && !canAccess(item.id) && (
+                  <span style={{ marginLeft:'auto', background:'#e91e63', color:'#fff', borderRadius:4, padding:'1px 6px', fontSize:9, fontWeight:800 }}>PRO</span>
+                )}
                 {item.id==='pedidos' && unreadCount>0 && (
                   <span style={{ marginLeft:'auto', background:'#ef4444', color:'#fff', borderRadius:99,
                     padding:'1px 7px', fontSize:10, fontWeight:900 }}>{unreadCount}</span>
@@ -490,6 +503,11 @@ export default function AdminPage() {
 
           {/* Tab content */}
           <div style={{ padding: isMobile ? 14 : 28 }}>
+            {inTrial && trialDays > 0 && (
+              <div style={{ background:'#fef3c7', border:'1px solid #f59e0b', borderRadius:10, padding:'10px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:8, fontSize:13, color:'#92400e', fontWeight:600 }}>
+                <span>⏳</span> Prueba gratuita: {trialDays} día{trialDays!==1?'s':''} restante{trialDays!==1?'s':''}. <span style={{ fontWeight:400 }}>Todas las funciones están habilitadas.</span>
+              </div>
+            )}
             {loading && <p style={{ textAlign:'center', color:'#475569', padding:40 }}>Cargando…</p>}
 
         {/* ── DASHBOARD ── */}
@@ -854,7 +872,7 @@ export default function AdminPage() {
             <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>Recaudación Diaria</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
+                <button onClick={()=>{if(!canAccess('csv')){alert('Exportar CSV requiere el plan Premium.');return}downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)}} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
@@ -878,7 +896,7 @@ export default function AdminPage() {
             <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>Recaudación Semanal</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_semanal.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Descargar</button>
+                <button onClick={()=>{if(!canAccess('csv')){alert('Exportar CSV requiere el plan Premium.');return}downloadCSV(`contabilidad_semanal.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)}} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#1f2937',color:'#fff' }}>Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
@@ -902,7 +920,7 @@ export default function AdminPage() {
             <div style={{ background:'#fff',borderRadius:12,padding:22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
               <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16 }}>
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>Recaudación Mensual</h3>
-                <button onClick={()=>downloadCSV(`contabilidad_mensual.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
+                <button onClick={()=>{if(!canAccess('csv')){alert('Exportar CSV requiere el plan Premium.');return}downloadCSV(`contabilidad_mensual.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)}} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#e91e63',color:'#fff' }}>Descargar</button>
               </div>
               {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
