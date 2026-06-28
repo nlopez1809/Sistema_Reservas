@@ -956,6 +956,38 @@ export default function AdminPage() {
             <button onClick={async()=>{ await updateRestaurante(restForm); await refreshSession(); alert('Guardado ✓') }} style={{ width:'100%',padding:12,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar Cambios</button>
           </div>
 
+          {/* Mi Plan */}
+          <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
+            <h4 style={{ margin:'0 0 16px',fontWeight:800,color:'#374151' }}>Mi Plan</h4>
+            <div style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12 }}>
+              {([
+                { id:'starter' as const, name:'Starter', price:'49', features:['Menú semanal','Hasta 100 pedidos/mes','Control de stock','Estado de pedidos'] },
+                { id:'negocio' as const, name:'Negocio', price:'99', features:['Todo de Starter','Pedidos ilimitados','Base de clientes','Contabilidad y reportes'] },
+                { id:'premium' as const, name:'Premium', price:'249', features:['Todo de Negocio','Exportar CSV','Soporte prioritario','Funciones futuras'] },
+              ]).map(p=>{
+                const isCurrent = plan === p.id
+                const isUpgrade = (['starter','negocio','premium'] as const).indexOf(p.id) > (['starter','negocio','premium'] as const).indexOf(plan)
+                return (
+                <div key={p.id} style={{ borderRadius:10,padding:16,border: isCurrent ? '2px solid #e91e63' : '1px solid #e5e7eb',background: isCurrent ? '#fef1f5' : '#fff',position:'relative' as const }}>
+                  {isCurrent && <span style={{ position:'absolute' as const,top:-10,left:'50%',transform:'translateX(-50%)',background:'#e91e63',color:'#fff',fontSize:9,fontWeight:800,padding:'2px 10px',borderRadius:99 }}>ACTUAL</span>}
+                  <div style={{ fontWeight:800,fontSize:15,color:'#1f2937',marginBottom:4 }}>{p.name}</div>
+                  <div style={{ marginBottom:12 }}><span style={{ fontSize:24,fontWeight:800,color:'#1f2937' }}>{p.price}</span><span style={{ fontSize:12,color:'#6b7280' }}> Bs/mes</span></div>
+                  <ul style={{ listStyle:'none',padding:0,margin:'0 0 14px' }}>
+                    {p.features.map((f,i)=><li key={i} style={{ fontSize:11,color:'#4b5563',padding:'3px 0',display:'flex',alignItems:'center',gap:6 }}><span style={{ color:'#22c55e',fontWeight:900 }}>✓</span>{f}</li>)}
+                  </ul>
+                  {isUpgrade && (
+                    <button onClick={()=>{const msg=`Hola, quiero cambiar mi plan a ${p.name} (${p.price} Bs/mes). Mi restaurante: ${rest?.nombre ?? ''} (${rest?.slug ?? ''})`;window.open(`https://wa.me/59178900000?text=${encodeURIComponent(msg)}`,'_blank')}} style={{ width:'100%',padding:8,borderRadius:8,border:'none',background:'#e91e63',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer' }}>
+                      Subir a {p.name}
+                    </button>
+                  )}
+                  {isCurrent && !inTrial && <div style={{ textAlign:'center',fontSize:11,color:'#e91e63',fontWeight:700,marginTop:4 }}>Plan activo</div>}
+                  {isCurrent && inTrial && <div style={{ textAlign:'center',fontSize:11,color:'#f59e0b',fontWeight:700,marginTop:4 }}>Prueba gratis — {trialDays} días</div>}
+                </div>
+              )})}
+            </div>
+            {inTrial && <p style={{ fontSize:12,color:'#6b7280',marginTop:12,textAlign:'center' }}>Durante la prueba gratuita todas las funciones están habilitadas. Al terminar, se aplicarán las restricciones de tu plan.</p>}
+          </div>
+
           {/* Logo del Restaurante */}
           <div style={{ background:'#fff',borderRadius:12,padding:24,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb',marginBottom:20 }}>
             <h4 style={{ margin:'0 0 6px',fontWeight:800,color:'#374151' }}>Logo del Restaurante</h4>
