@@ -972,8 +972,8 @@ export default function AdminPage() {
       {/* Edit Modal */}
       {editItem && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
         <div style={{ background:'#fff',borderRadius:20,padding:26,maxWidth:400,width:'100%' }}>
-          <h3 style={{ margin:'0 0 18px',fontWeight:800 }}>✏️ Editar plato</h3>
-          {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:12,fontWeight:700,display:'block',marginBottom:4 }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
+          <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>✏️ Editar plato</h3>
+          {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
           <div style={{ display:'flex',gap:10 }}>
             <button onClick={async()=>{ await updatePlato(editItem.id,editForm); setPlatos(prev=>prev.map(p=>p.id===editItem.id?{...p,...editForm}:p)); setEditItem(null) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'linear-gradient(135deg,#f97316,#ef4444)',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar</button>
             <button onClick={()=>setEditItem(null)} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#f1f5f9',color:'#64748b',fontWeight:700,cursor:'pointer' }}>Cancelar</button>
@@ -984,8 +984,8 @@ export default function AdminPage() {
       {/* New Plato Modal */}
       {showNew && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
         <div style={{ background:'#fff',borderRadius:20,padding:26,maxWidth:400,width:'100%' }}>
-          <h3 style={{ margin:'0 0 18px',fontWeight:800 }}>➕ Nuevo plato — {editDay}</h3>
-          {[{l:'Categoría',k:'categoria',t:'select'},{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:12,fontWeight:700,display:'block',marginBottom:4 }}>{l}</label>
+          <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>➕ Nuevo plato — {editDay}</h3>
+          {[{l:'Categoría',k:'categoria',t:'select'},{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label>
             {t==='select'?(<select value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:e.target.value}))} style={inp}><option value="sopa">Sopa</option><option value="segundo">Segundo</option><option value="extra">Extra</option></select>)
             :(<input type={t} value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/>)}
           </div>))}
