@@ -445,7 +445,7 @@ export default function MenuPage() {
           </div>
 
           {/* Day tabs */}
-          <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4, WebkitOverflowScrolling:'touch' as any, marginBottom:8 }}>
+          <div style={{ display:'flex', gap:6, overflowX:'scroll', paddingBottom:8, WebkitOverflowScrolling:'touch' as any, marginBottom:8, scrollbarWidth:'none' as any, touchAction:'pan-x' as any }}>
             {activeDays.map(d=>(
               <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
                 flexShrink:0, padding:'6px 16px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
@@ -462,7 +462,7 @@ export default function MenuPage() {
 
       {/* Category tabs */}
       <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', position:'sticky', top:65, zIndex:90 }}>
-        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:0, overflowX:'auto', WebkitOverflowScrolling:'touch' as any }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:0, overflowX:'scroll', WebkitOverflowScrolling:'touch' as any, scrollbarWidth:'none' as any, touchAction:'pan-x' as any }}>
           {categories.map(cat=>(
             <button key={cat.key} onClick={()=>{setMenuType(cat.type);setSearch('')}} style={{
               padding: isMobile ? '10px 14px' : '12px 20px', cursor:'pointer', fontWeight:600, fontSize:13,
