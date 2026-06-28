@@ -14,15 +14,15 @@ function StockBadge({ stock, init, small }: { stock: number; init: number; small
         <div style={{ width:`${pct}%`, height:'100%', background:col, borderRadius:99 }} />
       </div>
       <span style={{ fontSize:small?10:11, fontWeight:700, color:col, minWidth:56, whiteSpace:'nowrap' }}>
-        {stock === 0 ? 'AGOTADO' : `${stock} disp.`}
+        {stock === 0 ? 'AGOTADO' : `${stock} disponibles`}
       </span>
     </div>
   )
 }
 
 // ─── CompletoPicker ───────────────────────────────────────────────────────────
-function CompletoPicker({ dayMenu, combos, onSave }: {
-  dayMenu: MenuDia; combos: Combo[]; onSave: (c: Combo[]) => void
+function CompletoPicker({ dayMenu, combos, onSave, isMobile }: {
+  dayMenu: MenuDia; combos: Combo[]; onSave: (c: Combo[]) => void; isMobile: boolean
 }) {
   const { sopas, segundos } = dayMenu
   const add = () => onSave([...combos, { sopaIdx:null, segundoIdx:null, qty:1 }])
@@ -31,7 +31,7 @@ function CompletoPicker({ dayMenu, combos, onSave }: {
     if (qty < 1) { remove(i); return }
     const c = combos[i]
     const maxS = c.sopaIdx!==null ? sopas[c.sopaIdx!].stock - combos.reduce((s,x,idx)=>idx!==i&&x.sopaIdx===c.sopaIdx?s+x.qty:s,0) : Infinity
-    const maxG = c.segundoIdx!==null ? segundos[c.segundoIdx!].stock - combos.reduce((s,x,idx)=>idx!==i&&x.segundoIdx===c.segundoIdx?s+x.qty:s,0) : Infinity
+    const maxG = c.segundoIdx!==null ? segundos[c.segundoIdx!].stock - combos.reduce((s,x,idx)=>idx!==i&&x.segundoIdx===c.segundoIdx?s+c.qty:s,0) : Infinity
     onSave(combos.map((x,idx)=>idx===i?{...x,qty:Math.min(qty,Math.max(1,Math.min(maxS,maxG)))}:x))
   }
   const pickSopa = (ci: number, si: number) => {
@@ -60,26 +60,26 @@ function CompletoPicker({ dayMenu, combos, onSave }: {
   },0)
 
   return (
-    <div style={{ background:'#fff', borderRadius:20, border:`2px solid ${allDone?'#f97316':'#fed7aa'}`, padding:24, marginBottom:24, boxShadow:allDone?'0 8px 32px rgba(249,115,22,0.18)':'0 2px 10px rgba(0,0,0,0.06)' }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+    <div style={{ background:'#fff', borderRadius:20, border:`2px solid ${allDone?'#f97316':'#fed7aa'}`, padding: isMobile ? 16 : 24, marginBottom:24, boxShadow:allDone?'0 8px 32px rgba(249,115,22,0.18)':'0 2px 10px rgba(0,0,0,0.06)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16, flexWrap:'wrap', gap:10 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-          <span style={{ fontSize:36 }}>🍽️</span>
+          <span style={{ fontSize: isMobile ? 28 : 36 }}>🍽️</span>
           <div>
             <span style={{ fontSize:10, fontWeight:800, letterSpacing:1.5, background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', padding:'3px 12px', borderRadius:99, textTransform:'uppercase' }}>Menú Completo</span>
-            <h2 style={{ margin:'6px 0 2px', fontSize:20, fontWeight:900 }}>Armá tu Almuerzo</h2>
-            <p style={{ margin:0, fontSize:13, color:'#64748b' }}>1 sopa + 1 segundo · Podés pedir distintas combinaciones</p>
+            <h2 style={{ margin:'6px 0 2px', fontSize: isMobile ? 17 : 20, fontWeight:900 }}>Armá tu Almuerzo</h2>
+            <p style={{ margin:0, fontSize:13, color:'#64748b' }}>Elegí 1 sopa + 1 segundo por combinación</p>
           </div>
         </div>
-        {combos.length>0 && <button onClick={()=>onSave([])} style={{ border:'none', background:'#fee2e2', color:'#ef4444', borderRadius:10, padding:'4px 12px', cursor:'pointer', fontWeight:700, fontSize:12 }}>✕ Limpiar</button>}
+        {combos.length>0 && <button onClick={()=>onSave([])} style={{ border:'none', background:'#fee2e2', color:'#ef4444', borderRadius:10, padding:'6px 14px', cursor:'pointer', fontWeight:700, fontSize:12 }}>Limpiar todo</button>}
       </div>
 
-      {/* Reference */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:20, background:'#f8fafc', borderRadius:14, padding:14 }}>
+      {/* Reference - available items */}
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12, marginBottom:20, background:'#f8fafc', borderRadius:14, padding: isMobile ? 12 : 14 }}>
         {([['🥣 Sopas del día','#3b82f6',sopas],['🍳 Segundos del día','#f97316',segundos]] as const).map(([label, col, items])=>(
           <div key={label as string}>
             <div style={{ fontSize:11, fontWeight:800, color:col as string, textTransform:'uppercase', marginBottom:8 }}>{label as string}</div>
             {(items as any[]).map((s: any,i: number)=>(
-              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'6px 8px', background:'#fff', borderRadius:8, marginBottom:4, border:`1.5px solid ${col as string}33` }}>
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 10px', background:'#fff', borderRadius:8, marginBottom:4, border:`1.5px solid ${col as string}33` }}>
                 <span style={{ fontSize:13, fontWeight:700 }}>{s.emoji} {s.nombre}</span>
                 <span style={{ fontSize:12, fontWeight:800, color:col as string }}>{fmtCur(s.precio)}</span>
               </div>
@@ -89,6 +89,14 @@ function CompletoPicker({ dayMenu, combos, onSave }: {
       </div>
 
       {/* Combo rows */}
+      {combos.length === 0 && (
+        <div style={{ textAlign:'center', padding: isMobile ? '20px 10px' : '24px', background:'#fffbf5', borderRadius:14, border:'2px dashed #fed7aa', marginBottom:16 }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>👇</div>
+          <p style={{ margin:0, fontWeight:700, color:'#9a3412', fontSize:14 }}>Toca el botón de abajo para armar tu almuerzo</p>
+          <p style={{ margin:'4px 0 0', fontSize:12, color:'#94a3b8' }}>Podés pedir varias combinaciones distintas</p>
+        </div>
+      )}
+
       {combos.map((combo, ci) => {
         const sopaObj = combo.sopaIdx!==null ? sopas[combo.sopaIdx!] : null
         const segObj  = combo.segundoIdx!==null ? segundos[combo.segundoIdx!] : null
@@ -97,55 +105,59 @@ function CompletoPicker({ dayMenu, combos, onSave }: {
         const otherG = combos.reduce((s,c,idx)=>idx!==ci&&c.segundoIdx===combo.segundoIdx?s+c.qty:s,0)
         const maxQty = done ? Math.min(sopaObj!.stock-otherS, segObj!.stock-otherG) : 1
         return (
-          <div key={ci} style={{ border:`2px solid ${done?'#f97316':'#e2e8f0'}`, borderRadius:16, padding:16, marginBottom:12, background:done?'#fffbf5':'#fafafa' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+          <div key={ci} style={{ border:`2px solid ${done?'#f97316':'#e2e8f0'}`, borderRadius:16, padding: isMobile ? 14 : 16, marginBottom:12, background:done?'#fffbf5':'#fafafa' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, flexWrap:'wrap', gap:8 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:26, height:26, borderRadius:'50%', background:done?'linear-gradient(135deg,#f97316,#ef4444)':'#e2e8f0', color:done?'#fff':'#94a3b8', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:13 }}>{ci+1}</div>
+                <div style={{ width:28, height:28, borderRadius:'50%', background:done?'linear-gradient(135deg,#f97316,#ef4444)':'#e2e8f0', color:done?'#fff':'#94a3b8', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:13 }}>{ci+1}</div>
                 <span style={{ fontWeight:800, fontSize:13 }}>{done?`${sopaObj!.emoji} ${sopaObj!.nombre} + ${segObj!.emoji} ${segObj!.nombre}`:`Combinación #${ci+1}`}</span>
-                {done && <span style={{ fontSize:11, background:'#dcfce7', color:'#166534', borderRadius:99, padding:'1px 8px', fontWeight:700 }}>✓</span>}
+                {done && <span style={{ fontSize:11, background:'#dcfce7', color:'#166534', borderRadius:99, padding:'2px 8px', fontWeight:700 }}>✓ Listo</span>}
               </div>
               <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                 {done && (<>
-                  <button onClick={()=>setQty(ci,combo.qty-1)} style={{ width:26, height:26, borderRadius:8, border:'2px solid #f97316', background:'#fff', color:'#f97316', fontWeight:900, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
-                  <span style={{ fontWeight:900, fontSize:15, minWidth:20, textAlign:'center' }}>{combo.qty}</span>
-                  <button onClick={()=>combo.qty<maxQty&&setQty(ci,combo.qty+1)} disabled={combo.qty>=maxQty} style={{ width:26, height:26, borderRadius:8, border:`2px solid ${combo.qty>=maxQty?'#e2e8f0':'#f97316'}`, background:combo.qty>=maxQty?'#f1f5f9':'#f97316', color:combo.qty>=maxQty?'#94a3b8':'#fff', fontWeight:900, cursor:combo.qty>=maxQty?'not-allowed':'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
-                  <span style={{ fontSize:12, fontWeight:900, color:'#f97316' }}>{fmtCur((sopaObj!.precio+segObj!.precio)*combo.qty)}</span>
-                  {combo.qty>=maxQty && <span style={{ fontSize:10, color:'#ef4444', fontWeight:700 }}>máx</span>}
+                  <button onClick={()=>setQty(ci,combo.qty-1)} style={{ width:32, height:32, borderRadius:8, border:'2px solid #f97316', background:'#fff', color:'#f97316', fontWeight:900, cursor:'pointer', fontSize:18, display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
+                  <span style={{ fontWeight:900, fontSize:16, minWidth:24, textAlign:'center' }}>{combo.qty}</span>
+                  <button onClick={()=>combo.qty<maxQty&&setQty(ci,combo.qty+1)} disabled={combo.qty>=maxQty} style={{ width:32, height:32, borderRadius:8, border:`2px solid ${combo.qty>=maxQty?'#e2e8f0':'#f97316'}`, background:combo.qty>=maxQty?'#f1f5f9':'#f97316', color:combo.qty>=maxQty?'#94a3b8':'#fff', fontWeight:900, cursor:combo.qty>=maxQty?'not-allowed':'pointer', fontSize:18, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
+                  <span style={{ fontSize:13, fontWeight:900, color:'#f97316', marginLeft:4 }}>{fmtCur((sopaObj!.precio+segObj!.precio)*combo.qty)}</span>
                 </>)}
-                <button onClick={()=>remove(ci)} style={{ border:'none', background:'#fee2e2', color:'#ef4444', borderRadius:8, padding:'3px 8px', cursor:'pointer', fontWeight:700, fontSize:11 }}>✕</button>
+                <button onClick={()=>remove(ci)} style={{ border:'none', background:'#fee2e2', color:'#ef4444', borderRadius:8, padding:'4px 10px', cursor:'pointer', fontWeight:700, fontSize:12, marginLeft:4 }}>Quitar</button>
               </div>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-              {([['sopa','🥣 Sopa','#3b82f6',sopas,combo.sopaIdx,(si:number)=>pickSopa(ci,si)],
-                 ['segundo','🍳 Segundo','#f97316',segundos,combo.segundoIdx,(gi:number)=>pickSeg(ci,gi)]] as const).map(([_key,label,col,items,selIdx,pick])=>(
-                <div key={label as string}>
-                  <div style={{ fontSize:11, fontWeight:700, color:col as string, textTransform:'uppercase', marginBottom:6 }}>{label as string}</div>
-                  {(items as any[]).map((s: any, si: number) => {
-                    const used = combos.reduce((sum,c,idx)=>idx!==ci&&(_key==='sopa'?c.sopaIdx:c.segundoIdx)===si?sum+c.qty:sum,0)
-                    const avail = s.stock-used; const noStock=avail<=0
-                    return (
-                      <button key={si} onClick={()=>!noStock&&(pick as any)(si)} style={{ width:'100%', marginBottom:5, padding:'8px 10px', borderRadius:10, border:`2px solid ${selIdx===si?col:'#e2e8f0'}`, background:selIdx===si?`${col as string}18`:'#fff', color:noStock?'#cbd5e1':selIdx===si?col:'#374151', fontWeight:selIdx===si?800:500, fontSize:12, cursor:noStock?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:noStock?0.5:1 }}>
-                        <span>{s.emoji} {s.nombre}</span>
-                        <span style={{ fontSize:11, fontWeight:800 }}>{fmtCur(s.precio)} · {noStock?'agotado':`${avail}`}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
+            {!done && (
+              <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:10 }}>
+                {([['sopa','🥣 Elegí tu Sopa','#3b82f6',sopas,combo.sopaIdx,(si:number)=>pickSopa(ci,si)],
+                   ['segundo','🍳 Elegí tu Segundo','#f97316',segundos,combo.segundoIdx,(gi:number)=>pickSeg(ci,gi)]] as const).map(([_key,label,col,items,selIdx,pick])=>(
+                  <div key={label as string}>
+                    <div style={{ fontSize:12, fontWeight:700, color:col as string, textTransform:'uppercase', marginBottom:6 }}>{label as string}</div>
+                    {(items as any[]).map((s: any, si: number) => {
+                      const used = combos.reduce((sum,c,idx)=>idx!==ci&&(_key==='sopa'?c.sopaIdx:c.segundoIdx)===si?sum+c.qty:sum,0)
+                      const avail = s.stock-used; const noStock=avail<=0
+                      return (
+                        <button key={si} onClick={()=>!noStock&&(pick as any)(si)} style={{ width:'100%', marginBottom:5, padding:'10px 12px', borderRadius:10, border:`2px solid ${selIdx===si?col:'#e2e8f0'}`, background:selIdx===si?`${col as string}18`:'#fff', color:noStock?'#cbd5e1':selIdx===si?col:'#374151', fontWeight:selIdx===si?800:600, fontSize:13, cursor:noStock?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:noStock?0.5:1 }}>
+                          <span>{s.emoji} {s.nombre}</span>
+                          <span style={{ fontSize:12, fontWeight:800 }}>{fmtCur(s.precio)} · {noStock?'Agotado':`${avail} disp.`}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+            )}
+            {done && (
+              <button onClick={()=>onSave(combos.map((c,i)=>i===ci?{...c,sopaIdx:null,segundoIdx:null}:c))} style={{ border:'none', background:'#f1f5f9', color:'#64748b', borderRadius:8, padding:'6px 14px', cursor:'pointer', fontWeight:600, fontSize:12 }}>Cambiar selección</button>
+            )}
           </div>
         )
       })}
 
-      <button onClick={add} style={{ width:'100%', padding:'10px 0', borderRadius:12, border:'2px dashed #fed7aa', background:'#fffbf5', color:'#f97316', fontWeight:800, fontSize:14, cursor:'pointer', marginBottom:16 }}>+ Agregar otro almuerzo</button>
+      <button onClick={add} style={{ width:'100%', padding:'12px 0', borderRadius:12, border:'2px dashed #fed7aa', background:'#fffbf5', color:'#f97316', fontWeight:800, fontSize:15, cursor:'pointer', marginBottom:16 }}>+ Agregar almuerzo</button>
 
-      <div style={{ borderTop:'2px dashed #fed7aa', paddingTop:14, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+      <div style={{ borderTop:'2px dashed #fed7aa', paddingTop:14, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
         <div>
           {allDone ? (<><div style={{ fontSize:12, color:'#94a3b8' }}>{combos.length} combinación{combos.length>1?'es':''} · {combos.reduce((s,c)=>s+c.qty,0)} almuerzo{combos.reduce((s,c)=>s+c.qty,0)>1?'s':''}</div><div style={{ fontSize:26, fontWeight:900, color:'#f97316' }}>{fmtCur(total)}</div></>)
           : combos.length===0 ? <div style={{ fontSize:13, color:'#94a3b8', fontStyle:'italic' }}>Agrega almuerzos arriba</div>
-          : <div style={{ fontSize:13, color:'#f59e0b', fontWeight:700 }}>⚠️ Completa todas las combinaciones</div>}
+          : <div style={{ fontSize:13, color:'#f59e0b', fontWeight:700 }}>Completa todas las combinaciones</div>}
         </div>
-        {allDone && <div style={{ background:'#dcfce7', borderRadius:12, padding:'8px 14px', fontSize:13, fontWeight:700, color:'#166534' }}>✓ Listo</div>}
+        {allDone && <div style={{ background:'#dcfce7', borderRadius:12, padding:'8px 14px', fontSize:13, fontWeight:700, color:'#166534' }}>✓ Listo para pedir</div>}
       </div>
     </div>
   )
@@ -169,6 +181,13 @@ export default function MenuPage() {
   const [submitting, setSubmitting] = useState(false)
   const [orderId, setOrderId] = useState('')
   const [payMethod, setPayMethod] = useState<MetodoPago>('efectivo')
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
 
   useEffect(() => {
     if (!slug) return
@@ -183,7 +202,6 @@ export default function MenuPage() {
   const dayMenuData = menu.find(m=>m.dia.nombre===activeDay)
   const today = (['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'] as const)[new Date().getDay()]
 
-  // Cart helpers
   const cartKeys = Object.keys(cart)
   const simpleItems = cartKeys.filter(k=>!k.endsWith('-completo')).map(k=>cart[k])
   const comboValid = combos.length>0 && combos.every(c=>c.sopaIdx!==null&&c.segundoIdx!==null)
@@ -251,7 +269,7 @@ export default function MenuPage() {
   async function handlePay(method: MetodoPago) {
     setPayMethod(method); setSubmitting(true)
     const id=genId()
-    const total=cartTotal  // capture before cart cleared
+    const total=cartTotal
     try {
       await createPedido({
         codigo:id, nombre:customer.nombre, apellido:customer.apellido,
@@ -279,66 +297,87 @@ export default function MenuPage() {
     </>)
   }
 
-  if(loading) return <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', fontSize:18, color:'#94a3b8' }}>Cargando menú…</div>
-  if(!menu.length) return <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', fontSize:18, color:'#ef4444' }}>Restaurante no encontrado</div>
+  if(loading) return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:12 }}>
+      <div style={{ fontSize:48, animation:'spin 1s linear infinite' }}>🍜</div>
+      <p style={{ fontSize:16, color:'#94a3b8', fontWeight:600 }}>Cargando menú...</p>
+      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
+  if(!menu.length) return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:12, padding:20, textAlign:'center' }}>
+      <div style={{ fontSize:48 }}>😕</div>
+      <p style={{ fontSize:18, color:'#ef4444', fontWeight:700 }}>Restaurante no encontrado</p>
+      <p style={{ fontSize:14, color:'#94a3b8' }}>Verifica que el link sea correcto</p>
+    </div>
+  )
 
-  const inp: React.CSSProperties={ width:'100%', padding:'10px 14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:15, boxSizing:'border-box', outline:'none' }
+  const inp: React.CSSProperties={ width:'100%', padding:'11px 14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:15, boxSizing:'border-box', outline:'none' }
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(160deg,#fff7ed 0%,#fef3c7 30%,#fff 60%)', fontFamily:'Georgia,serif' }}>
       {/* NAV */}
-      <nav style={{ background:'rgba(255,255,255,0.93)', backdropFilter:'blur(10px)', borderBottom:'2px solid #fed7aa', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:100, height:64 }}>
+      <nav style={{ background:'rgba(255,255,255,0.93)', backdropFilter:'blur(10px)', borderBottom:'2px solid #fed7aa', padding: isMobile ? '0 12px' : '0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:100, height:60 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <span style={{ fontSize:28 }}>🍜</span>
-          <div><div style={{ fontWeight:900, fontSize:18, color:'#9a3412' }}>{restaurante?.nombre ?? 'Menú del día'}</div><div style={{ fontSize:11, color:'#c2410c', fontWeight:600 }}>{restaurante?.ciudad ?? ''}</div></div>
+          {restaurante?.logo_url
+            ? <img src={restaurante.logo_url} alt="" style={{ width:32, height:32, borderRadius:8, objectFit:'cover' }} />
+            : <span style={{ fontSize:24 }}>🍜</span>}
+          <div>
+            <div style={{ fontWeight:900, fontSize: isMobile ? 15 : 18, color:'#9a3412' }}>{restaurante?.nombre ?? 'Menú del día'}</div>
+            {restaurante?.ciudad && <div style={{ fontSize:10, color:'#c2410c', fontWeight:600 }}>{restaurante.ciudad}</div>}
+          </div>
         </div>
         {hasItems && <div style={{ background:'#f97316', color:'#fff', borderRadius:20, padding:'6px 14px', fontSize:13, fontWeight:800 }}>🛒 {fmtCur(cartTotal)}</div>}
       </nav>
 
       {/* HERO */}
-      <div style={{ background:'linear-gradient(135deg,#9a3412,#c2410c,#ea580c)', padding:'32px 24px', textAlign:'center', color:'#fff' }}>
-        <h1 style={{ margin:'0 0 6px', fontSize:30, fontWeight:900 }}>Menú de la Semana</h1>
-        <p style={{ margin:0, opacity:0.85, fontSize:14 }}>Reserva tu almuerzo · Pago en efectivo o QR</p>
+      <div style={{ background:'linear-gradient(135deg,#9a3412,#c2410c,#ea580c)', padding: isMobile ? '24px 16px' : '32px 24px', textAlign:'center', color:'#fff' }}>
+        <h1 style={{ margin:'0 0 6px', fontSize: isMobile ? 22 : 30, fontWeight:900 }}>Menú de la Semana</h1>
+        <p style={{ margin:0, opacity:0.85, fontSize: isMobile ? 13 : 14 }}>Reserva tu almuerzo · Pago en efectivo o QR</p>
       </div>
 
-      <div style={{ maxWidth:980, margin:'0 auto', padding:'24px 16px' }}>
+      <div style={{ maxWidth:980, margin:'0 auto', padding: isMobile ? '16px 12px' : '24px 16px' }}>
         {/* DAY TABS */}
-        <div style={{ display:'flex', gap:8, marginBottom:20, overflowX:'auto', paddingBottom:4 }}>
+        <div style={{ display:'flex', gap:8, marginBottom:16, overflowX:'auto', paddingBottom:4, WebkitOverflowScrolling:'touch' }}>
           {activeDays.map(d=>(
-            <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([])}} style={{ flexShrink:0, padding:'10px 20px', borderRadius:30, border:'none', cursor:'pointer', fontWeight:800, fontSize:13, background:activeDay===d.nombre?'linear-gradient(135deg,#f97316,#ef4444)':'#fff', color:activeDay===d.nombre?'#fff':'#64748b', boxShadow:activeDay===d.nombre?'0 4px 15px rgba(249,115,22,0.35)':'0 1px 4px rgba(0,0,0,0.08)' }}>
+            <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([])}} style={{ flexShrink:0, padding: isMobile ? '8px 16px' : '10px 20px', borderRadius:30, border:'none', cursor:'pointer', fontWeight:800, fontSize:13, background:activeDay===d.nombre?'linear-gradient(135deg,#f97316,#ef4444)':'#fff', color:activeDay===d.nombre?'#fff':'#64748b', boxShadow:activeDay===d.nombre?'0 4px 15px rgba(249,115,22,0.35)':'0 1px 4px rgba(0,0,0,0.08)' }}>
               {d.nombre===today?`⭐ ${d.nombre}`:d.nombre}
             </button>
           ))}
         </div>
 
         {/* TYPE SELECTOR */}
-        <div style={{ background:'#fff', borderRadius:16, padding:14, marginBottom:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', display:'flex', gap:8, flexWrap:'wrap' }}>
-          {([['completo','🍽️ Menú Completo'],['sopa','🥣 Solo Sopa'],['segundo','🍳 Solo Segundo'],['extra','🥤 Plato Extra']] as const).map(([v,l])=>(
-            <button key={v} onClick={()=>setMenuType(v)} style={{ padding:'8px 16px', borderRadius:20, border:`2px solid ${menuType===v?'#f97316':'#e2e8f0'}`, background:menuType===v?'#fff7ed':'#fff', color:menuType===v?'#f97316':'#64748b', fontWeight:700, cursor:'pointer', fontSize:13 }}>{l}</button>
+        <div style={{ background:'#fff', borderRadius:16, padding: isMobile ? 10 : 14, marginBottom:18, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', display:'flex', gap:6, flexWrap:'wrap' }}>
+          {([['completo','🍽️ Completo'],['sopa','🥣 Sopa'],['segundo','🍳 Segundo'],['extra','🥤 Extra']] as const).map(([v,l])=>(
+            <button key={v} onClick={()=>setMenuType(v)} style={{ padding: isMobile ? '7px 12px' : '8px 16px', borderRadius:20, border:`2px solid ${menuType===v?'#f97316':'#e2e8f0'}`, background:menuType===v?'#fff7ed':'#fff', color:menuType===v?'#f97316':'#64748b', fontWeight:700, cursor:'pointer', fontSize: isMobile ? 12 : 13, flex: isMobile ? '1 1 auto' : 'none', textAlign:'center' }}>{l}</button>
           ))}
         </div>
 
         {/* CONTENT */}
         {dayMenuData && (<>
-          {menuType==='completo' && <CompletoPicker dayMenu={dayMenuData} combos={combos} onSave={setCombos} />}
+          {menuType==='completo' && <CompletoPicker dayMenu={dayMenuData} combos={combos} onSave={setCombos} isMobile={isMobile} />}
 
           {(menuType==='sopa'||menuType==='segundo') && (
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:14, marginBottom:22 }}>
+            <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill,minmax(280px,1fr))', gap:14, marginBottom:22 }}>
               {(menuType==='sopa'?dayMenuData.sopas:dayMenuData.segundos).map((item,idx)=>{
                 const key=`${activeDay}-${menuType}-${idx}`; const sel=!!cart[key]; const qty=cart[key]?.qty??1
                 return (
-                  <div key={key} onClick={()=>item.stock>0&&toggleSimple(menuType,idx)} style={{ background:item.stock===0?'#f1f5f9':sel?'#fff7ed':'#fff', border:`2px solid ${sel?'#f97316':item.stock===0?'#e2e8f0':'#e5e7eb'}`, borderRadius:16, padding:20, cursor:item.stock===0?'not-allowed':'pointer', opacity:item.stock===0?0.6:1, position:'relative' }}>
-                    {sel&&<div style={{ position:'absolute',top:10,right:10,background:'#f97316',color:'#fff',borderRadius:'50%',width:22,height:22,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:900 }}>✓</div>}
-                    <div style={{ fontSize:40, marginBottom:8 }}>{item.emoji}</div>
-                    <span style={{ fontSize:10,fontWeight:700,letterSpacing:1,background:menuType==='sopa'?'#3b82f6':'#f97316',color:'#fff',padding:'2px 8px',borderRadius:99,textTransform:'uppercase' }}>{menuType==='sopa'?'Sopa':'Segundo'}</span>
-                    <h3 style={{ margin:'8px 0 4px',fontSize:15,fontWeight:800 }}>{item.nombre}</h3>
-                    <p style={{ fontSize:12,color:'#64748b',margin:'0 0 8px' }}>{item.descripcion}</p>
-                    <div style={{ fontSize:20,fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</div>
+                  <div key={key} onClick={()=>item.stock>0&&toggleSimple(menuType,idx)} style={{ background:item.stock===0?'#f1f5f9':sel?'#fff7ed':'#fff', border:`2px solid ${sel?'#f97316':item.stock===0?'#e2e8f0':'#e5e7eb'}`, borderRadius:16, padding: isMobile ? 16 : 20, cursor:item.stock===0?'not-allowed':'pointer', opacity:item.stock===0?0.6:1, position:'relative' }}>
+                    {sel&&<div style={{ position:'absolute',top:10,right:10,background:'#f97316',color:'#fff',borderRadius:'50%',width:24,height:24,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:900 }}>✓</div>}
+                    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                      <div style={{ fontSize:36 }}>{item.emoji}</div>
+                      <div style={{ flex:1 }}>
+                        <span style={{ fontSize:10,fontWeight:700,letterSpacing:1,background:menuType==='sopa'?'#3b82f6':'#f97316',color:'#fff',padding:'2px 8px',borderRadius:99,textTransform:'uppercase' }}>{menuType==='sopa'?'Sopa':'Segundo'}</span>
+                        <h3 style={{ margin:'4px 0 2px',fontSize:15,fontWeight:800 }}>{item.nombre}</h3>
+                        {item.descripcion && <p style={{ fontSize:12,color:'#64748b',margin:'0 0 4px' }}>{item.descripcion}</p>}
+                        <div style={{ fontSize:20,fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</div>
+                      </div>
+                    </div>
                     <StockBadge stock={item.stock} init={item.stock_inicial} />
                     {sel&&<div style={{ marginTop:12,display:'flex',alignItems:'center',gap:8 }} onClick={e=>e.stopPropagation()}>
-                      <button onClick={()=>setQty(key,Math.max(1,qty-1))} style={{ width:28,height:28,borderRadius:8,border:'2px solid #f97316',background:'#fff',color:'#f97316',fontWeight:900,cursor:'pointer',fontSize:16 }}>−</button>
-                      <span style={{ fontWeight:800,fontSize:16,minWidth:20,textAlign:'center' }}>{qty}</span>
-                      <button onClick={()=>setQty(key,Math.min(item.stock,qty+1))} style={{ width:28,height:28,borderRadius:8,border:'2px solid #f97316',background:'#f97316',color:'#fff',fontWeight:900,cursor:'pointer',fontSize:16 }}>+</button>
+                      <button onClick={()=>setQty(key,Math.max(1,qty-1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#fff',color:'#f97316',fontWeight:900,cursor:'pointer',fontSize:18 }}>−</button>
+                      <span style={{ fontWeight:800,fontSize:18,minWidth:24,textAlign:'center' }}>{qty}</span>
+                      <button onClick={()=>setQty(key,Math.min(item.stock,qty+1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#f97316',color:'#fff',fontWeight:900,cursor:'pointer',fontSize:18 }}>+</button>
                     </div>}
                   </div>
                 )
@@ -348,19 +387,23 @@ export default function MenuPage() {
 
           {menuType==='extra' && dayMenuData.extra && (()=>{
             const item=dayMenuData.extra!; const key=`${activeDay}-extra-0`; const sel=!!cart[key]; const qty=cart[key]?.qty??1
-            return (<div style={{ maxWidth:340 }}>
-              <div onClick={()=>item.stock>0&&toggleSimple('extra',0)} style={{ background:item.stock===0?'#f1f5f9':sel?'#fff7ed':'#fff', border:`2px solid ${sel?'#f97316':item.stock===0?'#e2e8f0':'#e5e7eb'}`, borderRadius:16, padding:20, cursor:item.stock===0?'not-allowed':'pointer', opacity:item.stock===0?0.6:1, position:'relative' }}>
-                {sel&&<div style={{ position:'absolute',top:10,right:10,background:'#f97316',color:'#fff',borderRadius:'50%',width:22,height:22,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:900 }}>✓</div>}
-                <div style={{ fontSize:40,marginBottom:8 }}>{item.emoji}</div>
-                <span style={{ fontSize:10,fontWeight:700,background:'#8b5cf6',color:'#fff',padding:'2px 8px',borderRadius:99 }}>Extra</span>
-                <h3 style={{ margin:'8px 0 4px',fontSize:15,fontWeight:800 }}>{item.nombre}</h3>
-                <p style={{ fontSize:12,color:'#64748b',margin:'0 0 8px' }}>{item.descripcion}</p>
-                <div style={{ fontSize:20,fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</div>
+            return (<div style={{ maxWidth:400 }}>
+              <div onClick={()=>item.stock>0&&toggleSimple('extra',0)} style={{ background:item.stock===0?'#f1f5f9':sel?'#fff7ed':'#fff', border:`2px solid ${sel?'#f97316':item.stock===0?'#e2e8f0':'#e5e7eb'}`, borderRadius:16, padding: isMobile ? 16 : 20, cursor:item.stock===0?'not-allowed':'pointer', opacity:item.stock===0?0.6:1, position:'relative' }}>
+                {sel&&<div style={{ position:'absolute',top:10,right:10,background:'#f97316',color:'#fff',borderRadius:'50%',width:24,height:24,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:900 }}>✓</div>}
+                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ fontSize:36 }}>{item.emoji}</div>
+                  <div style={{ flex:1 }}>
+                    <span style={{ fontSize:10,fontWeight:700,background:'#8b5cf6',color:'#fff',padding:'2px 8px',borderRadius:99 }}>Extra</span>
+                    <h3 style={{ margin:'4px 0 2px',fontSize:15,fontWeight:800 }}>{item.nombre}</h3>
+                    {item.descripcion && <p style={{ fontSize:12,color:'#64748b',margin:'0 0 4px' }}>{item.descripcion}</p>}
+                    <div style={{ fontSize:20,fontWeight:900,color:'#f97316' }}>{fmtCur(item.precio)}</div>
+                  </div>
+                </div>
                 <StockBadge stock={item.stock} init={item.stock_inicial} />
                 {sel&&<div style={{ marginTop:12,display:'flex',alignItems:'center',gap:8 }} onClick={e=>e.stopPropagation()}>
-                  <button onClick={()=>setQty(key,Math.max(1,qty-1))} style={{ width:28,height:28,borderRadius:8,border:'2px solid #f97316',background:'#fff',color:'#f97316',fontWeight:900,cursor:'pointer',fontSize:16 }}>−</button>
-                  <span style={{ fontWeight:800,fontSize:16,minWidth:20,textAlign:'center' }}>{qty}</span>
-                  <button onClick={()=>setQty(key,Math.min(item.stock,qty+1))} style={{ width:28,height:28,borderRadius:8,border:'2px solid #f97316',background:'#f97316',color:'#fff',fontWeight:900,cursor:'pointer',fontSize:16 }}>+</button>
+                  <button onClick={()=>setQty(key,Math.max(1,qty-1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#fff',color:'#f97316',fontWeight:900,cursor:'pointer',fontSize:18 }}>−</button>
+                  <span style={{ fontWeight:800,fontSize:18,minWidth:24,textAlign:'center' }}>{qty}</span>
+                  <button onClick={()=>setQty(key,Math.min(item.stock,qty+1))} style={{ width:36,height:36,borderRadius:10,border:'2px solid #f97316',background:'#f97316',color:'#fff',fontWeight:900,cursor:'pointer',fontSize:18 }}>+</button>
                 </div>}
               </div>
             </div>)
@@ -369,7 +412,7 @@ export default function MenuPage() {
 
         {/* CART */}
         {hasItems && (
-          <div style={{ background:'#fff', borderRadius:20, padding:22, marginTop:8, boxShadow:'0 4px 24px rgba(249,115,22,0.14)', border:'2px solid #fed7aa' }}>
+          <div style={{ background:'#fff', borderRadius:20, padding: isMobile ? 16 : 22, marginTop:8, boxShadow:'0 4px 24px rgba(249,115,22,0.14)', border:'2px solid #fed7aa' }}>
             <h3 style={{ margin:'0 0 14px', fontSize:16, fontWeight:900, color:'#9a3412' }}>🛒 Tu Pedido</h3>
             <div style={{ marginBottom:14 }}>
               {comboValid && dayMenuData && (<div style={{ marginBottom:8 }}>
@@ -400,7 +443,7 @@ export default function MenuPage() {
               <span style={{ fontWeight:800, fontSize:17 }}>Total:</span>
               <span style={{ fontWeight:900, fontSize:24, color:'#f97316' }}>{fmtCur(cartTotal)}</span>
             </div>
-            <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'13px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', boxShadow:'0 4px 20px rgba(249,115,22,0.35)' }}>
+            <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'14px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', boxShadow:'0 4px 20px rgba(249,115,22,0.35)' }}>
               Confirmar Reserva →
             </button>
           </div>
@@ -409,10 +452,10 @@ export default function MenuPage() {
 
       {/* DATOS MODAL */}
       {step==='datos' && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.65)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
-          <div style={{ background:'#fff', borderRadius:24, padding:30, maxWidth:460, width:'100%', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
-            <div style={{ textAlign:'center', marginBottom:22 }}><div style={{ fontSize:38 }}>👤</div><h2 style={{ margin:'8px 0 4px', fontSize:20, fontWeight:900 }}>Datos para tu Reserva</h2></div>
-            <div style={{ background:'#fff7ed', border:'2px solid #fed7aa', borderRadius:14, padding:'12px 16px', marginBottom:18 }}>
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.65)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 8 : 16 }}>
+          <div style={{ background:'#fff', borderRadius:24, padding: isMobile ? 20 : 30, maxWidth:460, width:'100%', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
+            <div style={{ textAlign:'center', marginBottom:18 }}><div style={{ fontSize:34 }}>👤</div><h2 style={{ margin:'8px 0 4px', fontSize:20, fontWeight:900 }}>Datos para tu Reserva</h2></div>
+            <div style={{ background:'#fff7ed', border:'2px solid #fed7aa', borderRadius:14, padding:'12px 14px', marginBottom:16 }}>
               <p style={{ margin:'0 0 8px', fontSize:11, fontWeight:800, color:'#c2410c' }}>RESUMEN</p>
               {renderReceiptItems(buildItems())}
               <div style={{ borderTop:'1px dashed #fed7aa', marginTop:8, paddingTop:8, display:'flex', justifyContent:'space-between' }}>
@@ -424,28 +467,28 @@ export default function MenuPage() {
               <div key={k} style={{ marginBottom:14 }}>
                 <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>{icon} {l}</label>
                 <input type={t||'text'} placeholder={p} value={(customer as any)[k]} onChange={e=>{setCustomer(prev=>({...prev,[k]:e.target.value}));setCustErr(prev=>({...prev,[k]:''}))} } style={{ ...inp, border:`2px solid ${custErr[k]?'#ef4444':'#e2e8f0'}`, background:custErr[k]?'#fff5f5':'#fff' }} />
-                {custErr[k]&&<p style={{ color:'#ef4444', fontSize:12, margin:'4px 0 0', fontWeight:600 }}>⚠️ {custErr[k]}</p>}
+                {custErr[k]&&<p style={{ color:'#ef4444', fontSize:12, margin:'4px 0 0', fontWeight:600 }}>{custErr[k]}</p>}
               </div>
             ))}
-            <div style={{ marginBottom:22 }}>
+            <div style={{ marginBottom:18 }}>
               <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:6 }}>🕐 Hora de recojo / llegada</label>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
                 {['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30'].map(h=>(
-                  <button key={h} onClick={()=>{setCustomer(p=>({...p,hora:h}));setCustErr(p=>({...p,hora:''}))}} style={{ padding:'9px 4px', borderRadius:10, cursor:'pointer', border:`2px solid ${customer.hora===h?'#f97316':'#e2e8f0'}`, background:customer.hora===h?'#fff7ed':'#fff', color:customer.hora===h?'#f97316':'#64748b', fontWeight:800, fontSize:13 }}>{h}</button>
+                  <button key={h} onClick={()=>{setCustomer(p=>({...p,hora:h}));setCustErr(p=>({...p,hora:''}))}} style={{ padding:'10px 4px', borderRadius:10, cursor:'pointer', border:`2px solid ${customer.hora===h?'#f97316':'#e2e8f0'}`, background:customer.hora===h?'#fff7ed':'#fff', color:customer.hora===h?'#f97316':'#64748b', fontWeight:800, fontSize:14 }}>{h}</button>
                 ))}
               </div>
-              {custErr.hora&&<p style={{ color:'#ef4444', fontSize:12, margin:'6px 0 0', fontWeight:600 }}>⚠️ {custErr.hora}</p>}
+              {custErr.hora&&<p style={{ color:'#ef4444', fontSize:12, margin:'6px 0 0', fontWeight:600 }}>{custErr.hora}</p>}
             </div>
-            <button onClick={handleConfirmData} style={{ width:'100%', padding:'13px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', marginBottom:10 }}>Continuar al Pago →</button>
-            <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:12, border:'none', background:'#f1f5f9', color:'#64748b', cursor:'pointer', fontWeight:600 }}>← Volver</button>
+            <button onClick={handleConfirmData} style={{ width:'100%', padding:'14px 0', borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', marginBottom:10 }}>Continuar al Pago →</button>
+            <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:12, border:'none', background:'#f1f5f9', color:'#64748b', cursor:'pointer', fontWeight:600 }}>← Volver al menú</button>
           </div>
         </div>
       )}
 
       {/* PAGO MODAL */}
       {step==='pago' && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
-          <div style={{ background:'#fff', borderRadius:24, padding:30, maxWidth:440, width:'100%', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 8 : 16 }}>
+          <div style={{ background:'#fff', borderRadius:24, padding: isMobile ? 20 : 30, maxWidth:440, width:'100%', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
             <div style={{ textAlign:'center', marginBottom:18 }}>
               <div style={{ fontSize:34 }}>🧾</div>
               <h2 style={{ margin:'8px 0 4px', fontSize:21, fontWeight:900 }}>Confirmar Pago</h2>
@@ -465,20 +508,18 @@ export default function MenuPage() {
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:20, fontWeight:900, marginBottom:22, color:'#f97316' }}>
               <span>TOTAL</span><span>{fmtCur(cartTotal)}</span>
             </div>
-            <p style={{ fontSize:13, fontWeight:700, marginBottom:12, textAlign:'center' }}>¿Cómo desea pagar?</p>
+            <p style={{ fontSize:14, fontWeight:700, marginBottom:12, textAlign:'center' }}>¿Cómo deseas pagar?</p>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:10 }}>
-              {/* Efectivo */}
-              <button onClick={()=>handlePay('efectivo')} disabled={submitting} style={{ padding:'16px 8px', borderRadius:14, border:'2px solid #22c55e', background:'#f0fdf4', color:'#166534', fontWeight:800, cursor:'pointer', fontSize:15, display:'flex', flexDirection:'column', alignItems:'center', gap:4, opacity:submitting?0.6:1 }}>
+              <button onClick={()=>handlePay('efectivo')} disabled={submitting} style={{ padding:'18px 8px', borderRadius:14, border:'2px solid #22c55e', background:'#f0fdf4', color:'#166534', fontWeight:800, cursor:'pointer', fontSize:16, display:'flex', flexDirection:'column', alignItems:'center', gap:6, opacity:submitting?0.6:1 }}>
                 💵<span>Efectivo</span>
               </button>
-              {/* QR — disabled if restaurante has no QR image, shows tooltip */}
               <button
                 onClick={()=>restaurante?.qr_url ? handlePay('qr') : null}
                 disabled={submitting || !restaurante?.qr_url}
                 title={!restaurante?.qr_url ? 'El restaurante aún no ha configurado su QR de pago' : 'Pagar con QR'}
-                style={{ padding:'16px 8px', borderRadius:14, border:`2px solid ${restaurante?.qr_url?'#3b82f6':'#e2e8f0'}`, background:restaurante?.qr_url?'#eff6ff':'#f8fafc', color:restaurante?.qr_url?'#1e40af':'#94a3b8', fontWeight:800, cursor:restaurante?.qr_url?'pointer':'not-allowed', fontSize:15, display:'flex', flexDirection:'column', alignItems:'center', gap:4, opacity:submitting?0.6:1 }}>
+                style={{ padding:'18px 8px', borderRadius:14, border:`2px solid ${restaurante?.qr_url?'#3b82f6':'#e2e8f0'}`, background:restaurante?.qr_url?'#eff6ff':'#f8fafc', color:restaurante?.qr_url?'#1e40af':'#94a3b8', fontWeight:800, cursor:restaurante?.qr_url?'pointer':'not-allowed', fontSize:16, display:'flex', flexDirection:'column', alignItems:'center', gap:6, opacity:submitting?0.6:1 }}>
                 📱<span>Pago QR</span>
-                {!restaurante?.qr_url && <span style={{ fontSize:9, fontWeight:600, color:'#94a3b8' }}>No disponible</span>}
+                {!restaurante?.qr_url && <span style={{ fontSize:10, fontWeight:600, color:'#94a3b8' }}>No disponible</span>}
               </button>
             </div>
             <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:12, borderRadius:12, border:'none', background:'#f1f5f9', color:'#64748b', cursor:'pointer', fontWeight:600 }}>← Volver</button>
@@ -488,8 +529,8 @@ export default function MenuPage() {
 
       {/* DONE MODAL */}
       {step==='done' && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
-          <div style={{ background:'#fff', borderRadius:24, padding:36, maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 8 : 16 }}>
+          <div style={{ background:'#fff', borderRadius:24, padding: isMobile ? 24 : 36, maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 25px 60px rgba(0,0,0,0.3)', maxHeight:'90vh', overflowY:'auto' }}>
             {payMethod==='qr' ? (
               <>
                 <div style={{ fontSize:48, marginBottom:8 }}>📱</div>
@@ -498,76 +539,51 @@ export default function MenuPage() {
                   Pedido <strong>#{orderId}</strong> · Total: <strong style={{ color:'#f97316' }}>{fmtCur(finalTotal)}</strong>
                 </p>
 
-                {/* Real QR image */}
                 {restaurante?.qr_url ? (
                   <div style={{ marginBottom:20 }}>
                     <div style={{ background:'#f8fafc', border:'2px solid #e2e8f0', borderRadius:16, padding:16, display:'inline-block', marginBottom:12 }}>
-                      <img
-                        src={restaurante.qr_url}
-                        alt="QR de pago"
-                        style={{ width:220, height:220, objectFit:'contain', borderRadius:8, display:'block' }}
-                      />
+                      <img src={restaurante.qr_url} alt="QR de pago" style={{ width: isMobile ? 180 : 220, height: isMobile ? 180 : 220, objectFit:'contain', borderRadius:8, display:'block' }} />
                     </div>
-                    <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
-                      {/* Download button */}
-                      <a
-                        href={restaurante.qr_url}
-                        download={`QR-Pago-${restaurante?.nombre ?? 'restaurante'}.png`}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ padding:'10px 20px', borderRadius:12, background:'linear-gradient(135deg,#3b82f6,#1d4ed8)', color:'#fff', fontWeight:800, fontSize:14, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6 }}
-                      >
-                        ⬇️ Descargar QR
+                    <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
+                      <a href={restaurante.qr_url} download={`QR-Pago-${restaurante?.nombre ?? 'restaurante'}.png`} target="_blank" rel="noreferrer" style={{ padding:'10px 20px', borderRadius:12, background:'linear-gradient(135deg,#3b82f6,#1d4ed8)', color:'#fff', fontWeight:800, fontSize:14, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6 }}>
+                        Descargar QR
                       </a>
-                      {/* Share if available */}
                       {navigator.share && (
-                        <button
-                          onClick={async()=>{
-                            try {
-                              const res = await fetch(restaurante!.qr_url!)
-                              const blob = await res.blob()
-                              const file = new File([blob], 'QR-Pago.png', { type: blob.type })
-                              await navigator.share({ title:'QR de Pago', files:[file] })
-                            } catch {}
-                          }}
-                          style={{ padding:'10px 20px', borderRadius:12, background:'#f1f5f9', color:'#374151', fontWeight:800, fontSize:14, border:'none', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:6 }}
-                        >
-                          📤 Compartir
+                        <button onClick={async()=>{try{const res=await fetch(restaurante!.qr_url!);const blob=await res.blob();const file=new File([blob],'QR-Pago.png',{type:blob.type});await navigator.share({title:'QR de Pago',files:[file]})}catch{}}} style={{ padding:'10px 20px', borderRadius:12, background:'#f1f5f9', color:'#374151', fontWeight:800, fontSize:14, border:'none', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:6 }}>
+                          Compartir
                         </button>
                       )}
                     </div>
-                    <p style={{ fontSize:12, color:'#94a3b8', marginTop:12 }}>
-                      Descarga el QR y realiza la transferencia por el monto exacto
-                    </p>
+                    <p style={{ fontSize:12, color:'#94a3b8', marginTop:12 }}>Descarga el QR y realiza la transferencia por el monto exacto</p>
                   </div>
                 ) : (
                   <div style={{ background:'#fef3c7', borderRadius:12, padding:16, marginBottom:20, fontSize:13, color:'#92400e' }}>
-                    ⚠️ El restaurante aún no ha subido su QR de pago. Consulta al local.
+                    El restaurante aún no ha subido su QR de pago. Consulta al local.
                   </div>
                 )}
 
-                <div style={{ background:'#fff7ed', border:'1.5px solid #fed7aa', borderRadius:12, padding:'10px 14px', marginBottom:20, fontSize:13 }}>
-                  <div style={{ fontWeight:700, color:'#9a3412', marginBottom:4 }}>Instrucciones de pago:</div>
-                  <div style={{ color:'#64748b' }}>1. Escanea el QR con tu app de banca o billetera digital</div>
-                  <div style={{ color:'#64748b' }}>2. Transfiere exactamente <strong style={{ color:'#f97316' }}>{fmtCur(finalTotal)}</strong></div>
+                <div style={{ background:'#fff7ed', border:'1.5px solid #fed7aa', borderRadius:12, padding:'12px 14px', marginBottom:20, fontSize:13, textAlign:'left' }}>
+                  <div style={{ fontWeight:700, color:'#9a3412', marginBottom:6 }}>Instrucciones de pago:</div>
+                  <div style={{ color:'#64748b', marginBottom:4 }}>1. Escanea el QR con tu app bancaria</div>
+                  <div style={{ color:'#64748b', marginBottom:4 }}>2. Transfiere exactamente <strong style={{ color:'#f97316' }}>{fmtCur(finalTotal)}</strong></div>
                   <div style={{ color:'#64748b' }}>3. Guarda el comprobante</div>
                 </div>
 
                 <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:14, borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer' }}>
-                  ¡Listo! Ya pagué 🎉
+                  ¡Listo, ya pagué!
                 </button>
               </>
             ) : (
               <>
                 <div style={{ fontSize:64, marginBottom:14 }}>✅</div>
                 <h2 style={{ margin:'0 0 8px', fontWeight:900, fontSize:22 }}>¡Reserva Confirmada!</h2>
-                <p style={{ color:'#64748b', fontSize:13, marginBottom:22 }}>
+                <p style={{ color:'#64748b', fontSize:14, marginBottom:22, lineHeight:1.6 }}>
                   Pedido <strong>#{orderId}</strong> registrado.<br/>
                   {consumo==='local'?'Te esperamos en el local 🍽️':'Pasarás a recogerlo 📦'}<br/>
                   <strong>Paga en efectivo al recoger.</strong>
                 </p>
                 <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:14, borderRadius:14, border:'none', background:'linear-gradient(135deg,#f97316,#ef4444)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer' }}>
-                  ¡Listo! 🎉
+                  ¡Listo!
                 </button>
               </>
             )}

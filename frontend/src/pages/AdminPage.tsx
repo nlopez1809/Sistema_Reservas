@@ -12,6 +12,14 @@ export default function AdminPage() {
   const navigate = useNavigate()
   const { session, refreshSession } = useAuth()
   const [tab, setTab] = useState('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   const [dias, setDias] = useState<Dia[]>([])
   const [platos, setPlatos] = useState<Plato[]>([])
   const [pedidos, setPedidos] = useState<Pedido[]>([])
@@ -333,12 +341,20 @@ export default function AdminPage() {
       {/* ── LAYOUT: Sidebar + Content ── */}
       <div style={{ display:'flex', minHeight:'100vh' }}>
 
+        {/* Mobile overlay backdrop */}
+        {isMobile && sidebarOpen && (
+          <div onClick={() => setSidebarOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:90 }} />
+        )}
+
         {/* SIDEBAR */}
         <div style={{
           width: 240, flexShrink: 0,
           background: 'linear-gradient(180deg,#1e293b 0%,#0f172a 100%)',
           display: 'flex', flexDirection: 'column',
-          position: 'sticky', top: 0, height: '100vh', overflowY: 'auto',
+          position: isMobile ? 'fixed' : 'sticky', top: 0, height: '100vh', overflowY: 'auto',
+          zIndex: isMobile ? 100 : 'auto',
+          transform: isMobile && !sidebarOpen ? 'translateX(-100%)' : 'translateX(0)',
+          transition: 'transform 0.25s ease-in-out',
         }}>
           {/* Logo / Restaurant name */}
           <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
@@ -359,18 +375,27 @@ export default function AdminPage() {
           {/* Nav items */}
           <nav style={{ flex:1, padding:'12px 12px' }}>
             {[
+              { id:'_section', label:'Principal' },
               { id:'dashboard',    icon:'📊', label:'Dashboard' },
               { id:'menu',         icon:'🍽️', label:'Menú' },
               { id:'dias',         icon:'📅', label:'Días' },
+              { id:'_section2', label:'Operaciones' },
               { id:'stock',        icon:'📦', label:'Stock' },
               { id:'pedidos',      icon:'📋', label:'Pedidos' },
               { id:'clientes',     icon:'👥', label:'Clientes' },
+              { id:'_section3', label:'Negocio' },
               { id:'contabilidad', icon:'💵', label:'Contabilidad' },
               { id:'ajustes',      icon:'⚙️', label:'Ajustes' },
-            ].map(item => (
+            ].map(item => {
+              if (item.id.startsWith('_section')) return (
+                <div key={item.id} style={{ fontSize:10, fontWeight:700, color:'#475569', textTransform:'uppercase' as const, letterSpacing:1, padding:'12px 12px 4px', marginTop:4, borderTop: item.id === '_section' ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>
+                  {item.label}
+                </div>
+              )
+              return (
               <button
                 key={item.id}
-                onClick={() => setTab(item.id)}
+                onClick={() => { setTab(item.id); if (isMobile) setSidebarOpen(false) }}
                 style={{
                   width: '100%', display:'flex', alignItems:'center', gap:10,
                   padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
@@ -387,7 +412,8 @@ export default function AdminPage() {
                     padding:'1px 7px', fontSize:10, fontWeight:900 }}>{unreadCount}</span>
                 )}
               </button>
-            ))}
+            )})
+            }
           </nav>
 
           {/* Bottom: notifications + signout */}
@@ -428,15 +454,22 @@ export default function AdminPage() {
         {/* MAIN CONTENT */}
         <div style={{ flex:1, overflowY:'auto', background:'#f8fafc' }}>
           {/* Top bar */}
-          <div style={{ background:'#fff', borderBottom:'1px solid #e2e8f0', padding:'14px 28px',
+          <div style={{ background:'#fff', borderBottom:'1px solid #e2e8f0', padding: isMobile ? '10px 14px' : '14px 28px',
             display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:50 }}>
-            <h2 style={{ margin:0, fontSize:17, fontWeight:900, color:'#1e293b' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              {isMobile && (
+                <button onClick={() => setSidebarOpen(true)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:22, padding:'4px 8px', lineHeight:1 }} aria-label="Abrir menú">
+                  ☰
+                </button>
+              )}
+            <h2 style={{ margin:0, fontSize: isMobile ? 14 : 17, fontWeight:900, color:'#1e293b' }}>
               {[
                 ['dashboard','📊 Dashboard'],['menu','🍽️ Menú del Día'],['dias','📅 Días'],
                 ['stock','📦 Control de Stock'],['pedidos','📋 Pedidos'],['clientes','👥 Clientes'],
                 ['contabilidad','💵 Contabilidad'],['ajustes','⚙️ Ajustes'],
               ].find(([id])=>id===tab)?.[1] ?? ''}
             </h2>
+            </div>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               {unreadCount > 0 && (
                 <div style={{ background:'#fff7ed', border:'1.5px solid #fed7aa', borderRadius:10,
@@ -451,7 +484,7 @@ export default function AdminPage() {
           </div>
 
           {/* Tab content */}
-          <div style={{ padding:28 }}>
+          <div style={{ padding: isMobile ? 14 : 28 }}>
             {loading && <p style={{ textAlign:'center', color:'#94a3b8', padding:40 }}>Cargando…</p>}
 
         {/* ── DASHBOARD ── */}
@@ -464,7 +497,7 @@ export default function AdminPage() {
               <button onClick={()=>setReportModal('clientes')} style={{ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#8b5cf6',color:'#fff' }}>👥 Ver Clientes</button>
             </div>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:20 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:14, marginBottom:20 }}>
             {[{icon:'💰',label:'Total Recaudado',value:fmtCur(totalRev),color:'#22c55e'},{icon:'📋',label:'Total Pedidos',value:pedidos.length,color:'#3b82f6'},{icon:'🍽️',label:'En Local',value:localN,color:'#f97316'},{icon:'📦',label:'Para Llevar',value:llevarN,color:'#8b5cf6'}].map((k,i)=>(
               <div key={i} style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)',borderLeft:`4px solid ${k.color}` }}>
                 <div style={{ fontSize:24 }}>{k.icon}</div>
@@ -473,7 +506,7 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap:14 }}>
             <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🏆 Lo más vendido</h3>
               {topPlatos.length===0?<p style={{ color:'#94a3b8',fontSize:13 }}>Sin datos</p>:topPlatos.slice(0,5).map((p,i)=>(<div key={i} style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}><span style={{ fontSize:13 }}>#{i+1} {p.plato}</span><span style={{ fontWeight:800,color:'#f97316',fontSize:13 }}>{p.total_vendido}</span></div>))}
@@ -554,9 +587,10 @@ export default function AdminPage() {
         </div>)}
 
         {/* ── PEDIDOS ── */}
-        {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding:22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+        {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding: isMobile ? 14 : 22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
           <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>📋 Registro de Pedidos</h3>
-          {pedidos.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(
+          {pedidos.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(<>
+            {isMobile && <p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
                 <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -573,14 +607,15 @@ export default function AdminPage() {
                 </tr>))}</tbody>
               </table>
             </div>
-          )}
+          </>)}
         </div>)}
 
         {/* ── CLIENTES ── */}
-        {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding:22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
+        {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding: isMobile ? 14 : 22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
           <h3 style={{ margin:'0 0 6px',fontSize:16,fontWeight:800 }}>👥 Base de Datos de Clientes</h3>
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 18px' }}>Identificados por WhatsApp. El contador sube automáticamente con cada pedido.</p>
-          {clientes.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(
+          {clientes.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(<>
+            {isMobile && <p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
                 <thead><tr style={{ background:'#f8fafc' }}>{['#','Nombre','Apellido','WhatsApp','Pedidos','Último Pedido'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -598,7 +633,7 @@ export default function AdminPage() {
                 })}</tbody>
               </table>
             </div>
-          )}
+          </>)}
         </div>)}
 
         {/* ── STOCK ── */}
@@ -698,11 +733,19 @@ export default function AdminPage() {
                                     style={{ padding:'4px 8px', borderRadius:8, border:'none', background:'#f1f5f9', color:'#64748b', fontWeight:700, cursor:'pointer', fontSize:12 }}>✕</button>
                                 </div>
                               ) : (
+                                <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+                                <button onClick={()=>handleUpdateStock(p.id, Math.max(0, p.stock - 1))}
+                                  style={{ width:26, height:26, borderRadius:'50%', border:'1.5px solid #e2e8f0', background:'#f8fafc', cursor:'pointer', fontWeight:900, fontSize:14, color:'#ef4444', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}
+                                  title="-1">−</button>
                                 <button onClick={()=>setEditingStock(prev=>({...prev,[p.id]:p.stock}))}
-                                  style={{ fontWeight:900, fontSize:16, color:col, background:'none', border:'none', cursor:'pointer', padding:'2px 6px', borderRadius:8, transition:'background 0.15s' }}
+                                  style={{ fontWeight:900, fontSize:16, color:col, background:'none', border:'none', cursor:'pointer', padding:'2px 6px', borderRadius:8, transition:'background 0.15s', minWidth:30, textAlign:'center' as const }}
                                   title="Clic para editar">
                                   {p.stock}
                                 </button>
+                                <button onClick={()=>handleUpdateStock(p.id, Math.min(p.stock_inicial, p.stock + 1))}
+                                  style={{ width:26, height:26, borderRadius:'50%', border:'1.5px solid #e2e8f0', background:'#f8fafc', cursor:'pointer', fontWeight:900, fontSize:14, color:'#22c55e', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}
+                                  title="+1">+</button>
+                              </div>
                               )}
                             </td>
                             <td style={{ ...td, color:'#64748b', fontWeight:600 }}>{p.stock_inicial}</td>
@@ -751,7 +794,7 @@ export default function AdminPage() {
           <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20 }}>
             <h2 style={{ margin:0,fontSize:17,fontWeight:900 }}>💵 Contabilidad</h2>
           </div>
-          <div style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:20 }}>
+          <div style={{ display:'grid',gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)',gap:14,marginBottom:20 }}>
             {[{icon:'💰',label:'Total Histórico',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_recaudado),0)||totalRev),color:'#f97316'},
               {icon:'💵',label:'Efectivo',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_efectivo),0)),color:'#22c55e'},
               {icon:'📱',label:'QR',value:fmtCur(contMensual.reduce((s:number,r:any)=>s+Number(r.total_qr),0)),color:'#3b82f6'},
