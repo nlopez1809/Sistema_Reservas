@@ -28,7 +28,7 @@ export default function LandingPage() {
       {/* Hero */}
       <div style={{ background:'linear-gradient(135deg,#9a3412 0%,#c2410c 60%,#ea580c 100%)', padding: isMobile ? '48px 20px' : '80px 32px', textAlign:'center', color:'#fff' }}>
         <h1 style={{ fontSize: isMobile ? 28 : 48, fontWeight:900, margin:'0 0 16px', letterSpacing:-1, lineHeight:1.2 }}>Digitaliza tu Pensión o Restaurante</h1>
-        <p style={{ fontSize: isMobile ? 15 : 20, opacity:0.9, margin:'0 0 40px', maxWidth:560, marginLeft:'auto', marginRight:'auto', lineHeight:1.5 }}>
+        <p style={{ fontSize: isMobile ? 15 : 20, opacity:1, margin:'0 0 40px', maxWidth:560, marginLeft:'auto', marginRight:'auto', lineHeight:1.5 }}>
           Sistema de reservas de almuerzos con menú semanal, control de stock, pagos y contabilidad. Listo para usar.
         </p>
         <button onClick={()=>navigate('/register')} style={{ padding: isMobile ? '14px 32px' : '16px 40px', fontSize: isMobile ? 16 : 18, fontWeight:900, borderRadius:14, border:'none', background:'#fff', color:'#c2410c', cursor:'pointer', boxShadow:'0 4px 20px rgba(0,0,0,0.2)', width: isMobile ? '100%' : 'auto', maxWidth:400 }}>

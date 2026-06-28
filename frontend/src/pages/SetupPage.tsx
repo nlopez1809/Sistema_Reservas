@@ -50,10 +50,10 @@ export default function SetupPage() {
           <div style={{ marginBottom:16 }}>
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔗 URL pública</label>
             <div style={{ display:'flex', alignItems:'center', background:'#f8fafc', borderRadius:12, border:'2px solid #e2e8f0', overflow:'hidden' }}>
-              <span style={{ padding:'11px 12px', color:'#94a3b8', fontSize:14, borderRight:'2px solid #e2e8f0', whiteSpace:'nowrap' }}>/menu/</span>
+              <span style={{ padding:'11px 12px', color:'#475569', fontSize:14, borderRight:'2px solid #e2e8f0', whiteSpace:'nowrap' }}>/menu/</span>
               <input value={slug} onChange={e=>setSlug(slugify(e.target.value))} placeholder="mi-pension" style={{ ...inp, border:'none', borderRadius:0, background:'transparent' }} />
             </div>
-            <p style={{ fontSize:11, color:'#94a3b8', marginTop:4 }}>Tus clientes reservarán en: <strong>/menu/{slug||'tu-pension'}</strong></p>
+            <p style={{ fontSize:11, color:'#475569', marginTop:4 }}>Tus clientes reservarán en: <strong>/menu/{slug||'tu-pension'}</strong></p>
           </div>
           <div style={{ marginBottom:14 }}>
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>📝 Descripción</label>

@@ -288,7 +288,7 @@ export default function AdminPage() {
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
-              {pedidos.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(
+              {pedidos.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
                     <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Cliente','WhatsApp','Día','Hora','Consumo','Pago','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -316,13 +316,13 @@ export default function AdminPage() {
                   <button onClick={()=>setReportModal(null)} style={{ padding:'7px 12px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:13,background:'#f1f5f9',color:'#64748b' }}>✕</button>
                 </div>
               </div>
-              {clientes.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(
+              {clientes.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(
                 <table style={{ width:'100%',borderCollapse:'collapse' }}>
                   <thead><tr style={{ background:'#f8fafc' }}>{['#','Nombre','Apellido','WhatsApp','Pedidos','Último Pedido'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                   <tbody>{[...clientes].sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>{
                     return (
                       <tr key={c.id} style={rowBg(i)}>
-                        <td style={{ ...td,color:'#94a3b8',fontWeight:700 }}>{i+1}</td>
+                        <td style={{ ...td,color:'#475569',fontWeight:700 }}>{i+1}</td>
                         <td style={{ ...td,fontWeight:800 }}>{c.nombre}</td>
                         <td style={td}>{c.apellido}</td>
                         <td style={td}><a href={'https://wa.me/591' + c.whatsapp} target="_blank" rel="noreferrer" style={{ color:'#22c55e',fontWeight:700,textDecoration:'none' }}>📱 {c.whatsapp}</a></td>
@@ -424,7 +424,7 @@ export default function AdminPage() {
               style={{ width:'100%', display:'flex', alignItems:'center', gap:10,
                 padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
                 background: showHistory?'rgba(249,115,22,0.15)':'transparent',
-                color:'#94a3b8', fontSize:13, fontWeight:600, textAlign:'left', marginBottom:4 }}>
+                color:'#475569', fontSize:13, fontWeight:600, textAlign:'left', marginBottom:4 }}>
               <span style={{ fontSize:16 }}>🔔</span>
               <span>Notificaciones</span>
               {unreadCount>0 && (
@@ -477,7 +477,7 @@ export default function AdminPage() {
                   🔔 {unreadCount} nuevo{unreadCount>1?'s':''} pedido{unreadCount>1?'s':''}
                 </div>
               )}
-              <div style={{ fontSize:12, color:'#94a3b8' }}>
+              <div style={{ fontSize:12, color:'#475569' }}>
                 {new Date().toLocaleDateString('es-BO', { weekday:'long', day:'numeric', month:'long' })}
               </div>
             </div>
@@ -485,7 +485,7 @@ export default function AdminPage() {
 
           {/* Tab content */}
           <div style={{ padding: isMobile ? 14 : 28 }}>
-            {loading && <p style={{ textAlign:'center', color:'#94a3b8', padding:40 }}>Cargando…</p>}
+            {loading && <p style={{ textAlign:'center', color:'#475569', padding:40 }}>Cargando…</p>}
 
         {/* ── DASHBOARD ── */}
         {tab==='dashboard' && !loading && (<div>
@@ -509,7 +509,7 @@ export default function AdminPage() {
           <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap:14 }}>
             <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🏆 Lo más vendido</h3>
-              {topPlatos.length===0?<p style={{ color:'#94a3b8',fontSize:13 }}>Sin datos</p>:topPlatos.slice(0,5).map((p,i)=>(<div key={i} style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}><span style={{ fontSize:13 }}>#{i+1} {p.plato}</span><span style={{ fontWeight:800,color:'#f97316',fontSize:13 }}>{p.total_vendido}</span></div>))}
+              {topPlatos.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos</p>:topPlatos.slice(0,5).map((p,i)=>(<div key={i} style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}><span style={{ fontSize:13 }}>#{i+1} {p.plato}</span><span style={{ fontWeight:800,color:'#f97316',fontSize:13 }}>{p.total_vendido}</span></div>))}
             </div>
             <div style={{ background:'#fff',borderRadius:16,padding:18,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 14px',fontSize:14,fontWeight:800 }}>🍽️ Consumo</h3>
@@ -589,8 +589,8 @@ export default function AdminPage() {
         {/* ── PEDIDOS ── */}
         {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding: isMobile ? 14 : 22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
           <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>📋 Registro de Pedidos</h3>
-          {pedidos.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(<>
-            {isMobile && <p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
+          {pedidos.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin pedidos aún.</p>:(<>
+            {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
                 <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -614,15 +614,15 @@ export default function AdminPage() {
         {tab==='clientes' && !loading && (<div style={{ background:'#fff',borderRadius:16,padding: isMobile ? 14 : 22,boxShadow:'0 1px 6px rgba(0,0,0,0.07)' }}>
           <h3 style={{ margin:'0 0 6px',fontSize:16,fontWeight:800 }}>👥 Base de Datos de Clientes</h3>
           <p style={{ color:'#64748b',fontSize:13,margin:'0 0 18px' }}>Identificados por WhatsApp. El contador sube automáticamente con cada pedido.</p>
-          {clientes.length===0?<p style={{ color:'#94a3b8',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(<>
-            {isMobile && <p style={{ fontSize:11, color:'#94a3b8', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
+          {clientes.length===0?<p style={{ color:'#475569',textAlign:'center',padding:40 }}>Sin clientes aún.</p>:(<>
+            {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
                 <thead><tr style={{ background:'#f8fafc' }}>{['#','Nombre','Apellido','WhatsApp','Pedidos','Último Pedido'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                 <tbody>{[...clientes].sort((a,b)=>(b.total_pedidos||0)-(a.total_pedidos||0)).map((c,i)=>{
                   return (
                     <tr key={c.id} style={rowBg(i)}>
-                      <td style={{ ...td,color:'#94a3b8',fontWeight:700 }}>{i+1}</td>
+                      <td style={{ ...td,color:'#475569',fontWeight:700 }}>{i+1}</td>
                       <td style={{ ...td,fontWeight:800 }}>{c.nombre}</td>
                       <td style={td}>{c.apellido}</td>
                       <td style={td}><a href={'https://wa.me/591' + c.whatsapp} target="_blank" rel="noreferrer" style={{ color:'#22c55e',fontWeight:700,textDecoration:'none' }}>📱 {c.whatsapp}</a></td>
@@ -783,7 +783,7 @@ export default function AdminPage() {
           })()}
 
           {stockData.length === 0 && (
-            <p style={{ color:'#94a3b8', textAlign:'center', padding:40 }}>
+            <p style={{ color:'#475569', textAlign:'center', padding:40 }}>
               No hay platos configurados aún. Ve a 🍽️ Menú para agregar platos.
             </p>
           )}
@@ -808,7 +808,7 @@ export default function AdminPage() {
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>📅 Recaudación Diaria</h3>
                 <button onClick={()=>downloadCSV(`contabilidad_diario.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#f97316',color:'#fff' }}>⬇️ Descargar</button>
               </div>
-              {rows.length===0?<p style={{ color:'#94a3b8',fontSize:13 }}>Sin datos aún.</p>:(
+              {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
                     <thead><tr style={{ background:'#f8fafc' }}>{['Fecha','Pedidos','Efectivo 💵','QR 📱','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -832,7 +832,7 @@ export default function AdminPage() {
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>📆 Recaudación Semanal</h3>
                 <button onClick={()=>downloadCSV(`contabilidad_semanal.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#3b82f6',color:'#fff' }}>⬇️ Descargar</button>
               </div>
-              {rows.length===0?<p style={{ color:'#94a3b8',fontSize:13 }}>Sin datos aún.</p>:(
+              {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
                     <thead><tr style={{ background:'#f8fafc' }}>{['Semana','Pedidos','Efectivo 💵','QR 📱','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -856,7 +856,7 @@ export default function AdminPage() {
                 <h3 style={{ margin:0,fontSize:15,fontWeight:800 }}>🗓️ Recaudación Mensual</h3>
                 <button onClick={()=>downloadCSV(`contabilidad_mensual.csv`,['Período','Pedidos','Efectivo','QR','Total'],data)} style={{ padding:'7px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:'#22c55e',color:'#fff' }}>⬇️ Descargar</button>
               </div>
-              {rows.length===0?<p style={{ color:'#94a3b8',fontSize:13 }}>Sin datos aún.</p>:(
+              {rows.length===0?<p style={{ color:'#475569',fontSize:13 }}>Sin datos aún.</p>:(
                 <div style={{ overflowX:'auto' }}>
                   <table style={{ width:'100%',borderCollapse:'collapse' }}>
                     <thead><tr style={{ background:'#f8fafc' }}>{['Mes','Pedidos','Efectivo 💵','QR 📱','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
@@ -910,7 +910,7 @@ export default function AdminPage() {
               <p style={{ margin:0,fontWeight:700,color:'#374151',fontSize:14 }}>
                 {uploadingLogo ? 'Subiendo imagen...' : rest?.logo_url ? 'Clic para cambiar el logo' : 'Clic para subir tu logo'}
               </p>
-              <p style={{ margin:'4px 0 0',fontSize:11,color:'#94a3b8' }}>PNG, JPG o WEBP · Máximo 2 MB</p>
+              <p style={{ margin:'4px 0 0',fontSize:11,color:'#475569' }}>PNG, JPG o WEBP · Máximo 2 MB</p>
             </div>
             <input
               ref={logoFileRef}
@@ -945,7 +945,7 @@ export default function AdminPage() {
               <p style={{ margin:0,fontWeight:700,color:'#374151',fontSize:14 }}>
                 {uploadingQr ? 'Subiendo imagen...' : rest?.qr_url ? 'Clic para cambiar el QR' : 'Clic para subir tu QR de pago'}
               </p>
-              <p style={{ margin:'4px 0 0',fontSize:11,color:'#94a3b8' }}>PNG, JPG o WEBP · Máximo 2 MB</p>
+              <p style={{ margin:'4px 0 0',fontSize:11,color:'#475569' }}>PNG, JPG o WEBP · Máximo 2 MB</p>
             </div>
             <input
               ref={qrFileRef}

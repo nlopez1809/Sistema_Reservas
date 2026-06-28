@@ -40,7 +40,7 @@ export default function LoginPage() {
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Contraseña</label>
             <div style={{ position:'relative' }}>
               <input type={showPass ? 'text' : 'password'} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" style={{ ...inp, paddingRight:42 }} />
-              <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#94a3b8', padding:4 }}>{showPass ? '🙈' : '👁️'}</button>
+              <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#475569', padding:4 }}>{showPass ? '🙈' : '👁️'}</button>
             </div>
           </div>
           {error && <p style={{ color:'#ef4444', fontSize:13, marginBottom:12, fontWeight:600 }}>⚠️ {error}</p>}

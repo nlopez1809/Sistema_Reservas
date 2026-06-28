@@ -51,14 +51,14 @@ export default function RegisterPage() {
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Contraseña</label>
             <div style={{ position:'relative' }}>
               <input type={showPass ? 'text' : 'password'} required value={form.password} onChange={e=>set('password',e.target.value)} placeholder="Mínimo 6 caracteres" style={{ ...inp, paddingRight:42 }} />
-              <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#94a3b8', padding:4 }}>{showPass ? '🙈' : '👁️'}</button>
+              <button type="button" onClick={()=>setShowPass(!showPass)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#475569', padding:4 }}>{showPass ? '🙈' : '👁️'}</button>
             </div>
           </div>
           <div style={{ marginBottom:20 }}>
             <label style={{ fontSize:13, fontWeight:700, display:'block', marginBottom:5 }}>🔒 Confirmar Contraseña</label>
             <div style={{ position:'relative' }}>
               <input type={showConfirm ? 'text' : 'password'} required value={form.confirm} onChange={e=>set('confirm',e.target.value)} placeholder="Repetir contraseña" style={{ ...inp, paddingRight:42 }} />
-              <button type="button" onClick={()=>setShowConfirm(!showConfirm)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#94a3b8', padding:4 }}>{showConfirm ? '🙈' : '👁️'}</button>
+              <button type="button" onClick={()=>setShowConfirm(!showConfirm)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:18, color:'#475569', padding:4 }}>{showConfirm ? '🙈' : '👁️'}</button>
             </div>
           </div>
           {error && <p style={{ color:'#ef4444', fontSize:13, marginBottom:12, fontWeight:600 }}>⚠️ {error}</p>}

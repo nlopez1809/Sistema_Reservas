@@ -93,7 +93,7 @@ function CompletoPicker({ dayMenu, combos, onSave, isMobile }: {
         <div style={{ textAlign:'center', padding: isMobile ? '20px 10px' : '24px', background:'#fffbf5', borderRadius:14, border:'2px dashed #fed7aa', marginBottom:16 }}>
           <div style={{ fontSize:32, marginBottom:8 }}>👇</div>
           <p style={{ margin:0, fontWeight:700, color:'#9a3412', fontSize:14 }}>Toca el botón de abajo para armar tu almuerzo</p>
-          <p style={{ margin:'4px 0 0', fontSize:12, color:'#94a3b8' }}>Podés pedir varias combinaciones distintas</p>
+          <p style={{ margin:'4px 0 0', fontSize:12, color:'#475569' }}>Podés pedir varias combinaciones distintas</p>
         </div>
       )}
 
@@ -153,8 +153,8 @@ function CompletoPicker({ dayMenu, combos, onSave, isMobile }: {
 
       <div style={{ borderTop:'2px dashed #fed7aa', paddingTop:14, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
         <div>
-          {allDone ? (<><div style={{ fontSize:12, color:'#94a3b8' }}>{combos.length} combinación{combos.length>1?'es':''} · {combos.reduce((s,c)=>s+c.qty,0)} almuerzo{combos.reduce((s,c)=>s+c.qty,0)>1?'s':''}</div><div style={{ fontSize:26, fontWeight:900, color:'#f97316' }}>{fmtCur(total)}</div></>)
-          : combos.length===0 ? <div style={{ fontSize:13, color:'#94a3b8', fontStyle:'italic' }}>Agrega almuerzos arriba</div>
+          {allDone ? (<><div style={{ fontSize:12, color:'#475569' }}>{combos.length} combinación{combos.length>1?'es':''} · {combos.reduce((s,c)=>s+c.qty,0)} almuerzo{combos.reduce((s,c)=>s+c.qty,0)>1?'s':''}</div><div style={{ fontSize:26, fontWeight:900, color:'#f97316' }}>{fmtCur(total)}</div></>)
+          : combos.length===0 ? <div style={{ fontSize:13, color:'#475569', fontStyle:'italic' }}>Agrega almuerzos arriba</div>
           : <div style={{ fontSize:13, color:'#f59e0b', fontWeight:700 }}>Completa todas las combinaciones</div>}
         </div>
         {allDone && <div style={{ background:'#dcfce7', borderRadius:12, padding:'8px 14px', fontSize:13, fontWeight:700, color:'#166534' }}>✓ Listo para pedir</div>}
@@ -291,7 +291,7 @@ export default function MenuPage() {
     return (<>
       {Object.entries(groups).map(([num,its])=>(<div key={num} style={{ marginBottom:8, background:'#fff7ed', borderRadius:10, padding:'8px 10px', border:'1.5px solid #fed7aa' }}>
         <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}><span style={{ fontSize:13, fontWeight:800, color:'#c2410c' }}>🍽️ Almuerzo #{num} {its[0].cantidad>1?`× ${its[0].cantidad}`:''}</span><span style={{ fontSize:13, fontWeight:900, color:'#f97316' }}>{fmtCur(its.reduce((s,i)=>s+i.precio*i.cantidad,0))}</span></div>
-        {its.map((it,i)=>(<div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:12, paddingLeft:6 }}><span style={{ color:'#64748b' }}>{it.tipo_linea==='sopa'?'🥣':'🍳'} {it.nombre}</span><span style={{ color:'#94a3b8' }}>{fmtCur(it.precio)}</span></div>))}
+        {its.map((it,i)=>(<div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:12, paddingLeft:6 }}><span style={{ color:'#64748b' }}>{it.tipo_linea==='sopa'?'🥣':'🍳'} {it.nombre}</span><span style={{ color:'#475569' }}>{fmtCur(it.precio)}</span></div>))}
       </div>))}
       {others.map((it,i)=>(<div key={i} style={{ display:'flex', justifyContent:'space-between', marginBottom:8, fontSize:14 }}><span>{it.cantidad}x {it.nombre}</span><span style={{ fontWeight:700 }}>{fmtCur(it.precio*it.cantidad)}</span></div>))}
     </>)
@@ -300,7 +300,7 @@ export default function MenuPage() {
   if(loading) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:12 }}>
       <div style={{ fontSize:48, animation:'spin 1s linear infinite' }}>🍜</div>
-      <p style={{ fontSize:16, color:'#94a3b8', fontWeight:600 }}>Cargando menú...</p>
+      <p style={{ fontSize:16, color:'#475569', fontWeight:600 }}>Cargando menú...</p>
       <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
     </div>
   )
@@ -308,7 +308,7 @@ export default function MenuPage() {
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:12, padding:20, textAlign:'center' }}>
       <div style={{ fontSize:48 }}>😕</div>
       <p style={{ fontSize:18, color:'#ef4444', fontWeight:700 }}>Restaurante no encontrado</p>
-      <p style={{ fontSize:14, color:'#94a3b8' }}>Verifica que el link sea correcto</p>
+      <p style={{ fontSize:14, color:'#475569' }}>Verifica que el link sea correcto</p>
     </div>
   )
 
@@ -336,7 +336,7 @@ export default function MenuPage() {
           <img src={restaurante.logo_url} alt={restaurante.nombre} style={{ width: isMobile ? 70 : 90, height: isMobile ? 70 : 90, borderRadius:20, objectFit:'cover', border:'3px solid rgba(255,255,255,0.3)', boxShadow:'0 4px 20px rgba(0,0,0,0.25)', marginBottom:12 }} />
         )}
         <h1 style={{ margin:'0 0 6px', fontSize: isMobile ? 22 : 30, fontWeight:900 }}>Menú de la Semana</h1>
-        <p style={{ margin:0, opacity:0.85, fontSize: isMobile ? 13 : 14 }}>Reserva tu almuerzo · Pago en efectivo o QR</p>
+        <p style={{ margin:0, opacity:1, fontSize: isMobile ? 13 : 14 }}>Reserva tu almuerzo · Pago en efectivo o QR</p>
       </div>
 
       <div style={{ maxWidth:980, margin:'0 auto', padding: isMobile ? '16px 12px' : '24px 16px' }}>
@@ -522,7 +522,7 @@ export default function MenuPage() {
                 title={!restaurante?.qr_url ? 'El restaurante aún no ha configurado su QR de pago' : 'Pagar con QR'}
                 style={{ padding:'18px 8px', borderRadius:14, border:`2px solid ${restaurante?.qr_url?'#3b82f6':'#e2e8f0'}`, background:restaurante?.qr_url?'#eff6ff':'#f8fafc', color:restaurante?.qr_url?'#1e40af':'#94a3b8', fontWeight:800, cursor:restaurante?.qr_url?'pointer':'not-allowed', fontSize:16, display:'flex', flexDirection:'column', alignItems:'center', gap:6, opacity:submitting?0.6:1 }}>
                 📱<span>Pago QR</span>
-                {!restaurante?.qr_url && <span style={{ fontSize:10, fontWeight:600, color:'#94a3b8' }}>No disponible</span>}
+                {!restaurante?.qr_url && <span style={{ fontSize:10, fontWeight:600, color:'#475569' }}>No disponible</span>}
               </button>
             </div>
             <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:12, borderRadius:12, border:'none', background:'#f1f5f9', color:'#64748b', cursor:'pointer', fontWeight:600 }}>← Volver</button>
@@ -557,7 +557,7 @@ export default function MenuPage() {
                         </button>
                       )}
                     </div>
-                    <p style={{ fontSize:12, color:'#94a3b8', marginTop:12 }}>Descarga el QR y realiza la transferencia por el monto exacto</p>
+                    <p style={{ fontSize:12, color:'#475569', marginTop:12 }}>Descarga el QR y realiza la transferencia por el monto exacto</p>
                   </div>
                 ) : (
                   <div style={{ background:'#fef3c7', borderRadius:12, padding:16, marginBottom:20, fontSize:13, color:'#92400e' }}>
