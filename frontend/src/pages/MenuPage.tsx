@@ -179,7 +179,9 @@ export default function MenuPage() {
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:16, fontFamily:font }}>
       <div style={{ width:40, height:40, border:'3px solid #e5e7eb', borderTopColor:'#e91e63', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
       <p style={{ fontSize:15, color:'#6b7280', fontWeight:500 }}>Cargando menú...</p>
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
     </div>
   )
   if(!menu.length) return (
@@ -409,6 +411,8 @@ export default function MenuPage() {
 
   return (
     <div style={{ minHeight:'100vh', background:'#fafafa', fontFamily:font }}>
+      <style>{`.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
       {/* Header */}
       <header style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', position:'sticky', top:0, zIndex:100 }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding: isMobile ? '12px 16px' : '12px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -444,25 +448,26 @@ export default function MenuPage() {
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar productos..." style={{ ...inp, paddingLeft:38, background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:24 }} />
           </div>
 
-          {/* Day tabs */}
-          <div style={{ display:'flex', gap:6, overflowX:'scroll', paddingBottom:8, WebkitOverflowScrolling:'touch' as any, marginBottom:8, scrollbarWidth:'none' as any, touchAction:'pan-x' as any }}>
-            {activeDays.map(d=>(
-              <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
-                flexShrink:0, padding:'6px 16px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
-                border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
-                background: activeDay===d.nombre ? '#fef1f5' : '#fff',
-                color: activeDay===d.nombre ? '#e91e63' : '#374151',
-              }}>
-                {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
-              </button>
-            ))}
-          </div>
+        </div>
+        {/* Day tabs - full width scroll */}
+        <div className="hide-scrollbar" style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:8, paddingLeft:16, paddingRight:16, marginBottom:0, WebkitOverflowScrolling:'touch' as any }}>
+          {activeDays.map(d=>(
+            <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
+              flexShrink:0, padding:'8px 18px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
+              border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
+              background: activeDay===d.nombre ? '#fef1f5' : '#fff',
+              color: activeDay===d.nombre ? '#e91e63' : '#374151',
+              whiteSpace:'nowrap',
+            }}>
+              {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Category tabs */}
       <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', position:'sticky', top:65, zIndex:90 }}>
-        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:0, overflowX:'scroll', WebkitOverflowScrolling:'touch' as any, scrollbarWidth:'none' as any, touchAction:'pan-x' as any }}>
+        <div className="hide-scrollbar" style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:0, overflowX:'auto', WebkitOverflowScrolling:'touch' as any }}>
           {categories.map(cat=>(
             <button key={cat.key} onClick={()=>{setMenuType(cat.type);setSearch('')}} style={{
               padding: isMobile ? '10px 14px' : '12px 20px', cursor:'pointer', fontWeight:600, fontSize:13,
