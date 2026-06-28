@@ -449,15 +449,14 @@ export default function MenuPage() {
           </div>
 
         </div>
-        {/* Day tabs - full width scroll */}
-        <div className="hide-scrollbar" style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:8, paddingLeft:16, paddingRight:16, marginBottom:0, WebkitOverflowScrolling:'touch' as any }}>
+        {/* Day tabs */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:6, paddingBottom:10, paddingLeft:16, paddingRight:16 }}>
           {activeDays.map(d=>(
             <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
-              flexShrink:0, padding:'8px 18px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
+              padding:'8px 14px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
               border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
               background: activeDay===d.nombre ? '#fef1f5' : '#fff',
               color: activeDay===d.nombre ? '#e91e63' : '#374151',
-              whiteSpace:'nowrap',
             }}>
               {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
             </button>
@@ -467,7 +466,7 @@ export default function MenuPage() {
 
       {/* Category tabs */}
       <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', position:'sticky', top:65, zIndex:90 }}>
-        <div className="hide-scrollbar" style={{ maxWidth:1200, margin:'0 auto', display:'flex', gap:0, overflowX:'auto', WebkitOverflowScrolling:'touch' as any }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', flexWrap:'wrap', gap:0 }}>
           {categories.map(cat=>(
             <button key={cat.key} onClick={()=>{setMenuType(cat.type);setSearch('')}} style={{
               padding: isMobile ? '10px 14px' : '12px 20px', cursor:'pointer', fontWeight:600, fontSize:13,
