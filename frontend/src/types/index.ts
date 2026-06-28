@@ -28,6 +28,7 @@ export interface Dia {
   nombre: string
   habilitado: boolean
   orden: number
+  mensaje_deshabilitado?: string
 }
 
 export type Categoria = 'sopa' | 'segundo' | 'extra'

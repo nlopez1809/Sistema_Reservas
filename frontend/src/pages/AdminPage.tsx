@@ -48,6 +48,8 @@ export default function AdminPage() {
   const [resettingStock, setResettingStock] = useState(false)
   const [resetMsg, setResetMsg] = useState('')
   const [editingStock, setEditingStock] = useState<Record<number,number>>({})
+  const [disableModal, setDisableModal] = useState<{dia:Dia}|null>(null)
+  const [disableMsg, setDisableMsg] = useState('')
 
   async function handleQrUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -541,12 +543,35 @@ export default function AdminPage() {
                   <span style={{ fontWeight:900,fontSize:16 }}>{dia.nombre}</span>
                   <span style={{ fontSize:11,fontWeight:700,padding:'2px 10px',borderRadius:99,background:dia.habilitado?'#dcfce7':'#fee2e2',color:dia.habilitado?'#166534':'#991b1b' }}>{dia.habilitado?'ACTIVO':'OFF'}</span>
                 </div>
-                <button onClick={async()=>{ await toggleDia(dia.id,!dia.habilitado); setDias(prev=>prev.map(d=>d.id===dia.id?{...d,habilitado:!d.habilitado}:d)) }} style={{ width:'100%',padding:'9px 0',borderRadius:12,border:'none',cursor:'pointer',fontWeight:700,color:'#fff',fontSize:13,background:dia.habilitado?'linear-gradient(135deg,#ef4444,#dc2626)':'linear-gradient(135deg,#22c55e,#16a34a)' }}>
+                {!dia.habilitado && dia.mensaje_deshabilitado && (
+                  <p style={{ fontSize:12,color:'#991b1b',background:'#fef2f2',padding:'6px 10px',borderRadius:8,margin:'0 0 10px',lineHeight:1.4 }}>{dia.mensaje_deshabilitado}</p>
+                )}
+                <button onClick={async()=>{
+                  if(dia.habilitado){ setDisableMsg('Estimados clientes, les informamos que el día '+dia.nombre+' no habrá atención. Disculpen las molestias, mañana volveremos con atención normal.'); setDisableModal({dia}); return }
+                  await toggleDia(dia.id,true)
+                  setDias(prev=>prev.map(d=>d.id===dia.id?{...d,habilitado:true,mensaje_deshabilitado:undefined}:d))
+                }} style={{ width:'100%',padding:'9px 0',borderRadius:12,border:'none',cursor:'pointer',fontWeight:700,color:'#fff',fontSize:13,background:dia.habilitado?'linear-gradient(135deg,#ef4444,#dc2626)':'linear-gradient(135deg,#22c55e,#16a34a)' }}>
                   {dia.habilitado?'Deshabilitar':'Habilitar'}
                 </button>
               </div>
             ))}
           </div>
+          {disableModal && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:9999,padding:16 }}>
+            <div style={{ background:'#fff',borderRadius:12,padding:24,width:'100%',maxWidth:460 }}>
+              <h3 style={{ margin:'0 0 4px',fontSize:17,fontWeight:800 }}>Deshabilitar {disableModal.dia.nombre}</h3>
+              <p style={{ color:'#64748b',fontSize:13,margin:'0 0 16px' }}>Este mensaje se mostrará a tus clientes en la página pública.</p>
+              <textarea value={disableMsg} onChange={e=>setDisableMsg(e.target.value)} rows={4} style={{ width:'100%',padding:'10px 12px',borderRadius:8,border:'1px solid #d1d5db',fontSize:14,boxSizing:'border-box',resize:'vertical',fontFamily:'inherit' }} />
+              <div style={{ display:'flex',gap:10,marginTop:16,justifyContent:'flex-end' }}>
+                <button onClick={()=>setDisableModal(null)} style={{ padding:'9px 20px',borderRadius:8,border:'1px solid #d1d5db',background:'#fff',fontWeight:600,cursor:'pointer',fontSize:13 }}>Cancelar</button>
+                <button onClick={async()=>{
+                  const d=disableModal.dia
+                  await toggleDia(d.id,false,disableMsg)
+                  setDias(prev=>prev.map(x=>x.id===d.id?{...x,habilitado:false,mensaje_deshabilitado:disableMsg}:x))
+                  setDisableModal(null)
+                }} style={{ padding:'9px 20px',borderRadius:8,border:'none',background:'#e91e63',color:'#fff',fontWeight:600,cursor:'pointer',fontSize:13 }}>Deshabilitar</button>
+              </div>
+            </div>
+          </div>)}
         </div>)}
 
         {/* ── MENÚ ── */}

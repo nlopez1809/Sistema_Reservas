@@ -19,11 +19,19 @@ router.get('/', requireRestaurante, async (req: AuthRequest, res: Response) => {
 // PATCH /api/dias/:id
 router.patch('/:id', requireRestaurante, async (req: AuthRequest, res: Response) => {
   const { id } = req.params
-  const { habilitado } = req.body
+  const { habilitado, mensaje_deshabilitado } = req.body
+
+  const updateData: Record<string, any> = { habilitado }
+  if (typeof mensaje_deshabilitado === 'string') {
+    updateData.mensaje_deshabilitado = mensaje_deshabilitado
+  }
+  if (habilitado) {
+    updateData.mensaje_deshabilitado = null
+  }
 
   const { data, error } = await supabase
     .from('dias')
-    .update({ habilitado })
+    .update(updateData)
     .eq('id', id)
     .eq('restaurante_id', req.restauranteId) // ensure ownership
     .select()

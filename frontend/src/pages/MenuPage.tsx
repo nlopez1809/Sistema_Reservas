@@ -53,6 +53,7 @@ export default function MenuPage() {
   }, [slug])
 
   const activeDays = dias.filter(d=>d.habilitado)
+  const disabledDaysWithMsg = dias.filter(d=>!d.habilitado && d.mensaje_deshabilitado)
   const dayMenuData = menu.find(m=>m.dia.nombre===activeDay)
   const today = (['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'] as const)[new Date().getDay()]
 
@@ -447,6 +448,17 @@ export default function MenuPage() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar productos..." style={{ ...inp, paddingLeft:38, background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:24 }} />
           </div>
+
+          {/* Disabled day notices */}
+          {disabledDaysWithMsg.length>0 && disabledDaysWithMsg.map(d=>(
+            <div key={d.id} style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:'12px 16px', marginBottom:12, display:'flex', gap:10, alignItems:'flex-start' }}>
+              <span style={{ color:'#dc2626', fontSize:18, lineHeight:1, flexShrink:0, marginTop:1 }}>!</span>
+              <div>
+                <span style={{ fontWeight:700, fontSize:13, color:'#991b1b' }}>{d.nombre}</span>
+                <p style={{ margin:'4px 0 0', fontSize:13, color:'#7f1d1d', lineHeight:1.5 }}>{d.mensaje_deshabilitado}</p>
+              </div>
+            </div>
+          ))}
 
           {/* Day tabs */}
           <div style={{ display:'flex', flexWrap:'wrap', gap:6, paddingBottom:10 }}>

@@ -53,8 +53,8 @@ export const updateRestaurante = (data: object) =>
 export const getDias = () => api.get('/dias').then(r => r.data)
 export const getDiasBySlug = (slug: string) =>
   api.get(`/public/${slug}/dias`).then(r => r.data)
-export const toggleDia = (id: number, habilitado: boolean) =>
-  api.patch(`/dias/${id}`, { habilitado }).then(r => r.data)
+export const toggleDia = (id: number, habilitado: boolean, mensaje_deshabilitado?: string) =>
+  api.patch(`/dias/${id}`, { habilitado, mensaje_deshabilitado }).then(r => r.data)
 
 // ── Platos ───────────────────────────────────────────────────────────────────
 export const getMenu = () => api.get('/platos/menu').then(r => r.data)
