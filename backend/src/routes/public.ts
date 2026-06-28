@@ -135,4 +135,54 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
   res.json({ message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña.' })
 })
 
+// GET /api/public/:slug/pedido/:codigo — customer checks their order status
+router.get('/:slug/pedido/:codigo', async (req: Request, res: Response) => {
+  const { slug, codigo } = req.params
+  const rest = await getRestBySlug(slug)
+  if (!rest) return res.status(404).json({ error: 'Restaurante no encontrado' })
+
+  const { data, error } = await supabase
+    .from('pedidos')
+    .select(`
+      codigo, estado, hora_recojo, consumo, metodo_pago, total, creado_en,
+      detalle:pedido_detalle(nombre, precio, cantidad, tipo_linea)
+    `)
+    .eq('restaurante_id', rest.id)
+    .eq('codigo', codigo)
+    .single()
+
+  if (error) return res.status(404).json({ error: 'Pedido no encontrado' })
+  res.json(data)
+})
+
+// GET /api/public/:slug/historial/:whatsapp — customer order history
+router.get('/:slug/historial/:whatsapp', async (req: Request, res: Response) => {
+  const { slug, whatsapp } = req.params
+  const rest = await getRestBySlug(slug)
+  if (!rest) return res.status(404).json({ error: 'Restaurante no encontrado' })
+
+  const { data: cliente } = await supabase
+    .from('clientes')
+    .select('id')
+    .eq('restaurante_id', rest.id)
+    .eq('whatsapp', whatsapp)
+    .single()
+
+  if (!cliente) return res.json([])
+
+  const { data, error } = await supabase
+    .from('pedidos')
+    .select(`
+      codigo, estado, total, creado_en, hora_recojo, consumo,
+      detalle:pedido_detalle(nombre, precio, cantidad)
+    `)
+    .eq('restaurante_id', rest.id)
+    .eq('cliente_id', cliente.id)
+    .order('creado_en', { ascending: false })
+    .limit(10)
+
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
 export default router

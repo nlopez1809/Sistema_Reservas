@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { getMenuBySlug, getDiasBySlug, createPedido } from '@/lib/api'
+import { getMenuBySlug, getDiasBySlug, createPedido, getOrderStatus, getOrderHistory } from '@/lib/api'
 import { fmtCur, genId } from '@/lib/utils'
 import type { MenuDia, Dia, Combo, PedidoItem, Consumo, MetodoPago } from '@/types'
 
@@ -35,6 +35,14 @@ export default function MenuPage() {
   const [search, setSearch] = useState('')
   const [finalTotal, setFinalTotal] = useState(0)
   const [showMobileCart, setShowMobileCart] = useState(false)
+  const [trackCode, setTrackCode] = useState('')
+  const [trackResult, setTrackResult] = useState<any>(null)
+  const [trackLoading, setTrackLoading] = useState(false)
+  const [trackError, setTrackError] = useState('')
+  const [historyWa, setHistoryWa] = useState('')
+  const [historyData, setHistoryData] = useState<any[]|null>(null)
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [showTracker, setShowTracker] = useState(false)
   const cartRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -178,6 +186,35 @@ export default function MenuPage() {
       setCart({}); setCombos([])
     } catch(e){ alert('Error al registrar. Intenta de nuevo.'); console.error(e) }
     finally { setSubmitting(false) }
+  }
+
+  async function handleTrackOrder() {
+    if(!trackCode.trim()) return
+    setTrackLoading(true); setTrackError(''); setTrackResult(null)
+    try {
+      const data = await getOrderStatus(slug!, trackCode.trim())
+      setTrackResult(data)
+    } catch { setTrackError('Pedido no encontrado') }
+    finally { setTrackLoading(false) }
+  }
+
+  async function handleLoadHistory() {
+    if(!historyWa.trim()||!/^\d{7,10}$/.test(historyWa.trim())) return
+    setHistoryLoading(true); setHistoryData(null)
+    try {
+      const data = await getOrderHistory(slug!, historyWa.trim())
+      setHistoryData(data)
+    } catch { setHistoryData([]) }
+    finally { setHistoryLoading(false) }
+  }
+
+  const estadoLabel: Record<string,{text:string,bg:string,color:string}> = {
+    pendiente:  {text:'Pendiente',bg:'#f1f5f9',color:'#374151'},
+    confirmado: {text:'Confirmado',bg:'#e0e7ff',color:'#3730a3'},
+    preparando: {text:'Preparando',bg:'#fef3c7',color:'#92400e'},
+    listo:      {text:'Listo para recoger',bg:'#dbeafe',color:'#1d4ed8'},
+    entregado:  {text:'Entregado',bg:'#dcfce7',color:'#166534'},
+    cancelado:  {text:'Cancelado',bg:'#fee2e2',color:'#991b1b'},
   }
 
   // ── Styles ──
@@ -440,8 +477,87 @@ export default function MenuPage() {
               {restaurante?.ciudad && <div style={{ fontSize:12, color:'#6b7280' }}>{restaurante.ciudad}{restaurante?.direccion ? ` · ${restaurante.direccion}` : ''}</div>}
             </div>
           </div>
+          <button onClick={()=>setShowTracker(true)} style={{ padding:'7px 14px', borderRadius:8, border:'1px solid #d1d5db', background:'#fff', color:'#374151', fontWeight:600, cursor:'pointer', fontSize:12, fontFamily:font }}>
+            Mis pedidos
+          </button>
         </div>
       </header>
+
+      {/* Order Tracker Modal */}
+      {showTracker && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 0 : 16 }}>
+          <div style={{ background:'#fff', borderRadius: isMobile ? 0 : 16, padding: isMobile ? '24px 16px' : '32px', maxWidth:460, width:'100%', maxHeight:'100vh', overflowY:'auto', ...(isMobile ? {minHeight:'100vh'} : {}) }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+              <h2 style={{ margin:0, fontSize:18, fontWeight:700, color:'#1f2937' }}>Mis pedidos</h2>
+              <button onClick={()=>setShowTracker(false)} style={{ border:'none', background:'none', fontSize:24, color:'#6b7280', cursor:'pointer' }}>×</button>
+            </div>
+
+            {/* Track by code */}
+            <div style={{ marginBottom:24 }}>
+              <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Consultar estado del pedido</label>
+              <div style={{ display:'flex', gap:8 }}>
+                <input value={trackCode} onChange={e=>setTrackCode(e.target.value)} placeholder="Código del pedido" style={{ ...inp, flex:1 }} />
+                <button onClick={handleTrackOrder} disabled={trackLoading} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
+                  {trackLoading?'...':'Buscar'}
+                </button>
+              </div>
+              {trackError && <p style={{ color:'#dc2626', fontSize:12, marginTop:6, fontWeight:500 }}>{trackError}</p>}
+              {trackResult && (
+                <div style={{ background:'#f9fafb', borderRadius:10, padding:16, marginTop:12, border:'1px solid #e5e7eb' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+                    <span style={{ fontWeight:700, fontSize:14 }}>#{trackResult.codigo}</span>
+                    <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:(estadoLabel[trackResult.estado]||estadoLabel.pendiente).bg, color:(estadoLabel[trackResult.estado]||estadoLabel.pendiente).color }}>
+                      {(estadoLabel[trackResult.estado]||estadoLabel.pendiente).text}
+                    </span>
+                  </div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:4 }}>Hora: {trackResult.hora_recojo} · {trackResult.consumo==='local'?'En el local':'Para llevar'}</div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}>Total: <strong style={{ color:'#e91e63' }}>{fmtCur(Number(trackResult.total))}</strong></div>
+                  {trackResult.detalle?.length>0 && (
+                    <div style={{ borderTop:'1px solid #e5e7eb', paddingTop:8 }}>
+                      {trackResult.detalle.map((d:any,i:number)=>(
+                        <div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:'#6b7280', marginBottom:2 }}>
+                          <span>{d.cantidad}x {d.nombre}</span>
+                          <span>{fmtCur(d.precio*d.cantidad)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* History by WhatsApp */}
+            <div style={{ borderTop:'1px solid #e5e7eb', paddingTop:20 }}>
+              <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Historial de pedidos</label>
+              <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+                <input value={historyWa} onChange={e=>setHistoryWa(e.target.value)} placeholder="Tu número de WhatsApp" type="tel" style={{ ...inp, flex:1 }} />
+                <button onClick={handleLoadHistory} disabled={historyLoading} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
+                  {historyLoading?'...':'Ver'}
+                </button>
+              </div>
+              {historyData!==null && (historyData.length===0
+                ? <p style={{ color:'#6b7280', fontSize:13, textAlign:'center', padding:16 }}>No se encontraron pedidos con ese número.</p>
+                : <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                    {historyData.map((h:any,i:number)=>(
+                      <div key={i} style={{ background:'#f9fafb', borderRadius:8, padding:12, border:'1px solid #e5e7eb' }}>
+                        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+                          <span style={{ fontWeight:700, fontSize:13 }}>#{h.codigo}</span>
+                          <span style={{ fontSize:12, color:'#6b7280' }}>{new Date(h.creado_en).toLocaleDateString('es-BO')}</span>
+                        </div>
+                        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                          <span style={{ fontSize:13, color:'#e91e63', fontWeight:700 }}>{fmtCur(Number(h.total))}</span>
+                          <span style={{ padding:'2px 8px', borderRadius:99, fontSize:10, fontWeight:700, background:(estadoLabel[h.estado]||estadoLabel.pendiente).bg, color:(estadoLabel[h.estado]||estadoLabel.pendiente).color }}>
+                            {(estadoLabel[h.estado]||estadoLabel.pendiente).text}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Restaurant Info */}
       <div style={{ background:'#fff', borderBottom:'1px solid #e5e7eb' }}>

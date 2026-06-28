@@ -40,4 +40,26 @@ router.get('/:id', requireRestaurante, async (req: AuthRequest, res: Response) =
   res.json(data)
 })
 
+// PATCH /api/pedidos/:id/estado
+router.patch('/:id/estado', requireRestaurante, async (req: AuthRequest, res: Response) => {
+  const { id } = req.params
+  const { estado } = req.body
+
+  const validEstados = ['pendiente', 'confirmado', 'preparando', 'listo', 'entregado', 'cancelado']
+  if (!validEstados.includes(estado)) {
+    return res.status(400).json({ error: 'Estado inválido' })
+  }
+
+  const { data, error } = await supabase
+    .from('pedidos')
+    .update({ estado })
+    .eq('id', id)
+    .eq('restaurante_id', req.restauranteId)
+    .select()
+    .single()
+
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
 export default router

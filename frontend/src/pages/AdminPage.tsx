@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { authSignOut, getDias, toggleDia, getPlatos, createPlato, updatePlato, deletePlato, getPedidos, getClientes, getContDiaria, getContSemanal, getContMensual, getTopPlatos, updateRestaurante, resetStock, getStock, updateStock } from '@/lib/api'
+import { authSignOut, getDias, toggleDia, getPlatos, createPlato, updatePlato, deletePlato, getPedidos, getClientes, getContDiaria, getContSemanal, getContMensual, getTopPlatos, updateRestaurante, resetStock, getStock, updateStock, updatePedidoEstado } from '@/lib/api'
 import { fmtCur, downloadCSV, ALL_DAYS } from '@/lib/utils'
 import { useRealtimeOrders, playNotificationSound, requestNotificationPermission, showBrowserNotification } from '@/hooks/useRealtimeOrders'
 import { NotificationToast, NotificationBell, NotificationHistory } from '@/components/NotificationToast'
@@ -621,7 +621,7 @@ export default function AdminPage() {
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
-                <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
+                <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total','Estado'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
                 <tbody>{pedidos.map((o,i)=>(<tr key={o.id} style={rowBg(i)}>
                   <td style={{ ...td,fontWeight:700 }}>{o.codigo}</td>
                   <td style={td}>{new Date(o.creado_en).toLocaleDateString('es-BO')}</td>
@@ -632,6 +632,26 @@ export default function AdminPage() {
                   <td style={td}><span style={{ background:o.consumo==='local'?'#eff6ff':'#f5f3ff',color:o.consumo==='local'?'#1d4ed8':'#6d28d9',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.consumo==='local'?'🍽️ Local':'📦 Llevar'}</span></td>
                   <td style={td}><span style={{ background:o.metodo_pago==='efectivo'?'#f0fdf4':'#eff6ff',color:o.metodo_pago==='efectivo'?'#166534':'#1e40af',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.metodo_pago==='efectivo'?'💵 Efectivo':'📱 QR'}</span></td>
                   <td style={{ ...td,fontWeight:900,color:'#e91e63' }}>{fmtCur(Number(o.total))}</td>
+                  <td style={td}>
+                    <select value={o.estado||'pendiente'} onChange={async(e)=>{
+                      const newEstado=e.target.value
+                      try{
+                        await updatePedidoEstado(o.id,newEstado)
+                        setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:newEstado}:p))
+                      }catch(err){console.error(err)}
+                    }} style={{
+                      padding:'4px 8px',borderRadius:6,border:'1px solid #d1d5db',fontSize:11,fontWeight:700,cursor:'pointer',
+                      background:o.estado==='entregado'?'#dcfce7':o.estado==='listo'?'#dbeafe':o.estado==='preparando'?'#fef3c7':o.estado==='cancelado'?'#fee2e2':o.estado==='confirmado'?'#e0e7ff':'#f1f5f9',
+                      color:o.estado==='entregado'?'#166534':o.estado==='listo'?'#1d4ed8':o.estado==='preparando'?'#92400e':o.estado==='cancelado'?'#991b1b':o.estado==='confirmado'?'#3730a3':'#374151'
+                    }}>
+                      <option value="pendiente">Pendiente</option>
+                      <option value="confirmado">Confirmado</option>
+                      <option value="preparando">Preparando</option>
+                      <option value="listo">Listo</option>
+                      <option value="entregado">Entregado</option>
+                      <option value="cancelado">Cancelado</option>
+                    </select>
+                  </td>
                 </tr>))}</tbody>
               </table>
             </div>

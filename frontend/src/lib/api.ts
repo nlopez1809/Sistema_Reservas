@@ -89,3 +89,12 @@ export const getTopPlatos   = () => api.get('/contabilidad/top-platos').then(r =
 // ── Password Recovery ────────────────────────────────────────────────────────
 export const forgotPassword = (email: string) =>
   api.post('/public/forgot-password', { email }).then(r => r.data)
+
+export const updatePedidoEstado = (id: number, estado: string) =>
+  api.patch(`/pedidos/${id}/estado`, { estado }).then(r => r.data)
+
+export const getOrderStatus = (slug: string, codigo: string) =>
+  api.get(`/public/${slug}/pedido/${codigo}`).then(r => r.data)
+
+export const getOrderHistory = (slug: string, whatsapp: string) =>
+  api.get(`/public/${slug}/historial/${whatsapp}`).then(r => r.data)
