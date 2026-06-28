@@ -976,7 +976,7 @@ export default function AdminPage() {
                     {p.features.map((f,i)=><li key={i} style={{ fontSize:11,color:'#4b5563',padding:'3px 0',display:'flex',alignItems:'center',gap:6 }}><span style={{ color:'#22c55e',fontWeight:900 }}>✓</span>{f}</li>)}
                   </ul>
                   {isUpgrade && (
-                    <button onClick={()=>{const msg=`Hola, quiero cambiar mi plan a ${p.name} (${p.price} Bs/mes). Mi restaurante: ${rest?.nombre ?? ''} (${rest?.slug ?? ''})`;window.open(`https://wa.me/59178900000?text=${encodeURIComponent(msg)}`,'_blank')}} style={{ width:'100%',padding:8,borderRadius:8,border:'none',background:'#e91e63',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer' }}>
+                    <button onClick={()=>{const msg=`Hola, quiero cambiar mi plan a ${p.name} (${p.price} Bs/mes). Mi restaurante: ${rest?.nombre ?? ''} (${rest?.slug ?? ''})`;window.open(`https://wa.me/59176806091?text=${encodeURIComponent(msg)}`,'_blank')}} style={{ width:'100%',padding:8,borderRadius:8,border:'none',background:'#e91e63',color:'#fff',fontWeight:700,fontSize:12,cursor:'pointer' }}>
                       Subir a {p.name}
                     </button>
                   )}
