@@ -675,7 +675,7 @@ export default function AdminPage() {
                       const s=labels[est]||labels.pendiente
                       const idx=flow.indexOf(est)
                       const next=idx>=0&&idx<flow.length-1?flow[idx+1]:null
-                      const advance=async(newEst:string)=>{try{await updatePedidoEstado(o.id,newEst);setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:newEst}:p))}catch(err){console.error(err)}}
+                      const advance=async(newEst:string)=>{try{await updatePedidoEstado(o.id,newEst);setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:newEst}:p))}catch(err:any){alert('Error al cambiar estado: '+(err.message||err))}}
                       return (<div style={{ display:'flex',flexDirection:'column',gap:4,alignItems:'flex-start' }}>
                         <span style={{ background:s.bg,color:s.color,padding:'3px 10px',borderRadius:99,fontWeight:700,fontSize:11,whiteSpace:'nowrap' }}>{s.text}</span>
                         {est!=='entregado'&&est!=='cancelado'&&(<div style={{ display:'flex',gap:3 }}>
