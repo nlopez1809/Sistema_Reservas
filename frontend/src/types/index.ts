@@ -45,6 +45,7 @@ export interface Plato {
   descripcion: string
   precio: number
   emoji: string
+  imagen_url?: string
   stock: number
   stock_inicial: number
   activo: boolean

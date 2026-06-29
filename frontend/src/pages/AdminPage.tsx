@@ -793,7 +793,7 @@ export default function AdminPage() {
                         const isEditing = editingStock[p.id] !== undefined
                         return (
                           <tr key={p.id} style={rowBg(i)}>
-                            <td style={{ ...td, fontWeight:700 }}>{p.emoji} {p.nombre}</td>
+                            <td style={{ ...td, fontWeight:700 }}><div style={{ display:'flex',alignItems:'center',gap:8 }}>{p.imagen_url?<img src={p.imagen_url} alt="" style={{ width:32,height:32,borderRadius:6,objectFit:'cover' }}/>:<span>{p.emoji}</span>}<span>{p.nombre}</span></div></td>
                             <td style={td}>
                               <span style={{ fontSize:11, fontWeight:700, padding:'2px 8px', borderRadius:99,
                                 background:`${catColors[p.categoria]}18`, color:catColors[p.categoria] }}>
@@ -1130,6 +1130,21 @@ export default function AdminPage() {
         <div style={{ background:'#fff',borderRadius:12,padding:26,maxWidth:400,width:'100%' }}>
           <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>Editar plato</h3>
           {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
+          <div style={{ marginBottom:12 }}>
+            <label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>Foto del plato</label>
+            {(editForm as any).imagen_url && <img src={(editForm as any).imagen_url} alt="" style={{ width:80,height:80,borderRadius:8,objectFit:'cover',marginBottom:8 }} />}
+            <input type="file" accept="image/*" onChange={async(e)=>{
+              const file=e.target.files?.[0]; if(!file||!rest?.id) return
+              if(file.size>2*1024*1024){alert('Máximo 2 MB');return}
+              const ext=file.name.split('.').pop()
+              const path=`${rest.id}/platos/${editItem.id}.${ext}`
+              const {error:upErr}=await supabase.storage.from('plato-imagenes').upload(path,file,{upsert:true,contentType:file.type})
+              if(upErr){alert('Error: '+upErr.message);return}
+              const {data:{publicUrl}}=supabase.storage.from('plato-imagenes').getPublicUrl(path)
+              const imagen_url=`${publicUrl}?t=${Date.now()}`
+              setEditForm(p=>({...p,imagen_url}))
+            }} style={{ fontSize:12 }} />
+          </div>
           <div style={{ display:'flex',gap:10 }}>
             <button onClick={async()=>{ await updatePlato(editItem.id,editForm); setPlatos(prev=>prev.map(p=>p.id===editItem.id?{...p,...editForm}:p)); setEditItem(null) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Guardar</button>
             <button onClick={()=>setEditItem(null)} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#f1f5f9',color:'#64748b',fontWeight:700,cursor:'pointer' }}>Cancelar</button>
@@ -1145,6 +1160,22 @@ export default function AdminPage() {
             {t==='select'?(<select value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:e.target.value}))} style={inp}><option value="sopa">Sopa</option><option value="segundo">Segundo</option><option value="extra">Extra</option></select>)
             :(<input type={t} value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/>)}
           </div>))}
+          <div style={{ marginBottom:12 }}>
+            <label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>Foto del plato</label>
+            {(newForm as any).imagen_url && <img src={(newForm as any).imagen_url} alt="" style={{ width:80,height:80,borderRadius:8,objectFit:'cover',marginBottom:8 }} />}
+            <input type="file" accept="image/*" onChange={async(e)=>{
+              const file=e.target.files?.[0]; if(!file||!rest?.id) return
+              if(file.size>2*1024*1024){alert('Máximo 2 MB');return}
+              const ext=file.name.split('.').pop()
+              const tmpId=Date.now()
+              const path=`${rest.id}/platos/tmp_${tmpId}.${ext}`
+              const {error:upErr}=await supabase.storage.from('plato-imagenes').upload(path,file,{upsert:true,contentType:file.type})
+              if(upErr){alert('Error: '+upErr.message);return}
+              const {data:{publicUrl}}=supabase.storage.from('plato-imagenes').getPublicUrl(path)
+              const imagen_url=`${publicUrl}?t=${Date.now()}`
+              setNewForm(p=>({...p,imagen_url}))
+            }} style={{ fontSize:12 }} />
+          </div>
           <div style={{ display:'flex',gap:10 }}>
             <button onClick={async()=>{ const dia=dias.find(d=>d.nombre===editDay); if(!dia)return; const created=await createPlato({...newForm,dia_id:dia.id} as any); setPlatos(prev=>[...prev,created]); setShowNew(false) }} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#e91e63',color:'#fff',fontWeight:800,cursor:'pointer' }}>Crear</button>
             <button onClick={()=>setShowNew(false)} style={{ flex:1,padding:11,borderRadius:12,border:'none',background:'#f1f5f9',color:'#64748b',fontWeight:700,cursor:'pointer' }}>Cancelar</button>
