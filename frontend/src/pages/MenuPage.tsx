@@ -223,7 +223,7 @@ export default function MenuPage() {
 
   if(loading) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', gap:16, fontFamily:font }}>
-      <div style={{ width:40, height:40, border:'3px solid #e5e7eb', borderTopColor:'#e91e63', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
+      <div style={{ width:40, height:40, border:'3px solid #e5e7eb', borderTopColor:'#f97316', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
       <p style={{ fontSize:15, color:'#6b7280', fontWeight:500 }}>Cargando menú...</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -277,13 +277,13 @@ export default function MenuPage() {
           {qty > 0 && (
             <div style={{ position:'absolute', bottom:-6, right:-6, display:'flex', alignItems:'center', background:'#fff', borderRadius:20, boxShadow:'0 2px 8px rgba(0,0,0,0.15)', border:'1px solid #e5e7eb', overflow:'hidden' }}
               onClick={e=>e.stopPropagation()}>
-              <button onClick={()=>setQty(key, qty-1)} style={{ width:28, height:28, border:'none', background:'#fff', color:'#e91e63', fontWeight:700, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
+              <button onClick={()=>setQty(key, qty-1)} style={{ width:28, height:28, border:'none', background:'#fff', color:'#f97316', fontWeight:700, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
               <span style={{ fontSize:13, fontWeight:700, color:'#1f2937', minWidth:20, textAlign:'center' }}>{qty}</span>
-              <button onClick={()=>setQty(key, Math.min(item.stock, qty+1))} style={{ width:28, height:28, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'0 20px 20px 0' }}>+</button>
+              <button onClick={()=>setQty(key, Math.min(item.stock, qty+1))} style={{ width:28, height:28, border:'none', background:'#f97316', color:'#fff', fontWeight:700, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'0 20px 20px 0' }}>+</button>
             </div>
           )}
           {!qty && !outOfStock && (
-            <div style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#e91e63', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:700, boxShadow:'0 2px 6px rgba(233,30,99,0.4)', cursor:'pointer' }}
+            <div style={{ position:'absolute', bottom:-6, right:-6, width:28, height:28, borderRadius:'50%', background:'#f97316', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:700, boxShadow:'0 2px 6px rgba(233,30,99,0.4)', cursor:'pointer' }}
               onClick={e=>{e.stopPropagation(); addToCart(type, idx)}}>+</div>
           )}
         </div>
@@ -309,7 +309,7 @@ export default function MenuPage() {
             <div key={ci} style={{ margin:'12px 16px', border:'1px solid #e5e7eb', borderRadius:12, overflow:'hidden', background:'#fff' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background: done ? '#fef9f5' : '#f9fafb', borderBottom:'1px solid #f3f4f6' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  <div style={{ width:24, height:24, borderRadius:'50%', background: done ? '#e91e63':'#d1d5db', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:12 }}>{ci+1}</div>
+                  <div style={{ width:24, height:24, borderRadius:'50%', background: done ? '#f97316':'#d1d5db', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:12 }}>{ci+1}</div>
                   <span style={{ fontWeight:600, fontSize:13, color:'#374151' }}>
                     {done ? `${sopaObj!.nombre} + ${segObj!.nombre}` : `Combinación ${ci+1}`}
                   </span>
@@ -319,8 +319,8 @@ export default function MenuPage() {
                   {done && (<>
                     <button onClick={()=>setComboQty(ci, combo.qty-1)} style={{ width:26, height:26, borderRadius:6, border:'1px solid #d1d5db', background:'#fff', cursor:'pointer', fontSize:14, fontWeight:700, color:'#374151', display:'flex', alignItems:'center', justifyContent:'center' }}>−</button>
                     <span style={{ fontSize:13, fontWeight:700, minWidth:18, textAlign:'center' }}>{combo.qty}</span>
-                    <button onClick={()=>setComboQty(ci, combo.qty+1)} style={{ width:26, height:26, borderRadius:6, border:'none', background:'#e91e63', color:'#fff', cursor:'pointer', fontSize:14, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
-                    <span style={{ fontSize:13, fontWeight:700, color:'#e91e63', marginLeft:4 }}>{fmtCur((sopaObj!.precio+segObj!.precio)*combo.qty)}</span>
+                    <button onClick={()=>setComboQty(ci, combo.qty+1)} style={{ width:26, height:26, borderRadius:6, border:'none', background:'#f97316', color:'#fff', cursor:'pointer', fontSize:14, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center' }}>+</button>
+                    <span style={{ fontSize:13, fontWeight:700, color:'#f97316', marginLeft:4 }}>{fmtCur((sopaObj!.precio+segObj!.precio)*combo.qty)}</span>
                   </>)}
                   <button onClick={()=>removeCombo(ci)} style={{ border:'none', background:'none', color:'#9ca3af', cursor:'pointer', fontSize:18, padding:'0 4px' }}>×</button>
                 </div>
@@ -332,9 +332,9 @@ export default function MenuPage() {
                     {sopas.map((s: any, si: number) => {
                       const sel = combo.sopaIdx === si
                       return (
-                        <button key={si} onClick={()=>pickSopa(ci, si)} style={{ width:'100%', marginBottom:4, padding:'8px 10px', borderRadius:6, border:`1px solid ${sel?'#e91e63':'#e5e7eb'}`, background:sel?'#fef1f5':'#fff', color: s.stock<=0?'#9ca3af':'#374151', fontWeight:sel?600:400, fontSize:13, cursor:s.stock<=0?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:s.stock<=0?0.5:1 }}>
+                        <button key={si} onClick={()=>pickSopa(ci, si)} style={{ width:'100%', marginBottom:4, padding:'8px 10px', borderRadius:6, border:`1px solid ${sel?'#f97316':'#e5e7eb'}`, background:sel?'#fff7ed':'#fff', color: s.stock<=0?'#9ca3af':'#374151', fontWeight:sel?600:400, fontSize:13, cursor:s.stock<=0?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:s.stock<=0?0.5:1 }}>
                           <span>{s.nombre}</span>
-                          <span style={{ fontSize:12, color:sel?'#e91e63':'#6b7280' }}>{fmtCur(s.precio)}</span>
+                          <span style={{ fontSize:12, color:sel?'#f97316':'#6b7280' }}>{fmtCur(s.precio)}</span>
                         </button>
                       )
                     })}
@@ -344,9 +344,9 @@ export default function MenuPage() {
                     {segundos.map((s: any, gi: number) => {
                       const sel = combo.segundoIdx === gi
                       return (
-                        <button key={gi} onClick={()=>pickSeg(ci, gi)} style={{ width:'100%', marginBottom:4, padding:'8px 10px', borderRadius:6, border:`1px solid ${sel?'#e91e63':'#e5e7eb'}`, background:sel?'#fef1f5':'#fff', color: s.stock<=0?'#9ca3af':'#374151', fontWeight:sel?600:400, fontSize:13, cursor:s.stock<=0?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:s.stock<=0?0.5:1 }}>
+                        <button key={gi} onClick={()=>pickSeg(ci, gi)} style={{ width:'100%', marginBottom:4, padding:'8px 10px', borderRadius:6, border:`1px solid ${sel?'#f97316':'#e5e7eb'}`, background:sel?'#fff7ed':'#fff', color: s.stock<=0?'#9ca3af':'#374151', fontWeight:sel?600:400, fontSize:13, cursor:s.stock<=0?'not-allowed':'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', opacity:s.stock<=0?0.5:1 }}>
                           <span>{s.nombre}</span>
-                          <span style={{ fontSize:12, color:sel?'#e91e63':'#6b7280' }}>{fmtCur(s.precio)}</span>
+                          <span style={{ fontSize:12, color:sel?'#f97316':'#6b7280' }}>{fmtCur(s.precio)}</span>
                         </button>
                       )
                     })}
@@ -355,7 +355,7 @@ export default function MenuPage() {
               )}
               {done && (
                 <div style={{ padding:'8px 14px', borderTop:'1px solid #f3f4f6' }}>
-                  <button onClick={()=>setCombos(prev=>prev.map((c,i)=>i===ci?{...c,sopaIdx:null,segundoIdx:null}:c))} style={{ border:'none', background:'none', color:'#e91e63', cursor:'pointer', fontWeight:500, fontSize:12, padding:0 }}>Cambiar selección</button>
+                  <button onClick={()=>setCombos(prev=>prev.map((c,i)=>i===ci?{...c,sopaIdx:null,segundoIdx:null}:c))} style={{ border:'none', background:'none', color:'#f97316', cursor:'pointer', fontWeight:500, fontSize:12, padding:0 }}>Cambiar selección</button>
                 </div>
               )}
             </div>
@@ -363,7 +363,7 @@ export default function MenuPage() {
         })}
 
         <div style={{ padding:'12px 16px' }}>
-          <button onClick={addCombo} style={{ width:'100%', padding:'10px 0', borderRadius:8, border:'1px dashed #d1d5db', background:'#fff', color:'#e91e63', fontWeight:600, fontSize:14, cursor:'pointer' }}>+ Agregar almuerzo</button>
+          <button onClick={addCombo} style={{ width:'100%', padding:'10px 0', borderRadius:8, border:'1px dashed #d1d5db', background:'#fff', color:'#f97316', fontWeight:600, fontSize:14, cursor:'pointer' }}>+ Agregar almuerzo</button>
         </div>
       </div>
     )
@@ -426,7 +426,7 @@ export default function MenuPage() {
               </div>
               <div style={{ display:'flex', gap:8, marginBottom:12 }}>
                 {(['local','llevar'] as const).map(v=>(
-                  <button key={v} onClick={()=>setConsumo(v)} style={{ flex:1, padding:'8px', borderRadius:6, cursor:'pointer', border:`1px solid ${consumo===v?'#e91e63':'#d1d5db'}`, background:consumo===v?'#fef1f5':'#fff', color:consumo===v?'#e91e63':'#6b7280', fontWeight:600, fontSize:12 }}>
+                  <button key={v} onClick={()=>setConsumo(v)} style={{ flex:1, padding:'8px', borderRadius:6, cursor:'pointer', border:`1px solid ${consumo===v?'#f97316':'#d1d5db'}`, background:consumo===v?'#fff7ed':'#fff', color:consumo===v?'#f97316':'#6b7280', fontWeight:600, fontSize:12 }}>
                     {v==='local'?'En el local':'Para llevar'}
                   </button>
                 ))}
@@ -436,7 +436,7 @@ export default function MenuPage() {
                   Fuera de horario de atención ({restaurante.hora_apertura} - {restaurante.hora_cierre})
                 </div>
               ) : (
-                <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                <button onClick={()=>setStep('datos')} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
                   Confirmar pedido
                 </button>
               )}
@@ -497,7 +497,7 @@ export default function MenuPage() {
               <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Consultar estado del pedido</label>
               <div style={{ display:'flex', gap:8 }}>
                 <input value={trackCode} onChange={e=>setTrackCode(e.target.value)} placeholder="Código del pedido" style={{ ...inp, flex:1 }} />
-                <button onClick={handleTrackOrder} disabled={trackLoading} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
+                <button onClick={handleTrackOrder} disabled={trackLoading} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:600, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
                   {trackLoading?'...':'Buscar'}
                 </button>
               </div>
@@ -511,7 +511,7 @@ export default function MenuPage() {
                     </span>
                   </div>
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:4 }}>Hora: {trackResult.hora_recojo} · {trackResult.consumo==='local'?'En el local':'Para llevar'}</div>
-                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}>Total: <strong style={{ color:'#e91e63' }}>{fmtCur(Number(trackResult.total))}</strong></div>
+                  <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}>Total: <strong style={{ color:'#f97316' }}>{fmtCur(Number(trackResult.total))}</strong></div>
                   {trackResult.detalle?.length>0 && (
                     <div style={{ borderTop:'1px solid #e5e7eb', paddingTop:8 }}>
                       {trackResult.detalle.map((d:any,i:number)=>(
@@ -531,7 +531,7 @@ export default function MenuPage() {
               <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Historial de pedidos</label>
               <div style={{ display:'flex', gap:8, marginBottom:12 }}>
                 <input value={historyWa} onChange={e=>setHistoryWa(e.target.value)} placeholder="Tu número de WhatsApp" type="tel" style={{ ...inp, flex:1 }} />
-                <button onClick={handleLoadHistory} disabled={historyLoading} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
+                <button onClick={handleLoadHistory} disabled={historyLoading} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:600, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
                   {historyLoading?'...':'Ver'}
                 </button>
               </div>
@@ -545,7 +545,7 @@ export default function MenuPage() {
                           <span style={{ fontSize:12, color:'#6b7280' }}>{new Date(h.creado_en).toLocaleDateString('es-BO')}</span>
                         </div>
                         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                          <span style={{ fontSize:13, color:'#e91e63', fontWeight:700 }}>{fmtCur(Number(h.total))}</span>
+                          <span style={{ fontSize:13, color:'#f97316', fontWeight:700 }}>{fmtCur(Number(h.total))}</span>
                           <span style={{ padding:'2px 8px', borderRadius:99, fontSize:10, fontWeight:700, background:(estadoLabel[h.estado]||estadoLabel.pendiente).bg, color:(estadoLabel[h.estado]||estadoLabel.pendiente).color }}>
                             {(estadoLabel[h.estado]||estadoLabel.pendiente).text}
                           </span>
@@ -602,9 +602,9 @@ export default function MenuPage() {
             {activeDays.map(d=>(
               <button key={d.id} onClick={()=>{setActiveDay(d.nombre);setCart({});setCombos([]);setSearch('')}} style={{
                 padding:'8px 14px', borderRadius:20, cursor:'pointer', fontWeight:600, fontSize:13,
-                border: activeDay===d.nombre ? '2px solid #e91e63' : '1px solid #d1d5db',
-                background: activeDay===d.nombre ? '#fef1f5' : '#fff',
-                color: activeDay===d.nombre ? '#e91e63' : '#374151',
+                border: activeDay===d.nombre ? '2px solid #f97316' : '1px solid #d1d5db',
+                background: activeDay===d.nombre ? '#fff7ed' : '#fff',
+                color: activeDay===d.nombre ? '#f97316' : '#374151',
               }}>
                 {d.nombre===today ? `${d.nombre} (Hoy)` : d.nombre}
               </button>
@@ -619,8 +619,8 @@ export default function MenuPage() {
           {categories.map(cat=>(
             <button key={cat.key} onClick={()=>{setMenuType(cat.type);setSearch('')}} style={{
               padding: isMobile ? '10px 14px' : '12px 20px', cursor:'pointer', fontWeight:600, fontSize:13,
-              border:'none', borderBottom: menuType===cat.type ? '3px solid #e91e63' : '3px solid transparent',
-              background:'transparent', color: menuType===cat.type ? '#e91e63' : '#6b7280',
+              border:'none', borderBottom: menuType===cat.type ? '3px solid #f97316' : '3px solid transparent',
+              background:'transparent', color: menuType===cat.type ? '#f97316' : '#6b7280',
               whiteSpace:'nowrap', flexShrink:0,
             }}>
               {cat.label}
@@ -671,7 +671,7 @@ export default function MenuPage() {
       {/* Mobile cart bar */}
       {isMobile && hasItems && step==='menu' && (
         <div style={{ position:'fixed', bottom:0, left:0, right:0, zIndex:100, padding:'12px 16px', background:'#fff', borderTop:'1px solid #e5e7eb', boxShadow:'0 -4px 12px rgba(0,0,0,0.08)' }}>
-          <button onClick={()=>setShowMobileCart(true)} style={{ width:'100%', padding:'14px 20px', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <button onClick={()=>setShowMobileCart(true)} style={{ width:'100%', padding:'14px 20px', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <span style={{ background:'rgba(255,255,255,0.2)', borderRadius:4, padding:'2px 8px', fontSize:13 }}>{totalQty}</span>
             <span>Ver pedido</span>
             <span>{fmtCur(cartTotal)}</span>
@@ -729,12 +729,12 @@ export default function MenuPage() {
               <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:6, color:'#374151' }}>Hora de recojo</label>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:6 }}>
                 {['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30'].map(h=>(
-                  <button key={h} onClick={()=>{setCustomer(p=>({...p,hora:h}));setCustErr(p=>({...p,hora:''}))}} style={{ padding:'8px 4px', borderRadius:6, cursor:'pointer', border:`1px solid ${customer.hora===h?'#e91e63':'#d1d5db'}`, background:customer.hora===h?'#fef1f5':'#fff', color:customer.hora===h?'#e91e63':'#374151', fontWeight:600, fontSize:13 }}>{h}</button>
+                  <button key={h} onClick={()=>{setCustomer(p=>({...p,hora:h}));setCustErr(p=>({...p,hora:''}))}} style={{ padding:'8px 4px', borderRadius:6, cursor:'pointer', border:`1px solid ${customer.hora===h?'#f97316':'#d1d5db'}`, background:customer.hora===h?'#fff7ed':'#fff', color:customer.hora===h?'#f97316':'#374151', fontWeight:600, fontSize:13 }}>{h}</button>
                 ))}
               </div>
               {custErr.hora&&<p style={{ color:'#ef4444', fontSize:12, margin:'4px 0 0', fontWeight:500 }}>{custErr.hora}</p>}
             </div>
-            <button onClick={handleConfirmData} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:8 }}>Continuar al pago</button>
+            <button onClick={handleConfirmData} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:8 }}>Continuar al pago</button>
             <button onClick={()=>{setStep('menu');setShowMobileCart(false)}} style={{ width:'100%', padding:10, borderRadius:8, border:'1px solid #d1d5db', background:'#fff', color:'#6b7280', cursor:'pointer', fontWeight:500 }}>Volver al menú</button>
           </div>
         </div>
@@ -785,7 +785,7 @@ export default function MenuPage() {
               <>
                 <h2 style={{ margin:'0 0 8px', fontWeight:700, fontSize:20, color:'#1f2937' }}>Escanea el QR para pagar</h2>
                 <p style={{ color:'#6b7280', fontSize:13, marginBottom:20 }}>
-                  Pedido <strong>#{orderId}</strong> · Total: <strong style={{ color:'#e91e63' }}>{fmtCur(finalTotal)}</strong>
+                  Pedido <strong>#{orderId}</strong> · Total: <strong style={{ color:'#f97316' }}>{fmtCur(finalTotal)}</strong>
                 </p>
                 {restaurante?.qr_url && (
                   <div style={{ marginBottom:20 }}>
@@ -807,9 +807,9 @@ export default function MenuPage() {
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>WhatsApp:</strong> {customer.whatsapp}</div>
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Hora de recojo:</strong> {customer.hora}</div>
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Consumo:</strong> {consumo==='local'?'En el local':'Para llevar'}</div>
-                  <div style={{ fontSize:13, color:'#6b7280' }}><strong style={{ color:'#1f2937' }}>Total:</strong> <span style={{ color:'#e91e63', fontWeight:700 }}>{fmtCur(finalTotal)}</span></div>
+                  <div style={{ fontSize:13, color:'#6b7280' }}><strong style={{ color:'#1f2937' }}>Total:</strong> <span style={{ color:'#f97316', fontWeight:700 }}>{fmtCur(finalTotal)}</span></div>
                 </div>
-                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
                   Listo, ya pagué
                 </button>
                 {restaurante?.telefono && (
@@ -834,9 +834,9 @@ export default function MenuPage() {
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>WhatsApp:</strong> {customer.whatsapp}</div>
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Hora de recojo:</strong> {customer.hora}</div>
                   <div style={{ fontSize:13, color:'#6b7280', marginBottom:8 }}><strong style={{ color:'#1f2937' }}>Consumo:</strong> {consumo==='local'?'En el local':'Para llevar'}</div>
-                  <div style={{ fontSize:13, color:'#6b7280' }}><strong style={{ color:'#1f2937' }}>Total:</strong> <span style={{ color:'#e91e63', fontWeight:700 }}>{fmtCur(finalTotal)}</span></div>
+                  <div style={{ fontSize:13, color:'#6b7280' }}><strong style={{ color:'#1f2937' }}>Total:</strong> <span style={{ color:'#f97316', fontWeight:700 }}>{fmtCur(finalTotal)}</span></div>
                 </div>
-                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                <button onClick={()=>setStep('menu')} style={{ width:'100%', padding:12, borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
                   Volver al menú
                 </button>
                 {restaurante?.telefono && (
