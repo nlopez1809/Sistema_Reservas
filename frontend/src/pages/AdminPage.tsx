@@ -612,8 +612,8 @@ export default function AdminPage() {
               </div>
               <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:12 }}>
                 {items.map(item=>(<div key={item.id} style={{ background:'#fff',borderRadius:14,padding:16,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-                  <div style={{ display:'flex',justifyContent:'space-between',marginBottom:8 }}>
-                    <span style={{ fontSize:24 }}>{item.emoji}</span>
+                  {item.imagen_url && <img src={item.imagen_url} alt="" style={{ width:'100%',height:120,borderRadius:10,objectFit:'cover',marginBottom:8 }} />}
+                  <div style={{ display:'flex',justifyContent:'flex-end',marginBottom:8 }}>
                     <div style={{ display:'flex',gap:6 }}>
                       <button onClick={()=>{ setEditItem(item); setEditForm({...item}) }} style={{ background:'#f1f5f9',border:'none',borderRadius:8,padding:'4px 10px',cursor:'pointer',fontSize:11,fontWeight:700 }}>✏️</button>
                       <button onClick={async()=>{ if(!confirm('¿Eliminar?')) return; await deletePlato(item.id); setPlatos(prev=>prev.filter(p=>p.id!==item.id)) }} style={{ background:'#fee2e2',border:'none',borderRadius:8,padding:'4px 10px',cursor:'pointer',fontSize:11,color:'#ef4444',fontWeight:700 }}>🗑️</button>
@@ -1129,7 +1129,7 @@ export default function AdminPage() {
       {editItem && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
         <div style={{ background:'#fff',borderRadius:12,padding:26,maxWidth:400,width:'100%' }}>
           <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>Editar plato</h3>
-          {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
+          {[{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label><input type={t} value={(editForm as any)[k]||''} onChange={e=>setEditForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/></div>))}
           <div style={{ marginBottom:12 }}>
             <label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>Foto del plato</label>
             {(editForm as any).imagen_url && <img src={(editForm as any).imagen_url} alt="" style={{ width:80,height:80,borderRadius:8,objectFit:'cover',marginBottom:8 }} />}
@@ -1156,7 +1156,7 @@ export default function AdminPage() {
       {showNew && (<div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}>
         <div style={{ background:'#fff',borderRadius:12,padding:26,maxWidth:400,width:'100%' }}>
           <h3 style={{ margin:'0 0 18px',fontWeight:800,color:'#1e293b' }}>Nuevo plato — {editDay}</h3>
-          {[{l:'Categoría',k:'categoria',t:'select'},{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'},{l:'Emoji',k:'emoji',t:'text'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label>
+          {[{l:'Categoría',k:'categoria',t:'select'},{l:'Nombre',k:'nombre',t:'text'},{l:'Descripción',k:'descripcion',t:'text'},{l:'Precio (Bs)',k:'precio',t:'number'},{l:'Stock',k:'stock',t:'number'},{l:'Stock inicial',k:'stock_inicial',t:'number'}].map(({l,k,t})=>(<div key={k} style={{ marginBottom:12 }}><label style={{ fontSize:13,fontWeight:700,display:'block',marginBottom:5,color:'#374151' }}>{l}</label>
             {t==='select'?(<select value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:e.target.value}))} style={inp}><option value="sopa">Sopa</option><option value="segundo">Segundo</option><option value="extra">Extra</option></select>)
             :(<input type={t} value={(newForm as any)[k]||''} onChange={e=>setNewForm(p=>({...p,[k]:t==='number'?parseFloat(e.target.value):e.target.value}))} style={inp}/>)}
           </div>))}
