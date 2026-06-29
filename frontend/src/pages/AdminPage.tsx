@@ -661,21 +661,29 @@ export default function AdminPage() {
                   <td style={td}><span style={{ background:o.metodo_pago==='efectivo'?'#f0fdf4':'#eff6ff',color:o.metodo_pago==='efectivo'?'#166534':'#1e40af',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.metodo_pago==='efectivo'?'💵 Efectivo':'📱 QR'}</span></td>
                   <td style={{ ...td,fontWeight:900,color:'#e91e63' }}>{fmtCur(Number(o.total))}</td>
                   <td style={td}>
-                    <select value={o.estado||'pendiente'} onChange={async(e)=>{
-                      const newEstado=e.target.value
-                      try{await updatePedidoEstado(o.id,newEstado);setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:newEstado}:p))}catch(err){console.error(err)}
-                    }} style={{
-                      padding:'5px 8px',borderRadius:8,border:'none',fontSize:11,fontWeight:700,cursor:'pointer',appearance:'auto' as any,
-                      background:o.estado==='entregado'?'#dcfce7':o.estado==='listo'?'#dbeafe':o.estado==='preparando'?'#fef3c7':o.estado==='cancelado'?'#fee2e2':o.estado==='confirmado'?'#e0e7ff':'#f1f5f9',
-                      color:o.estado==='entregado'?'#166534':o.estado==='listo'?'#1d4ed8':o.estado==='preparando'?'#92400e':o.estado==='cancelado'?'#991b1b':o.estado==='confirmado'?'#3730a3':'#374151'
-                    }}>
-                      <option value="pendiente">⏳ Pendiente</option>
-                      <option value="confirmado">✅ Confirmado</option>
-                      <option value="preparando">👨‍🍳 Preparando</option>
-                      <option value="listo">🔔 Listo</option>
-                      <option value="entregado">✔️ Entregado</option>
-                      <option value="cancelado">❌ Cancelado</option>
-                    </select>
+                    {(()=>{
+                      const est=o.estado||'pendiente'
+                      const flow=['pendiente','confirmado','preparando','listo','entregado']
+                      const labels:{[k:string]:{bg:string,color:string,text:string}}={
+                        pendiente:{bg:'#f1f5f9',color:'#374151',text:'Pendiente'},
+                        confirmado:{bg:'#e0e7ff',color:'#3730a3',text:'Confirmado'},
+                        preparando:{bg:'#fef3c7',color:'#92400e',text:'Preparando'},
+                        listo:{bg:'#dbeafe',color:'#1d4ed8',text:'Listo'},
+                        entregado:{bg:'#dcfce7',color:'#166534',text:'Entregado'},
+                        cancelado:{bg:'#fee2e2',color:'#991b1b',text:'Cancelado'},
+                      }
+                      const s=labels[est]||labels.pendiente
+                      const idx=flow.indexOf(est)
+                      const next=idx>=0&&idx<flow.length-1?flow[idx+1]:null
+                      const advance=async(newEst:string)=>{try{await updatePedidoEstado(o.id,newEst);setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:newEst}:p))}catch(err){console.error(err)}}
+                      return (<div style={{ display:'flex',flexDirection:'column',gap:4,alignItems:'flex-start' }}>
+                        <span style={{ background:s.bg,color:s.color,padding:'3px 10px',borderRadius:99,fontWeight:700,fontSize:11,whiteSpace:'nowrap' }}>{s.text}</span>
+                        {est!=='entregado'&&est!=='cancelado'&&(<div style={{ display:'flex',gap:3 }}>
+                          {next&&<button onClick={()=>advance(next)} style={{ padding:'2px 8px',borderRadius:6,border:'none',background:'#e91e63',color:'#fff',fontSize:10,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap' }}>{labels[next].text} →</button>}
+                          <button onClick={()=>advance('cancelado')} style={{ padding:'2px 6px',borderRadius:6,border:'none',background:'#fee2e2',color:'#991b1b',fontSize:10,fontWeight:700,cursor:'pointer' }}>✕</button>
+                        </div>)}
+                      </div>)
+                    })()}
                   </td>
                 </tr>))}</tbody>
               </table>
