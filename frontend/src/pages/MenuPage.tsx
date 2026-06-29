@@ -456,9 +456,9 @@ export default function MenuPage() {
 
   const categories: {key:string, label:string, type:'completo'|'sopa'|'segundo'|'extra'}[] = [
     { key:'completo', label:'Almuerzo Completo', type:'completo' },
-    { key:'sopa', label:'Sopas', type:'sopa' },
-    { key:'segundo', label:'Segundos', type:'segundo' },
-    { key:'extra', label:'Extras', type:'extra' },
+    { key:'sopa', label:'Solo Sopa', type:'sopa' },
+    { key:'segundo', label:'Solo Segundo', type:'segundo' },
+    { key:'extra', label:'A la Carta', type:'extra' },
   ]
 
   return (
