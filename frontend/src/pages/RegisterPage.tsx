@@ -74,13 +74,13 @@ export default function RegisterPage() {
               </div>
             </div>
             {error && <p style={{ color:'#dc2626', fontSize:13, marginBottom:12, fontWeight:500, background:'#fef2f2', padding:'8px 12px', borderRadius:6, border:'1px solid #fecaca' }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
+            <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
               {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
             </button>
           </form>
         </div>
         <p style={{ textAlign:'center', marginTop:20, fontSize:14, color:'#6b7280' }}>
-          ¿Ya tienes cuenta? <Link to="/login" style={{ color:'#e91e63', fontWeight:600, textDecoration:'none' }}>Iniciar sesión</Link>
+          ¿Ya tienes cuenta? <Link to="/login" style={{ color:'#f97316', fontWeight:600, textDecoration:'none' }}>Iniciar sesión</Link>
         </p>
       </div>
     </div>

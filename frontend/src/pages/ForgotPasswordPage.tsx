@@ -47,14 +47,14 @@ export default function ForgotPasswordPage() {
                 <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@email.com" style={inp} />
               </div>
               {error && <p style={{ color:'#dc2626', fontSize:13, marginBottom:12, fontWeight:500, background:'#fef2f2', padding:'8px 12px', borderRadius:6, border:'1px solid #fecaca' }}>{error}</p>}
-              <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
+              <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
                 {loading ? 'Enviando...' : 'Enviar instrucciones'}
               </button>
             </form>
           )}
         </div>
         <p style={{ textAlign:'center', marginTop:20, fontSize:14, color:'#6b7280' }}>
-          <Link to="/login" style={{ color:'#e91e63', fontWeight:600, textDecoration:'none' }}>Volver al inicio de sesion</Link>
+          <Link to="/login" style={{ color:'#f97316', fontWeight:600, textDecoration:'none' }}>Volver al inicio de sesion</Link>
         </p>
       </div>
     </div>

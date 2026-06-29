@@ -56,12 +56,12 @@ export default function ResetPasswordPage() {
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
               <p style={{ color:'#374151', fontSize:14, lineHeight:1.6, marginBottom:16 }}>Contrasena actualizada correctamente.</p>
-              <Link to="/login" style={{ display:'inline-block', padding:'12px 24px', borderRadius:8, background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, textDecoration:'none', fontFamily:font }}>Ir a Iniciar Sesion</Link>
+              <Link to="/login" style={{ display:'inline-block', padding:'12px 24px', borderRadius:8, background:'#f97316', color:'#fff', fontWeight:600, fontSize:15, textDecoration:'none', fontFamily:font }}>Ir a Iniciar Sesion</Link>
             </div>
           ) : !hasToken ? (
             <div style={{ textAlign:'center' }}>
               <p style={{ color:'#6b7280', fontSize:14 }}>Enlace invalido o expirado.</p>
-              <Link to="/forgot-password" style={{ color:'#e91e63', fontWeight:600, textDecoration:'none', fontSize:14 }}>Solicitar nuevo enlace</Link>
+              <Link to="/forgot-password" style={{ color:'#f97316', fontWeight:600, textDecoration:'none', fontSize:14 }}>Solicitar nuevo enlace</Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
@@ -74,14 +74,14 @@ export default function ResetPasswordPage() {
                 <input type="password" required value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Repite la contrasena" style={inp} />
               </div>
               {error && <p style={{ color:'#dc2626', fontSize:13, marginBottom:12, fontWeight:500, background:'#fef2f2', padding:'8px 12px', borderRadius:6, border:'1px solid #fecaca' }}>{error}</p>}
-              <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#e91e63', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
+              <button type="submit" disabled={loading} style={{ width:'100%', padding:'12px 0', borderRadius:8, border:'none', background:'#f97316', color:'#fff', fontWeight:600, fontSize:15, cursor:loading?'not-allowed':'pointer', opacity:loading?0.7:1, fontFamily:font }}>
                 {loading ? 'Guardando...' : 'Guardar contrasena'}
               </button>
             </form>
           )}
         </div>
         <p style={{ textAlign:'center', marginTop:20, fontSize:14, color:'#6b7280' }}>
-          <Link to="/login" style={{ color:'#e91e63', fontWeight:600, textDecoration:'none' }}>Volver al inicio de sesion</Link>
+          <Link to="/login" style={{ color:'#f97316', fontWeight:600, textDecoration:'none' }}>Volver al inicio de sesion</Link>
         </p>
       </div>
     </div>
