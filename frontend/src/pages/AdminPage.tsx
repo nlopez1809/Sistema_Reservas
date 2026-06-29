@@ -223,13 +223,14 @@ export default function AdminPage() {
   const segundos = platosDelDia.filter(p=>p.categoria==='segundo')
   const extras = platosDelDia.filter(p=>p.categoria==='extra')
 
-  const totalRev = pedidos.reduce((s,o)=>s+Number(o.total),0)
-  const localN = pedidos.filter(o=>o.consumo==='local').length
-  const llevarN = pedidos.filter(o=>o.consumo==='llevar').length
-  const efecN = pedidos.filter(o=>o.metodo_pago==='efectivo').length
-  const qrN = pedidos.filter(o=>o.metodo_pago==='qr').length
+  const pedidosActivos = pedidos.filter(o=>o.estado!=='cancelado')
+  const totalRev = pedidosActivos.reduce((s,o)=>s+Number(o.total),0)
+  const localN = pedidosActivos.filter(o=>o.consumo==='local').length
+  const llevarN = pedidosActivos.filter(o=>o.consumo==='llevar').length
+  const efecN = pedidosActivos.filter(o=>o.metodo_pago==='efectivo').length
+  const qrN = pedidosActivos.filter(o=>o.metodo_pago==='qr').length
   const salesByDay: Record<string,number>={}
-  pedidos.forEach(o=>{ if(o.dia?.nombre) salesByDay[o.dia.nombre]=(salesByDay[o.dia.nombre]||0)+Number(o.total) })
+  pedidosActivos.forEach(o=>{ if(o.dia?.nombre) salesByDay[o.dia.nombre]=(salesByDay[o.dia.nombre]||0)+Number(o.total) })
 
   const tabBtn=(active:boolean):React.CSSProperties=>({ padding:'8px 14px',borderRadius:10,border:'none',cursor:'pointer',fontWeight:700,fontSize:12,background:active?'#e91e63':'#f1f5f9',color:active?'#fff':'#64748b' })
   const th:React.CSSProperties={ padding:'9px 12px',textAlign:'left',fontWeight:600,color:'#6b7280',borderBottom:'2px solid #e5e7eb',fontSize:12,whiteSpace:'nowrap' }
