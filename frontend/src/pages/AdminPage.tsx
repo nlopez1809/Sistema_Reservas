@@ -51,6 +51,7 @@ export default function AdminPage() {
   const [disableModal, setDisableModal] = useState<{dia:Dia}|null>(null)
   const [disableMsg, setDisableMsg] = useState('')
   const [pedidoSearch, setPedidoSearch] = useState('')
+  const [estadoDropdown, setEstadoDropdown] = useState<number|null>(null)
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('notif_sound') !== 'off')
   const [horario, setHorario] = useState({ hora_apertura:'08:00', hora_cierre:'15:00' })
 
@@ -659,25 +660,31 @@ export default function AdminPage() {
                   <td style={td}><span style={{ background:o.consumo==='local'?'#eff6ff':'#f5f3ff',color:o.consumo==='local'?'#1d4ed8':'#6d28d9',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.consumo==='local'?'🍽️ Local':'📦 Llevar'}</span></td>
                   <td style={td}><span style={{ background:o.metodo_pago==='efectivo'?'#f0fdf4':'#eff6ff',color:o.metodo_pago==='efectivo'?'#166534':'#1e40af',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.metodo_pago==='efectivo'?'💵 Efectivo':'📱 QR'}</span></td>
                   <td style={{ ...td,fontWeight:900,color:'#e91e63' }}>{fmtCur(Number(o.total))}</td>
-                  <td style={td}>
-                    <select value={o.estado||'pendiente'} onChange={async(e)=>{
-                      const newEstado=e.target.value
-                      try{
-                        await updatePedidoEstado(o.id,newEstado)
-                        setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:newEstado}:p))
-                      }catch(err){console.error(err)}
-                    }} style={{
-                      padding:'4px 8px',borderRadius:6,border:'1px solid #d1d5db',fontSize:11,fontWeight:700,cursor:'pointer',
-                      background:o.estado==='entregado'?'#dcfce7':o.estado==='listo'?'#dbeafe':o.estado==='preparando'?'#fef3c7':o.estado==='cancelado'?'#fee2e2':o.estado==='confirmado'?'#e0e7ff':'#f1f5f9',
-                      color:o.estado==='entregado'?'#166534':o.estado==='listo'?'#1d4ed8':o.estado==='preparando'?'#92400e':o.estado==='cancelado'?'#991b1b':o.estado==='confirmado'?'#3730a3':'#374151'
-                    }}>
-                      <option value="pendiente">Pendiente</option>
-                      <option value="confirmado">Confirmado</option>
-                      <option value="preparando">Preparando</option>
-                      <option value="listo">Listo</option>
-                      <option value="entregado">Entregado</option>
-                      <option value="cancelado">Cancelado</option>
-                    </select>
+                  <td style={{ ...td,position:'relative' as const }}>
+                    {(()=>{
+                      const est=o.estado||'pendiente'
+                      const cfg:{[k:string]:{bg:string,color:string,label:string,icon:string}}={
+                        pendiente:{bg:'#f1f5f9',color:'#374151',label:'Pendiente',icon:'⏳'},
+                        confirmado:{bg:'#e0e7ff',color:'#3730a3',label:'Confirmado',icon:'✅'},
+                        preparando:{bg:'#fef3c7',color:'#92400e',label:'Preparando',icon:'👨‍🍳'},
+                        listo:{bg:'#dbeafe',color:'#1d4ed8',label:'Listo',icon:'🔔'},
+                        entregado:{bg:'#dcfce7',color:'#166534',label:'Entregado',icon:'✔️'},
+                        cancelado:{bg:'#fee2e2',color:'#991b1b',label:'Cancelado',icon:'❌'},
+                      }
+                      const c=cfg[est]||cfg.pendiente
+                      const nextStates=Object.entries(cfg).filter(([k])=>k!==est)
+                      return (<div style={{ position:'relative' }}>
+                        <button onClick={()=>setEstadoDropdown(prev=>prev===o.id?null:o.id)} style={{ padding:'4px 10px',borderRadius:6,border:'none',fontSize:11,fontWeight:700,cursor:'pointer',background:c.bg,color:c.color,whiteSpace:'nowrap' }}>{c.icon} {c.label} ▾</button>
+                        {estadoDropdown===o.id && (<div style={{ position:'absolute',top:'100%',right:0,zIndex:999,background:'#fff',borderRadius:8,boxShadow:'0 4px 16px rgba(0,0,0,0.15)',border:'1px solid #e5e7eb',padding:4,marginTop:4,minWidth:140 }}>
+                          {nextStates.map(([k,v])=>(
+                            <button key={k} onClick={async()=>{
+                              try{await updatePedidoEstado(o.id,k);setPedidos(prev=>prev.map(p=>p.id===o.id?{...p,estado:k}:p))}catch(err){console.error(err)}
+                              setEstadoDropdown(null)
+                            }} style={{ display:'block',width:'100%',padding:'6px 10px',border:'none',background:'transparent',cursor:'pointer',fontSize:11,fontWeight:600,textAlign:'left',borderRadius:4,color:v.color }} onMouseEnter={e=>(e.currentTarget.style.background=v.bg)} onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>{v.icon} {v.label}</button>
+                          ))}
+                        </div>)}
+                      </div>)
+                    })()}
                   </td>
                 </tr>))}</tbody>
               </table>
