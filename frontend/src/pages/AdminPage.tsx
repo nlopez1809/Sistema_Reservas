@@ -50,6 +50,7 @@ export default function AdminPage() {
   const [editingStock, setEditingStock] = useState<Record<number,number>>({})
   const [disableModal, setDisableModal] = useState<{dia:Dia}|null>(null)
   const [disableMsg, setDisableMsg] = useState('')
+  const [pedidoSearch, setPedidoSearch] = useState('')
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('notif_sound') !== 'off')
   const [horario, setHorario] = useState({ hora_apertura:'08:00', hora_cierre:'15:00' })
 
@@ -634,18 +635,26 @@ export default function AdminPage() {
 
         {/* ── PEDIDOS ── */}
         {tab==='pedidos' && !loading && (<div style={{ background:'#fff',borderRadius:12,padding: isMobile ? 14 : 22,boxShadow:'0 1px 3px rgba(0,0,0,0.04)',border:'1px solid #e5e7eb' }}>
-          <h3 style={{ margin:'0 0 18px',fontSize:16,fontWeight:800 }}>Registro de Pedidos</h3>
-          {pedidos.length===0?<div style={{ textAlign:'center',padding:48,color:'#9ca3af' }}><div style={{ fontSize:40,marginBottom:8 }}>📋</div><p style={{ fontWeight:600,color:'#6b7280',margin:'0 0 4px' }}>No hay pedidos registrados</p><p style={{ fontSize:13,margin:0 }}>Los pedidos de tus clientes aparecerán aquí en tiempo real.</p></div>:(<>
+          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18,flexWrap:'wrap',gap:10 }}>
+            <h3 style={{ margin:0,fontSize:16,fontWeight:800 }}>Registro de Pedidos</h3>
+            <input value={pedidoSearch} onChange={e=>setPedidoSearch(e.target.value)} placeholder="Buscar por código, cliente, WhatsApp, día..." style={{ padding:'8px 14px',borderRadius:8,border:'1px solid #d1d5db',fontSize:13,width: isMobile ? '100%' : 280,outline:'none' }} />
+          </div>
+          {pedidos.length===0?<div style={{ textAlign:'center',padding:48,color:'#9ca3af' }}><div style={{ fontSize:40,marginBottom:8 }}>📋</div><p style={{ fontWeight:600,color:'#6b7280',margin:'0 0 4px' }}>No hay pedidos registrados</p><p style={{ fontSize:13,margin:0 }}>Los pedidos de tus clientes aparecerán aquí en tiempo real.</p></div>:(()=>{
+            const q=pedidoSearch.toLowerCase().trim()
+            const filtered=q?pedidos.filter(o=>[o.codigo,o.cliente?.nombre,o.cliente?.apellido,o.cliente?.whatsapp,o.dia?.nombre,o.hora_recojo,o.consumo,o.metodo_pago,o.estado,o.detalle?.map(d=>d.nombre).join(' ')].some(v=>v?.toLowerCase().includes(q))):pedidos
+            return (<>
             {isMobile && <p style={{ fontSize:11, color:'#475569', margin:'0 0 8px', fontStyle:'italic' }}>Desliza para ver mas →</p>}
+            {q && <p style={{ fontSize:12,color:'#6b7280',marginBottom:8 }}>{filtered.length} resultado{filtered.length!==1?'s':''}</p>}
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%',borderCollapse:'collapse' }}>
-                <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Día','Cliente','WhatsApp','Hora','Consumo','Pago','Total','Estado'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
-                <tbody>{pedidos.map((o,i)=>(<tr key={o.id} style={rowBg(i)}>
+                <thead><tr style={{ background:'#f8fafc' }}>{['Código','Fecha','Día','Cliente','WhatsApp','Pedido','Hora','Consumo','Pago','Total','Estado'].map(h=>(<th key={h} style={th}>{h}</th>))}</tr></thead>
+                <tbody>{filtered.map((o,i)=>(<tr key={o.id} style={rowBg(i)}>
                   <td style={{ ...td,fontWeight:700 }}>{o.codigo}</td>
                   <td style={td}>{new Date(o.creado_en).toLocaleDateString('es-BO')}</td>
                   <td style={{ ...td,fontWeight:700 }}>{o.dia?.nombre||'—'}</td>
                   <td style={{ ...td,fontWeight:700 }}>{o.cliente?`${o.cliente.nombre} ${o.cliente.apellido}`:'—'}</td>
                   <td style={td}>{o.cliente?.whatsapp?<a href={`https://wa.me/591${o.cliente.whatsapp}`} target="_blank" rel="noreferrer" style={{ color:'#22c55e',fontWeight:700,textDecoration:'none' }}>📱 {o.cliente.whatsapp}</a>:'—'}</td>
+                  <td style={{ ...td,fontSize:11,maxWidth:200 }}>{o.detalle?.length?o.detalle.map((d,j)=><div key={j} style={{ whiteSpace:'nowrap' }}>{d.cantidad}x {d.nombre}</div>):'—'}</td>
                   <td style={{ ...td,color:'#7c3aed',fontWeight:700 }}>{o.hora_recojo?`🕐 ${o.hora_recojo}`:'—'}</td>
                   <td style={td}><span style={{ background:o.consumo==='local'?'#eff6ff':'#f5f3ff',color:o.consumo==='local'?'#1d4ed8':'#6d28d9',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.consumo==='local'?'🍽️ Local':'📦 Llevar'}</span></td>
                   <td style={td}><span style={{ background:o.metodo_pago==='efectivo'?'#f0fdf4':'#eff6ff',color:o.metodo_pago==='efectivo'?'#166534':'#1e40af',padding:'2px 8px',borderRadius:99,fontWeight:700,fontSize:11 }}>{o.metodo_pago==='efectivo'?'💵 Efectivo':'📱 QR'}</span></td>
@@ -673,7 +682,8 @@ export default function AdminPage() {
                 </tr>))}</tbody>
               </table>
             </div>
-          </>)}
+          </>)
+          })()}
         </div>)}
 
         {/* ── CLIENTES ── */}

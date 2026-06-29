@@ -123,6 +123,7 @@ export interface Pedido {
   creado_en: string
   cliente?: Cliente
   dia?: Dia
+  detalle?: { nombre: string; cantidad: number; precio: number; tipo_linea: string }[]
 }
 
 export interface AuthUser {

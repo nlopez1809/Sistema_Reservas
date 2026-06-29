@@ -11,7 +11,8 @@ router.get('/', requireRestaurante, async (req: AuthRequest, res: Response) => {
     .select(`
       *,
       cliente:clientes(nombre, apellido, whatsapp),
-      dia:dias(nombre)
+      dia:dias(nombre),
+      detalle:pedido_detalle(nombre, cantidad, precio, tipo_linea)
     `)
     .eq('restaurante_id', req.restauranteId)
     .order('creado_en', { ascending: false })
